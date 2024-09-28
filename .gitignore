@@ -1,0 +1,9 @@
+.vs/
+bin/
+obj/
+packages/
+
+*.user
+*.pdf
+*.exe
+ATK-DP100DLL(*).dll
