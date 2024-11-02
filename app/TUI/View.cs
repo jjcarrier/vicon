@@ -1,4 +1,4 @@
-﻿using LibDP100;
+using LibDP100;
 using System;
 using Spectre.Console;
 
@@ -99,8 +99,7 @@ namespace PowerSupplyApp
                 .AddRow(new Markup("[blue]Alt[/] + [blue]1[/]-[blue]9[/]"), new Markup("Alter/Store Current Setpoints to Preset"))
                 .AddRow(new Markup("[blue]↑[/]/[blue]↓[/]/[blue]←[/]/[blue]→[/]"), new Markup("Entry Navigation"))
                 .AddRow(new Markup("[blue]Shift[/] + [blue]↑[/]/[blue]↓[/]"), new Markup("Digit Modification"))
-                .AddRow(new Markup("[blue]i[/]/[blue]I[/]"), new Markup("Device Information"))
-                .AddRow(new Markup("[blue]p[/]/[blue]P[/]"), new Markup("Configure Protections"));
+                .AddRow(new Markup("[blue]i[/]/[blue]I[/]"), new Markup("Device Information"));
         }
 
         private static Grid GetProtectionsGrid()
