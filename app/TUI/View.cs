@@ -245,6 +245,11 @@ namespace PowerSupplyApp
 
         private static Table GetDataTable(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActuals actual)
         {
+            const int numDataRows = 11;
+            const int numSeparatorRows = 4;
+            const int numHeaderFooterRows = 2;
+            const int numExtraRows = 6; // Preset, 2x Empty, V-Row, I-Row, Help Row
+            const int totalRows = numDataRows + numSeparatorRows + numHeaderFooterRows + numExtraRows;
             int h = Console.BufferHeight;
             Table tab = new Table()
                 .Centered()
@@ -267,7 +272,7 @@ namespace PowerSupplyApp
                 .Border(TableBorder.Horizontal)
                 .BorderColor(Color.Grey);
 
-            for (int i = 0; i < h - 23; i++)
+            for (int i = 0; i < h - totalRows; i++)
             {
                 tab.AddEmptyRow();
             }
