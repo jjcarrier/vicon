@@ -46,6 +46,8 @@ Below is a basic overview of `vicon` functionality:
 - [x] JSON output
   - Providing a convenient way to integrate with other tooling.
 - [x] Serial command line processing
+- [x] Supports multi-device mechanisms, `--enumerate` and `--serial`, to improve
+      users experience when working with multiple DP100s.
 - [ ] Recorder/trace (support for logging all activity during interactive mode)
 - [ ] Supports a TUI lock function to prevent accidental button presses
 
