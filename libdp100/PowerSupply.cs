@@ -1,4 +1,4 @@
-﻿using ATK_DP100DLL;
+using ATK_DP100DLL;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -11,7 +11,7 @@ namespace LibDP100
     /// A wrapper for the DP100 providing basic helper functions and an overall cleaner,
     /// more C# centric API. Most notably nulls the output of the API's console writes.
     /// </summary>
-    public class PowerSupply
+    public class PowerSupply : IComparable
     {
         const byte NumPresets = 10;
         const ushort InvalidVoltage = 0xFFFF;
@@ -824,5 +824,15 @@ namespace LibDP100
         }
 
         #endregion Private methods
+
+        #region Overloads
+
+        public int CompareTo(object obj)
+        {
+            var otherPsu = (PowerSupply)obj;
+            return string.Compare(Device.SerialNumber, otherPsu.Device.SerialNumber);
+        }
+
+        #endregion
     }
 }

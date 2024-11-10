@@ -106,6 +106,7 @@
   <ItemGroup>
     <Compile Include="ArbitraryWaveformGen.cs" />
     <Compile Include="CommandResponse.cs" />
+    <Compile Include="Enumerator.cs" />
     <Compile Include="TUI\Controller.cs" />
     <Compile Include="TUI\KeyboardEvent.cs" />
     <Compile Include="TUI\View.cs" />

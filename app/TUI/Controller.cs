@@ -1,4 +1,4 @@
-﻿using LibDP100;
+using LibDP100;
 using Spectre.Console;
 using System;
 using System.Threading;
@@ -36,8 +36,9 @@ namespace PowerSupplyApp
         public static void RunInteractiveMode()
         {
             runInteractive = true;
-            Console.CancelKeyPress += OnCancelKeyPress;
             EnterAlternateScreenBuffer();
+            Console.CancelKeyPress += OnCancelKeyPress;
+            Console.Title = psu.Device.Type;
 
             psu.RefreshPreset(psu.Output.Preset);
             psu.RefreshSystemParams();

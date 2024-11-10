@@ -1,6 +1,7 @@
 using LibDP100;
 using System;
 using Spectre.Console;
+using System.Collections.Generic;
 
 namespace PowerSupplyApp
 {
@@ -13,7 +14,6 @@ namespace PowerSupplyApp
             // Enter alt-screen buffer and hide cursor.
             Console.Write($"{(char)27}[?1049h");
             Console.Write($"{(char)27}[?25l");
-            Console.Title = psu.Device.Type;
         }
 
         private static void ExitAlternateScreenBuffer()
@@ -298,6 +298,23 @@ namespace PowerSupplyApp
                 .Header("[blue] Device Info[/] [grey](Press Any Key To Return) [/]")
                 .BorderColor(Color.Grey)
                 .Expand();
+        }
+
+        /// <summary>
+        /// Prompt the user to select from one of the detected devices.
+        /// </summary>
+        /// <param name="serialNumbers">List of serial numbers to chose from.</param>
+        /// <returns>The serial number of the selected device.</returns>
+        private static string GetDeviceSelection(List<string> serialNumbers)
+        {
+            string serialNumber = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Connect to which device (serial number)?")
+                    .PageSize(10)
+                    .MoreChoicesText("[grey](Move up and down to reveal more devices)[/]")
+                    .AddChoices(serialNumbers));
+
+            return serialNumber;
         }
 
         private static Grid GetDataGrid(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActuals actual)

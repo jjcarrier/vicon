@@ -1,4 +1,4 @@
-﻿using LibDP100;
+using LibDP100;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
@@ -12,6 +12,8 @@ namespace PowerSupplyApp
     {
         static bool interactiveMode = false;
         static bool wavegenMode = false;
+        static bool enumerate = false;
+        static string psuSerialNumber;
 
         static void ShowHelp()
         {
@@ -29,7 +31,11 @@ namespace PowerSupplyApp
             grid.AddRow("  [white]--version[/], [white]-v[/]", "",
                 "Displays the version of the application.");
             grid.AddRow("  [white]--debug[/]", "",
-                "Enabled debug output of underlying driver.");
+                "Enables debug output of underlying driver. (Only intended for CLI mode)");
+            grid.AddRow("  [white]--enumerate[/]", "",
+                "Enumerates all connected power supplies and returns device information for each. If set, all other processing is ignored.");
+            grid.AddRow("  [white]--serial[/], [white]--sn[/]", "[silver]<SERIAL>[/]",
+                "Connects to the power supply that matches the specified [white]SERIAL[/] number.");
             grid.AddRow("  [white]--interactive[/]", "",
                 "Switches into interactive mode.");
             grid.AddRow("  [white]--json[/]", "",
@@ -80,6 +86,7 @@ namespace PowerSupplyApp
             // First pass, to check for --help or --json args
             if (args.Length > 0)
             {
+                int argIndex = 0;
                 foreach (string a in args)
                 {
                     string arg = a.ToLower();
@@ -97,6 +104,25 @@ namespace PowerSupplyApp
                             return ProcessArgsResult.OkExitNow;
                         case "--debug":
                             debug = true;
+                            break;
+                        case "--enumerate":
+                            enumerate = true;
+                            break;
+                        case "--serial":
+                        case "--sn":
+                            if (argIndex + 1 < args.Length)
+                            {
+                                psuSerialNumber = args[argIndex + 1];
+                                if (psuSerialNumber.StartsWith("-"))
+                                {
+                                    psuSerialNumber = null;
+                                    return ProcessArgsResult.MissingParameter;
+                                }
+                            }
+                            else
+                            {
+                                return ProcessArgsResult.MissingParameter;
+                            }
                             break;
                         case "--interactive":
                             interactiveMode = true;
@@ -147,6 +173,8 @@ namespace PowerSupplyApp
                             }
                             break;
                     }
+
+                    argIndex++;
                 }
             }
             else
@@ -181,7 +209,14 @@ namespace PowerSupplyApp
                         case "--json":
                         case "--json-list":
                         case "--debug":
+                        case "--enumerate":
                             // Do nothing, already handled in first pass.
+                            break;
+
+                        case "--serial":
+                        case "--sn":
+                            // Only increment the index, already handled in first pass.
+                            i++;
                             break;
 
                         case "--interactive":
@@ -916,22 +951,24 @@ namespace PowerSupplyApp
             if (!serializeAsJsonArray)
             {
                 serializedOutput++;
-                //Console.WriteLine(JsonConvert.SerializeObject(response));
                 Console.WriteLine(JsonConvert.SerializeObject(response, dtFmt));
             }
             else
             {
                 bool first = serializedOutput == 0;
                 serializedOutput++;
-                bool last = serializedOutput == numSerializedOutputs;
+                bool last = serializedOutput >= numSerializedOutputs;
 
                 if (first)
                 {
                     Console.Write('[');
                 }
 
-                //Console.Write(JsonConvert.SerializeObject(response));
-                Console.WriteLine(JsonConvert.SerializeObject(response, dtFmt));
+                if (response != null)
+                {
+                    Console.WriteLine(JsonConvert.SerializeObject(response, dtFmt));
+                }
+
                 if (last)
                 {
                     Console.Write(']');
