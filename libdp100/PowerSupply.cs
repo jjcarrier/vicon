@@ -1,4 +1,4 @@
-using ATK_DP100DLL;
+﻿using ATK_DP100DLL;
 using System;
 using System.Diagnostics;
 using System.IO;

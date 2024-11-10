@@ -1,4 +1,4 @@
-using LibDP100;
+﻿using LibDP100;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
