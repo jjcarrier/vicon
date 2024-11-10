@@ -76,7 +76,7 @@ namespace PowerSupplyApp
                 "Sets the Over-Temperature Protection level. Reaching or exceeding this limit will switch the output OFF. (units: 0.1 C, range: 500-800)");
 
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("A CLI interface for the AlienTek DP100 100W USB-C digital powersupply.");
+            AnsiConsole.MarkupLine("A CLI interface for the AlienTek DP100 100W USB-C digital power supply.");
             AnsiConsole.WriteLine();
             AnsiConsole.Write(grid);
         }

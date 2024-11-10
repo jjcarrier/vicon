@@ -90,6 +90,9 @@ namespace LibDP100
         // parsing stdout for data not exposed via the API.
         StringWriter stdoutReceiver = new StringWriter();
 
+        // Mutex to ensure single-access to underlying API.
+        private static Mutex apiMutex = new Mutex();
+
         /// <summary>
         /// Constructor for the power supply.
         /// </summary>
@@ -100,9 +103,6 @@ namespace LibDP100
             // This API does not appear to be functional.
             //ApiInstance.DevStateChanageEvent += DevStateChange;
         }
-
-        // Mutex to ensure single-access to underlying API.
-        private static Mutex apiMutex = new Mutex();
 
         private void DevStateChange(bool state)
         {
@@ -393,6 +393,9 @@ namespace LibDP100
 
             apiMutex.WaitOne();
             NullStdOutput();
+            // NOTE: This API is __BROKEN__. The firmware of the DP100 expects additional data that
+            // this API does not provide, so it is impossible to set these parameters via the API
+            // for now.
             result = ApiInstance.SetSysPar(
                 sysParams.Backlight,
                 sysParams.Volume,

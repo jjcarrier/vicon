@@ -112,44 +112,27 @@ namespace PowerSupplyApp
                 .AddRow(new Markup("[white]OTP (C)[/]"), new Markup(GetUserEntryString(sys.OTP, (selectedRow == 3), selectedCol)));
         }
 
-        private static BreakdownChart GetBreakdown100(int actual, int setpoint, int limit)
+        private static BreakdownChart GetBreakdown100(int actual, int limit)
         {
             BreakdownChart breakdown;
 
-            //if (setpoint < limit)
-            //{
-            //    int s = (limit == 0) ? 100 : 100 * setpoint / limit;
-            //    int a = (setpoint == 0) ? 0 : 100 * actual / setpoint;
-            //    breakdown = new BreakdownChart()
-            //        .HideTags()
-            //        .AddItem("ACT", a, Color.DarkRed)
-            //        .AddItem("SET", s - a, Color.White)
-            //        .AddItem("LIM", 100 - s, Color.Grey);
-            //}
-            //else
-            {
-                int a = (limit == 0) ? 100 : 100 * actual / limit;
-                breakdown = new BreakdownChart()
-                    .HideTags()
-                    .AddItem("ACT", a, Color.DarkRed)
-                    .AddItem("LIM", 100 - a, Color.Grey);
-            }
+            int a = (limit == 0) ? 100 : 100 * actual / limit;
+            breakdown = new BreakdownChart()
+                .HideTags()
+                .AddItem("ACT", a, Color.DarkRed)
+                .AddItem("LIM", 100 - a, Color.Grey);
 
             return breakdown;
         }
 
         private static Grid GetBarChartGrid(PowerSupplyActuals actual)
         {
-            int vo_set = sp.Voltage;
             int vo_limit = (actual.VoltageOutputMax > psu.PresetParams[psu.Output.Preset].OVP) ?
                 psu.PresetParams[psu.Output.Preset].OVP : actual.VoltageOutputMax;
-            int io_set = sp.Current;
             int io_limit = psu.PresetParams[psu.Output.Preset].OCP;
-            int v = (vo_limit == 0) ? 100 : 100 * actual.Voltage / vo_limit;
-            int i = (io_limit == 0) ? 100 : 100 * actual.Current / io_limit;
 
-            BreakdownChart vBreakdown = GetBreakdown100(actual.Voltage, vo_set, vo_limit);
-            BreakdownChart iBreakdown = GetBreakdown100(actual.Current, io_set, io_limit);
+            BreakdownChart vBreakdown = GetBreakdown100(actual.Voltage, vo_limit);
+            BreakdownChart iBreakdown = GetBreakdown100(actual.Current, io_limit);
 
             return new Grid()
                 .AddColumns(2)
