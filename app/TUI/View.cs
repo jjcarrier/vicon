@@ -69,6 +69,9 @@ namespace PowerSupplyApp
         private static Color highlightFgColor = scheme.Bar.Foreground;
         private static Color alternateBgColor = scheme.Bar.Background;
 
+        /// <summary>
+        /// Write the ANSI sequence to enter the alternate screen buffer.
+        /// </summary>
         private static void EnterAlternateScreenBuffer()
         {
             // Enter alt-screen buffer and hide cursor.
@@ -76,6 +79,9 @@ namespace PowerSupplyApp
             Console.Write($"{(char)27}[?25l");
         }
 
+        /// <summary>
+        /// Write the ANSI sequence to exit the alternate screen buffer.
+        /// </summary>
         private static void ExitAlternateScreenBuffer()
         {
             // Exit alt-screen buffer and show cursor.
@@ -83,6 +89,15 @@ namespace PowerSupplyApp
             Console.Write($"{(char)27}[?25h");
         }
 
+        /// <summary>
+        /// Convert the input value to it visual representation where leading zeros are dim
+        /// and if the value is currently the selected row, highlight the current digit that
+        /// is to be controlled.
+        /// </summary>
+        /// <param name="value">The current value to convert.</param>
+        /// <param name="selected">Indicates that the value is selected by the user.</param>
+        /// <param name="selectedDigit">Indicates which digit is currently being controlled.</param>
+        /// <returns>The converted markup text</returns>
         private static string GetUserEntryString(ushort value, bool selected = false, int selectedDigit = 0)
         {
             const int totalDigits = 5;
@@ -132,6 +147,10 @@ namespace PowerSupplyApp
             return markupText;
         }
 
+        /// <summary>
+        /// Gets the Grid for the device information.
+        /// </summary>
+        /// <returns>The Grid containing the device information.</returns>
         private static Grid GetDeviceInfoGrid()
         {
             return new Grid()
@@ -143,6 +162,10 @@ namespace PowerSupplyApp
                 .AddRow(new Markup("[blue]SW State[/]"), new Markup(psu.Device.SoftwareState));
         }
 
+        /// <summary>
+        /// Gets the Grid for the user controls.
+        /// </summary>
+        /// <returns>The Grid containing the user controls.</returns>
         private static Grid GetControlsGrid()
         {
             return new Grid()
@@ -165,6 +188,10 @@ namespace PowerSupplyApp
                 .AddRow(new Markup("[blue]/[/]/[blue]?[/]"), new Markup("Show Controls"));
         }
 
+        /// <summary>
+        /// Gets the Grid for the protections.
+        /// </summary>
+        /// <returns>The Grid containing the protections.</returns>
         private static Grid GetProtectionsGrid()
         {
             int rowIndex = 0;
@@ -184,6 +211,14 @@ namespace PowerSupplyApp
                     new Markup(GetUserEntryString(sys.OTP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData));
         }
 
+        /// <summary>
+        /// Gets the breakdown chart for the specified values. This chart is meant to render the
+        /// actual/sensed values as a percentage of the limit. In a sense, it represents a
+        /// percent load.
+        /// </summary>
+        /// <param name="actual">The actual/sensed value.</param>
+        /// <param name="limit">The limit.</param>
+        /// <returns>The BreakdownChart representing the percent load.</returns>
         private static BreakdownChart GetBreakdown100(int actual, int limit)
         {
             BreakdownChart breakdown;
@@ -336,11 +371,17 @@ namespace PowerSupplyApp
             }
         }
 
-        private static Style GetSelectedPresetStyle()
-        {
-            return new Style(Color.White, alternateBgColor);
-        }
-
+        /// <summary>
+        /// Gets the data table. This table is responsible for providing the data regularly viewed by the user.
+        /// Note that this method is intended to be called in the power supply event handler that is processed
+        /// in a thread at regular intervals of 1ms. Some considerations for execution speed should be made
+        /// when adding logic to this routine as it may impact the perceived performance of the UI.
+        /// </summary>
+        /// <param name="supply">The power supply instance.</param>
+        /// <param name="setpoint">The current setpoint data.</param>
+        /// <param name="system">The current system data.</param>
+        /// <param name="actual">The current actual data.</param>
+        /// <returns>The data table containing the key power supply data.</returns>
         private static Table GetDataTable(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActuals actual)
         {
             const int numDataRows = 11;
@@ -435,6 +476,10 @@ namespace PowerSupplyApp
             return tab;
         }
 
+        /// <summary>
+        /// Gets the controls panel.
+        /// </summary>
+        /// <returns>The panel providing user controls information.</returns>
         private static Panel GetControlsPanel()
         {
             return new Panel(
@@ -445,6 +490,10 @@ namespace PowerSupplyApp
                 .Expand();
         }
 
+        /// <summary>
+        /// Gets the device information panel.
+        /// </summary>
+        /// <returns>The panel providing device information.</returns>
         private static Panel GetDeviceInfoPanel()
         {
             return new Panel(
@@ -473,6 +522,14 @@ namespace PowerSupplyApp
             return serialNumber;
         }
 
+        /// <summary>
+        /// Get the main grid that presents the power supply data to the user.
+        /// </summary>
+        /// <param name="supply">The supply instance.</param>
+        /// <param name="setpoint">The current setpoint.</param>
+        /// <param name="system">The current system parameters.</param>
+        /// <param name="actual">The actual values received by the power supply.</param>
+        /// <returns>The grid containing the current state of the device.</returns>
         private static Grid GetDataGrid(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActuals actual)
         {
             string controlsCaption = wavegenMode ? "Press Q to Quit." : "Press Q to Quit. Press ? to Show Controls";
@@ -486,6 +543,11 @@ namespace PowerSupplyApp
                 .AddRow(new Markup(controlsCaption, scheme.Caption).Centered());
         }
 
+        /// <summary>
+        /// Process keyboard events for extended, more complex key strokes.
+        /// </summary>
+        /// <param name="key">The keypress information.</param>
+        /// <returns>The detected keyboard event.</returns>
         private static KeyboardEvent GetKeyboardEventExtended(ConsoleKeyInfo key)
         {
             if (key.Modifiers.HasFlag(ConsoleModifiers.Control | ConsoleModifiers.Shift))
@@ -580,6 +642,10 @@ namespace PowerSupplyApp
             }
         }
 
+        /// <summary>
+        /// Processes key press events. To be called regularly by the application task.
+        /// </summary>
+        /// <returns>The detected keyboard event.</returns>
         private static KeyboardEvent GetKeyboardEvent()
         {
             if (!Console.KeyAvailable)
