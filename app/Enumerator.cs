@@ -1,4 +1,5 @@
 ﻿using LibDP100;
+using System;
 using System.Collections.Generic;
 
 namespace PowerSupplyApp
@@ -7,8 +8,29 @@ namespace PowerSupplyApp
     // enumeration mechanisms.
     public static class Enumerator
     {
-        static List<PowerSupply> supplies = new List<PowerSupply>();
+        private class EnumeratedSupply : IComparable
+        {
+            public PowerSupply Instance { get; set; }
+            public bool Selected { get; set; }
 
+            public EnumeratedSupply(PowerSupply psu, bool selected)
+            {
+                Instance = psu;
+                Selected = selected;
+            }
+
+            public int CompareTo(object obj)
+            {
+                var other = (EnumeratedSupply)obj;
+                return Instance.CompareTo(other.Instance);
+            }
+        }
+
+        // The enumerated power supply instances.
+        // The boolean is used to determine which instances have been requested by the application
+        // to determine which instances to close during cleanup so that separate applications
+        // may take control of the device.
+        static List<EnumeratedSupply> supplies = new List<EnumeratedSupply>();
 
         /// <summary>
         /// Obtain list of device instances which may be used to present connection
@@ -29,13 +51,30 @@ namespace PowerSupplyApp
 
                 if (psu.RefreshDevInfo())
                 {
-                    supplies.Add(psu);
+                    supplies.Add(new EnumeratedSupply(psu, false));
                 }
             }
 
             supplies.Sort();
 
             return supplies.Count;
+        }
+
+        /// <summary>
+        /// Disconnects all instances that were not requested via GetDeviceBySerial
+        /// nor GetDeviceByIndex and resets the enumeration.
+        /// </summary>
+        public static void Done()
+        {
+            foreach (var psu in supplies)
+            {
+                if (!psu.Selected)
+                {
+                    psu.Instance.Disconnect();
+                }
+            }
+
+            supplies.Clear();
         }
 
         /// <summary>
@@ -50,6 +89,11 @@ namespace PowerSupplyApp
         /// <summary>
         /// Get the power supply that matches the specified serial number.
         /// </summary>
+        /// <remarks>
+        /// Successful requests will mark the instance as "selected" and
+        /// it will be the responsibility of the application to close
+        /// the instance when no longer needed.
+        /// </remarks>
         /// <param name="serial">The serial number to search for.</param>
         /// <returns>
         /// The matching PowerSupply instance. If no match found, this method
@@ -59,9 +103,10 @@ namespace PowerSupplyApp
         {
             foreach (var psu in supplies)
             {
-                if (psu.Device.SerialNumber == serial)
+                if (psu.Instance.Device.SerialNumber == serial)
                 {
-                    return psu;
+                    psu.Selected = true;
+                    return psu.Instance;
                 }
             }
 
@@ -71,6 +116,11 @@ namespace PowerSupplyApp
         /// <summary>
         /// Gets a PowerSupply at the specified index.
         /// </summary>
+        /// <remarks>
+        /// Successful requests will mark the instance as "selected" and
+        /// it will be the responsibility of the application to close
+        /// the instance when no longer needed.
+        /// </remarks>
         /// <param name="index">The index of the PowerSupply.</param>
         /// <returns>The PowerSupply at the specified index.</returns>
         public static PowerSupply GetDeviceByIndex(int index)
@@ -80,7 +130,8 @@ namespace PowerSupplyApp
                 return null;
             }
 
-            return supplies[index];
+            supplies[index].Selected = true;
+            return supplies[index].Instance;
         }
 
         /// <summary>
@@ -93,7 +144,7 @@ namespace PowerSupplyApp
 
             foreach (var psu in supplies)
             {
-                list.Add(psu.Device.SerialNumber);
+                list.Add(psu.Instance.Device.SerialNumber);
             }
 
             return list;

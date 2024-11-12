@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using LibDP100;
 
 namespace PowerSupplyApp
@@ -72,6 +72,10 @@ namespace PowerSupplyApp
                 psu.RefreshOutputParams();
                 psuReady = true;
             }
+
+            // Device selection done, release unused instances so that other
+            // applications may connect to them.
+            Enumerator.Done();
 
             if (!psuReady)
             {
