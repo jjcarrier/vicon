@@ -30,11 +30,11 @@ A CLI/TUI for controlling the AlienTek DP100 (ATK-DP100) over USB.
 
 Below is a basic overview of `vicon` functionality:
 
-- [x] Supports a CLI Interface
+- [x] CLI supported
   - Serial processing of commands, allowing for complex control sequences.
   - Normal-style and JSON-style output to provide option for human readability
     and tool integration.
-- [x] Support a Text-UI (TUI)
+- [x] Text-UI (TUI) supported
   - A streamlined text-based user interface providing control with minimal and
     intuitive keystrokes.
 - [x] Waveform Generator (AWG)
@@ -46,8 +46,12 @@ Below is a basic overview of `vicon` functionality:
 - [x] JSON output
   - Providing a convenient way to integrate with other tooling.
 - [x] Serial command line processing
-- [x] Supports multi-device mechanisms, `--enumerate` and `--serial`, to improve
-      users experience when working with multiple DP100s.
+  - For most options/commands, the order in which they are specified in the
+    command argument list determine the execution order. This aids in simple
+    scripting for automated workloads.
+- [x] Multi-device supported
+  - Mechanisms such as `--enumerate` and `--serial` improve user experience when
+    working with multiple DP100s.
 - [ ] Recorder/trace (support for logging all activity during interactive mode)
 - [ ] Supports a TUI lock function to prevent accidental button presses
 
