@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using LibDP100;
 
 namespace PowerSupplyApp
@@ -32,45 +32,7 @@ namespace PowerSupplyApp
 
             if (enumerate)
             {
-                numSerializedOutputs = Enumerator.GetDeviceCount();
-                if (numSerializedOutputs == 0)
-                {
-                    if (serializeAsJson)
-                    {
-                        SerializeObject(null);
-                    }
-                    else
-                    {
-                        Console.WriteLine("No DP100 detected!");
-                    }
-                }
-
-                for (int i = 0; i < numSerializedOutputs; i++)
-                {
-                    var dev = Enumerator.GetDeviceByIndex(i);
-                    bool res;
-
-                    if (serializeAsJson)
-                    {
-                        res = SerializeObject(new CommandResponse
-                        {
-                            Command = Operation.ReadDevice,
-                            Response = new { dev.Device }
-                        });
-                    }
-                    else
-                    {
-                        Console.WriteLine();
-                        res = dev.PrintDevInfo();
-                    }
-
-                    if (!res)
-                    {
-                        return -1;
-                    }
-                }
-
-                return 0;
+                return PrintEnumeration();
             }
 
             if (psuCount == 0)
@@ -134,6 +96,49 @@ namespace PowerSupplyApp
             psu.Disconnect();
 
             return (int)result;
+        }
+
+        static int PrintEnumeration()
+        {
+            numSerializedOutputs = Enumerator.GetDeviceCount();
+            if (numSerializedOutputs == 0)
+            {
+                if (serializeAsJson)
+                {
+                    SerializeObject(null);
+                }
+                else
+                {
+                    Console.WriteLine("No DP100 detected!");
+                }
+            }
+
+            for (int i = 0; i < numSerializedOutputs; i++)
+            {
+                var dev = Enumerator.GetDeviceByIndex(i);
+                bool res;
+
+                if (serializeAsJson)
+                {
+                    res = SerializeObject(new CommandResponse
+                    {
+                        Command = Operation.ReadDevice,
+                        Response = new { dev.Device }
+                    });
+                }
+                else
+                {
+                    Console.WriteLine();
+                    res = dev.PrintDevInfo();
+                }
+
+                if (!res)
+                {
+                    return -1;
+                }
+            }
+
+            return 0;
         }
     }
 }
