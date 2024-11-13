@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using LibDP100;
 
 namespace PowerSupplyApp
@@ -83,7 +83,8 @@ namespace PowerSupplyApp
                 return 1;
             }
 
-            psu.DebugMode = debug;
+            // Only permit debug mode in non-interactive mode.
+            psu.DebugMode = (interactiveMode) ? false : debug;
 
             sp = new PowerSupplySetpoint(psu.Output.Setpoint);
 
