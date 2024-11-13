@@ -1,4 +1,4 @@
-﻿namespace PowerSupplyApp
+namespace PowerSupplyApp
 {
     enum KeyboardEvent
     {
@@ -45,6 +45,8 @@
         SavePreset6,
         SavePreset7,
         SavePreset8,
-        SavePreset9
+        SavePreset9,
+        LockControls,
+        UnlockControls,
     }
 }

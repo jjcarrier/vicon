@@ -1,4 +1,4 @@
-﻿using LibDP100;
+using LibDP100;
 using System;
 using Spectre.Console;
 using System.Collections.Generic;
@@ -8,6 +8,22 @@ namespace PowerSupplyApp
     partial class Program
     {
         private static ViewMode ViewMode { get; set; } = ViewMode.Normal;
+        private static bool ControlsLocked
+        {
+            get { return controlsLocked; }
+            set
+            {
+                controlsLocked = value;
+                highlightFgColor = (controlsLocked ? Color.Black : Color.White);
+                highlightBgColor = (controlsLocked ? Color.Gold1 : Color.DarkRed);
+                alternateBgColor = (controlsLocked ? Color.Grey11 : Color.DarkRed);
+            }
+        }
+
+        private static bool controlsLocked = false;
+        private static Color highlightBgColor = Color.DarkRed;
+        private static Color highlightFgColor = Color.White;
+        private static Color alternateBgColor = Color.DarkRed;
 
         private static void EnterAlternateScreenBuffer()
         {
@@ -99,7 +115,10 @@ namespace PowerSupplyApp
                 .AddRow(new Markup("[blue]Alt[/] + [blue]1[/]-[blue]9[/]"), new Markup("Alter/Store Current Setpoints to Preset"))
                 .AddRow(new Markup("[blue]↑[/]/[blue]↓[/]/[blue]←[/]/[blue]→[/]"), new Markup("Entry Navigation"))
                 .AddRow(new Markup("[blue]Shift[/] + [blue]↑[/]/[blue]↓[/]"), new Markup("Digit Modification"))
-                .AddRow(new Markup("[blue]i[/]/[blue]I[/]"), new Markup("Device Information"));
+                .AddRow(new Markup("[blue]Control[/] + [blue]Shift[/] + [blue]L[/]"), new Markup("Lock/Unlock Device Controls"))
+                .AddRow(new Markup("[blue]i[/]/[blue]I[/]"), new Markup("Device Information"))
+                .AddRow(new Markup("[blue]q[/]/[blue]Q[/]"), new Markup("Quit Application"))
+                .AddRow(new Markup("[blue]/[/]/[blue]?[/]"), new Markup("Show Controls"));
         }
 
         private static Grid GetProtectionsGrid()
@@ -119,7 +138,7 @@ namespace PowerSupplyApp
             int a = (limit == 0) ? 100 : 100 * actual / limit;
             breakdown = new BreakdownChart()
                 .HideTags()
-                .AddItem("ACT", a, Color.DarkRed)
+                .AddItem("ACT", a, alternateBgColor)
                 .AddItem("LIM", 100 - a, Color.Grey);
 
             return breakdown;
@@ -158,7 +177,7 @@ namespace PowerSupplyApp
 
             if (psu.Output.Preset > 0)
             {
-                presetText[psu.Output.Preset - 1] = new Markup($" {psu.Output.Preset} ", new Style(Color.White, Color.DarkRed));
+                presetText[psu.Output.Preset - 1] = new Markup($" {psu.Output.Preset} ", GetSelectedPresetStyle());
             }
 
             return new Grid()
@@ -193,22 +212,33 @@ namespace PowerSupplyApp
                 case PowerSupplyOutputMode.NoInput:
                 case PowerSupplyOutputMode.Invalid:
                 default:
-                    markup = new Markup($" {text} ", new Style(Color.White, Color.DarkRed));
+                    markup = new Markup($" {text} ", new Style(highlightFgColor, highlightBgColor));
                     break;
             }
 
             return markup;
         }
 
+        private static Markup GetLockStatusMarkup()
+        {
+            Markup lockStatus =
+                (wavegenMode) ? new Markup(" AWG ", new Style(Color.Black, Color.Gold1)) :
+                (ControlsLocked) ? new Markup(" LOCKED ", new Style(Color.Black, Color.Gold1)) :
+                    new Markup("        ", new Style(Color.Black, Color.Black));
+
+            return lockStatus;
+        }
+
         private static Markup GetFaultStatusMarkup(PowerSupplyFaultStatus status)
         {
-            Markup markup;
+            Markup faultStatus;
+
             string text = Enum.GetName(typeof(PowerSupplyFaultStatus), status);
 
             switch (status)
             {
                 case PowerSupplyFaultStatus.OK:
-                    markup = new Markup(wavegenMode ? " AWG " : "", new Style(Color.Black, Color.Gold1));
+                    faultStatus = new Markup("", new Style(Color.White, Color.DarkRed));
                     break;
 
                 case PowerSupplyFaultStatus.OCP:
@@ -219,11 +249,42 @@ namespace PowerSupplyApp
                 case PowerSupplyFaultStatus.REP:
                 case PowerSupplyFaultStatus.Invalid:
                 default:
-                    markup = new Markup($" {text} ", new Style(Color.White, Color.DarkRed));
+                    faultStatus = new Markup($" {text} ", new Style(Color.White, Color.DarkRed));
                     break;
             }
 
-            return markup;
+            return faultStatus;
+        }
+
+        private static Color GetBorderColor(PowerSupplyFaultStatus status)
+        {
+            switch (status)
+            {
+                case PowerSupplyFaultStatus.OK:
+                    if (ControlsLocked)
+                    {
+                        return Color.Gold1;
+                    }
+                    else
+                    {
+                        return Color.Grey;
+                    }
+
+                case PowerSupplyFaultStatus.OCP:
+                case PowerSupplyFaultStatus.OVP:
+                case PowerSupplyFaultStatus.OPP:
+                case PowerSupplyFaultStatus.OTP:
+                case PowerSupplyFaultStatus.UVP:
+                case PowerSupplyFaultStatus.REP:
+                case PowerSupplyFaultStatus.Invalid:
+                default:
+                    return Color.DarkRed;
+            }
+        }
+
+        private static Style GetSelectedPresetStyle()
+        {
+            return new Style(Color.White, alternateBgColor);
         }
 
         private static Table GetDataTable(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActuals actual)
@@ -239,7 +300,7 @@ namespace PowerSupplyApp
                 .AddColumn(new TableColumn(GetFaultStatusMarkup(actual.FaultStatus)).RightAligned().Footer(new Markup("[white]Timestamp[/]")))
                 .AddColumn(new TableColumn(new Markup("[white]Setpoint[/]")).Centered().Footer(""))
                 .AddColumn(new TableColumn(new Markup("[white]Actual[/]")).Centered().Footer(new Text($"{actual.Timestamp.Ticks:X08}").Centered()))
-                .AddColumn(new TableColumn(new Text("")).Alignment(Justify.Left).Footer(""))
+                .AddColumn(new TableColumn(GetLockStatusMarkup()).Alignment(Justify.Left).Footer(""))
                 .AddRow(new Markup("[white]Voltage[/]"), new Markup(GetUserEntryString(setpoint.Voltage, (selectedRow == 0), selectedCol)), new Markup(GetUserEntryString(actual.Voltage)), new Text("mV"))
                 .AddRow(new Markup("[white]Current[/]"), new Markup(GetUserEntryString(setpoint.Current, (selectedRow == 1), selectedCol)), new Markup(GetUserEntryString(actual.Current)), new Text("mA"))
                 .AddRow(new Markup("[white]Power[/]"), new Text("---"), new Markup(GetUserEntryString((ushort)(actual.Voltage * actual.Current / 1000))), new Text("mW"))
@@ -253,7 +314,7 @@ namespace PowerSupplyApp
                 .AddRow(new Markup("[white]Mode[/]"), new Text("---"), GetOutputModeMarkup(actual.OutputMode), new Text(""))
                 .Expand()
                 .Border(TableBorder.Horizontal)
-                .BorderColor(Color.Grey);
+                .BorderColor(GetBorderColor(actual.FaultStatus));
 
             for (int i = 0; i < h - totalRows; i++)
             {
@@ -314,7 +375,26 @@ namespace PowerSupplyApp
 
         private static KeyboardEvent GetKeyboardEventExtended(ConsoleKeyInfo key)
         {
-            if (key.Modifiers.HasFlag(ConsoleModifiers.Alt))
+            if (key.Modifiers.HasFlag(ConsoleModifiers.Control | ConsoleModifiers.Shift))
+            {
+                switch (key.Key)
+                {
+                    case ConsoleKey.L:
+                        ControlsLocked ^= true;
+                        if (ControlsLocked)
+                        {
+                            return KeyboardEvent.LockControls;
+                        }
+                        else
+                        {
+                            return KeyboardEvent.UnlockControls;
+                        }
+
+                    default:
+                        return KeyboardEvent.None;
+                }
+            }
+            else if (key.Modifiers.HasFlag(ConsoleModifiers.Alt))
             {
                 switch (key.Key)
                 {
@@ -412,11 +492,35 @@ namespace PowerSupplyApp
             {
                 return KeyboardEvent.ReturnToNormal;
             }
+            else if (ControlsLocked == true)
+            {
+                switch (key.KeyChar)
+                {
+                    case '\f':
+                        // This is related to "Ctrl + Shift + L"
+                        return GetKeyboardEventExtended(key);
+                    case '?':
+                    case '/':
+                        return KeyboardEvent.ShowControls;
+                    case 'i':
+                    case 'I':
+                        return KeyboardEvent.ShowDeviceInfo;
+                    default:
+                        // Ignore all other operations.
+                        break;
+                }
+
+                return KeyboardEvent.None;
+            }
             else
             {
                 switch (key.KeyChar)
                 {
                     case '\0':
+                    case '\f':
+                        // This is related to:
+                        // Navigation keys, and other keystrokes involving
+                        // Control/Shift/Alt. For instance: "Ctrl + Shift + L"
                         return GetKeyboardEventExtended(key);
                     case '0':
                     case '1':
