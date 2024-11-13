@@ -1,4 +1,4 @@
-﻿using ATK_DP100DLL;
+using ATK_DP100DLL;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -730,6 +730,11 @@ namespace LibDP100
                 Console.WriteLine($"  Time (ns)    : {ActualOutput.Timestamp.Ticks:X08}");
                 Console.WriteLine($"  Voltage (mV) : {ActualOutput.Voltage}");
                 Console.WriteLine($"  Current (mA) : {ActualOutput.Current}");
+                Console.WriteLine($"  Fault Status : {ActualOutput.FaultStatus}");
+                Console.WriteLine($"  Output Mode  : {ActualOutput.OutputMode}");
+                Console.WriteLine($"  V[max] (mV)  : {ActualOutput.VoltageOutputMax}");
+                Console.WriteLine($"  V[in] (mV)   : {ActualOutput.VoltageInput}");
+                Console.WriteLine($"  V[usb] (mV)  : {ActualOutput.VoltageUsb5V}");
             }
             else
             {
