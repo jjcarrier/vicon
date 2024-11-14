@@ -119,6 +119,7 @@
     <Compile Include="TUI\Model.cs" />
     <Compile Include="TUI\ViewMode.cs" />
     <Compile Include="WaveGen.cs" />
+    <Compile Include="WaveGenStatus.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

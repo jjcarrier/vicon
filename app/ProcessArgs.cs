@@ -1,4 +1,4 @@
-﻿using LibDP100;
+using LibDP100;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
@@ -87,9 +87,9 @@ namespace PowerSupplyApp
             if (args.Length > 0)
             {
                 int argIndex = 0;
-                foreach (string a in args)
+                for (int i = 0; i < args.Length; i++)
                 {
-                    string arg = a.ToLower();
+                    string arg = args[i].ToLower();
 
                     switch (arg)
                     {
@@ -139,6 +139,17 @@ namespace PowerSupplyApp
                             break;
                         case "--awg":
                         case "--wavegen":
+                            if ((i + 1 >= args.Length) || args[i + 1].StartsWith("-"))
+                            {
+                                Console.WriteLine($"ERROR: Missing <FILE_PATH> parameter for '{args[i]}'.");
+                                return ProcessArgsResult.MissingParameter;
+                            }
+
+                            if (!WaveGen.Load(args[i + 1]))
+                            {
+                                Console.WriteLine(WaveGen.GetLastErrorMessage());
+                                return ProcessArgsResult.Error;
+                            }
                             break;
                         case "--preset":
                         case "-p":
@@ -225,40 +236,35 @@ namespace PowerSupplyApp
 
                         case "--awg":
                         case "--wavegen":
-                            if ((i + 1 < args.Length) &&
-                                (!args[i + 1].StartsWith("-")))
+                            if (!WaveGen.Init(inst, sp) || !WaveGen.Restart())
                             {
-                                WaveGen.Init(inst, sp);
-                                WaveGen.Load(args[i + 1]);
-                                WaveGen.Restart();
-                                if (!interactiveMode)
-                                {
-                                    do
-                                    {
-                                        if (serializeAsJson)
-                                        {
-                                            result = SerializeObject(new CommandResponse
-                                            {
-                                                Command = Operation.WriteSetpoint,
-                                                Response = WaveGen.GetCurrentWaveformPoint()
-                                            });
-                                        }
-                                    } while (WaveGen.Run());
+                                Console.WriteLine(WaveGen.GetLastErrorMessage());
+                                return ProcessArgsResult.Error;
+                            }
 
-                                    // TODO: support --json for both command/response.
-                                    //WaveGen.Generate();
-                                }
-                                else
+                            if (!interactiveMode)
+                            {
+                                do
                                 {
-                                    wavegenMode = true;
-                                }
-                                i++;
+                                    if (serializeAsJson)
+                                    {
+                                        result = SerializeObject(new CommandResponse
+                                        {
+                                            Command = Operation.WriteSetpoint,
+                                            Response = WaveGen.GetCurrentWaveformPoint()
+                                        });
+                                    }
+                                } while (WaveGen.Run());
+
+                                // TODO: support --json for both command/response.
+                                //WaveGen.Generate();
                             }
                             else
                             {
-                                Console.WriteLine($"ERROR: Missing <FILE_PATH> parameter for '{args[i]}'.");
-                                return ProcessArgsResult.MissingParameter;
+                                wavegenMode = true;
                             }
+
+                            i++;
                             break;
 
                         case "-d":

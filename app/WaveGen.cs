@@ -1,6 +1,5 @@
-﻿using LibDP100;
+using LibDP100;
 using Newtonsoft.Json;
-using System;
 using System.IO;
 using System.Threading;
 
@@ -9,6 +8,7 @@ namespace PowerSupplyApp
     public static class WaveGen
     {
         public static bool Running { get; set; } = false;
+        public static WaveGenStatus LastErrorCode { get; set; } = WaveGenStatus.Ok;
 
         private static PowerSupply psu;
         private static PowerSupplySetpoint sp;
@@ -16,33 +16,47 @@ namespace PowerSupplyApp
         private static bool awgBusy = false;
         private static int awgIndex = 0;
 
-        public static void Init(PowerSupply psu, PowerSupplySetpoint setpoint)
+        public static bool Init(PowerSupply psu, PowerSupplySetpoint setpoint)
         {
             WaveGen.psu = psu;
             sp = setpoint;
             awgIndex = 0;
             awgBusy = false;
+            LastErrorCode = WaveGenStatus.Ok;
+
+            return true;
         }
 
         /// <summary>
         /// Use to reset the AWG to the first index to allow the pattern to be re-run.
         /// </summary>
-        public static void Restart()
+        public static bool Restart()
         {
             if (awg == null)
             {
-                return;
+                LastErrorCode = WaveGenStatus.NotLoaded;
+                return false;
             }
 
+            LastErrorCode = WaveGenStatus.Ok;
             awgIndex = 0;
             awgBusy = true;
+
+            return true;
         }
 
-        public static void Load(string filepath)
+        public static bool Load(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
             {
-                return;
+                LastErrorCode = WaveGenStatus.InvalidFilePath;
+                return false;
+            }
+
+            if (!File.Exists(filepath))
+            {
+                LastErrorCode = WaveGenStatus.FileDoesNotExit;
+                return false;
             }
 
             using (StreamReader file = File.OpenText(filepath))
@@ -53,11 +67,35 @@ namespace PowerSupplyApp
 
             if (awg == null)
             {
-                return;
+                LastErrorCode = WaveGenStatus.InvalidFile;
+                return false;
             }
 
-            awgBusy = true;
             awgIndex = 0;
+            awgBusy = true;
+
+            return true;
+        }
+
+        public static string GetLastErrorMessage()
+        {
+            switch (LastErrorCode)
+            {
+                case WaveGenStatus.Ok:
+                    return "No Error";
+                case WaveGenStatus.FileDoesNotExit:
+                    return "File does not exist!";
+                case WaveGenStatus.InvalidFile:
+                    return "Invalid file format!";
+                case WaveGenStatus.InvalidFilePath:
+                    return "Invalid file path!";
+                case WaveGenStatus.NotLoaded:
+                    return "No Error";
+                case WaveGenStatus.SetpointFailure:
+                    return "Failed to Write Setpoint";
+                default:
+                    return "Unknown Error!";
+            }
         }
 
         public static WaveformPoint GetCurrentWaveformPoint()
@@ -85,6 +123,7 @@ namespace PowerSupplyApp
             sp.Voltage = point.Millivolts;
             if (!psu.SetSetpoint(sp))
             {
+                LastErrorCode = WaveGenStatus.SetpointFailure;
                 awgBusy = false;
             }
 
