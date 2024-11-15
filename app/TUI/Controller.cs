@@ -1,4 +1,4 @@
-﻿using LibDP100;
+using LibDP100;
 using Spectre.Console;
 using System;
 using System.Threading;
@@ -50,6 +50,8 @@ namespace PowerSupplyApp
 
             if (wavegenMode)
             {
+                // Deselect a valid row to hid cursor.
+                selectedRow = -1;
                 RunWaveGenMode();
             }
             else

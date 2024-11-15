@@ -363,6 +363,7 @@ namespace PowerSupplyApp
 
         private static Grid GetDataGrid(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActuals actual)
         {
+            string controlsCaption = (wavegenMode) ? "[dim]Press Q to Quit.[/]" : "[dim]Press Q to Quit. Press ? to Show Controls[/]";
             return new Grid()
                 .AddColumns(1)
                 .AddRow(GetDataTable(supply, setpoint, system, actual))
@@ -370,7 +371,7 @@ namespace PowerSupplyApp
                 .AddEmptyRow()
                 .AddRow(GetBarChartGrid(actual))
                 .AddEmptyRow()
-                .AddRow(new Markup("[dim]Press Q to Quit. Press ? to Show Controls[/]").Centered());
+                .AddRow(new Markup(controlsCaption).Centered());
         }
 
         private static KeyboardEvent GetKeyboardEventExtended(ConsoleKeyInfo key)
