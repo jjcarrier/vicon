@@ -393,14 +393,14 @@ namespace LibDP100
 
             apiMutex.WaitOne();
             NullStdOutput();
-            // NOTE: This API is __BROKEN__. The firmware of the DP100 expects additional data that
-            // this API does not provide, so it is impossible to set these parameters via the API
-            // for now.
             result = ApiInstance.SetSysPar(
+                Device.SoftwareVersion,
                 sysParams.Backlight,
                 sysParams.Volume,
                 sysParams.OPP,
-                sysParams.OTP);
+                sysParams.OTP,
+                (byte)(sysParams.RPP ? 1: 0),
+                (byte)(sysParams.AutoOn ? 1 : 0));
             apiMutex.ReleaseMutex();
             RestoreStdOutput();
 
@@ -572,10 +572,12 @@ namespace LibDP100
             byte vol = 0; // Volume level ranges from 0-4
             ushort opp = 0; // unit 0.1W
             ushort otp = 0;
+            byte en_rep = 0;
+            byte en_auto_out = 0;
 
             apiMutex.WaitOne();
             NullStdOutput();
-            result = ApiInstance.GetSysPar(ref blk, ref vol, ref opp, ref otp);//, ref en_rep, ref en_auto_out);
+            result = ApiInstance.GetSysPar(ref blk, ref vol, ref opp, ref otp, ref en_rep, ref en_auto_out);
             apiMutex.ReleaseMutex();
             RestoreStdOutput();
 
@@ -585,7 +587,8 @@ namespace LibDP100
                 SystemParams.Volume = vol;
                 SystemParams.OPP = opp;
                 SystemParams.OTP = otp;
-                ParseSystemData(SystemParams);
+                SystemParams.RPP = (en_rep != 0);
+                SystemParams.AutoOn = (en_auto_out != 0);
             }
 
             return result;

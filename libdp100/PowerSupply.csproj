@@ -31,8 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ATK-DP100DLL, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ATK-DP100DLL">
       <HintPath>.\ATK-DP100DLL.dll</HintPath>
     </Reference>
     <Reference Include="System" />

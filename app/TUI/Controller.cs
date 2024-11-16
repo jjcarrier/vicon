@@ -8,7 +8,7 @@ namespace PowerSupplyApp
     partial class Program
     {
         private const int numDataRows = 19;
-        private const int numUserEntryRows = 4; //6; OPP/OTP/RPP/Auto_OUT/Backlight/Volume are not supported for "set" operations due underlying driver sending the wrong data length.
+        private const int numUserEntryRows = 6;
         private const int numUserEntryCols = 5; // Five digits. Perhaps this should be specific to each row.
         private const ushort largeIncrement = 10;
 
