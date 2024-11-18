@@ -307,7 +307,7 @@ namespace PowerSupplyApp
                 .AddRow(new Markup("[white]OVP[/]"), new Markup(GetUserEntryString(setpoint.OVP, (selectedRow == 2), selectedCol)), new Markup(GetUserEntryString(supply.PresetParams[supply.Output.Preset].OVP)), new Text("mV"))
                 .AddRow(new Markup("[white]OCP[/]"), new Markup(GetUserEntryString(setpoint.OCP, (selectedRow == 3), selectedCol)), new Markup(GetUserEntryString(supply.PresetParams[supply.Output.Preset].OCP)), new Text("mA"))
                 .AddRow(new Markup("[white]OPP[/]"), new Markup(GetUserEntryString(system.OPP, (selectedRow == 4), selectedCol)), new Markup(GetUserEntryString(supply.SystemParams.OPP)), new Text("dW"))
-                .AddRow(new Markup("[white]OTP[/]"), new Markup(GetUserEntryString(system.OTP, (selectedRow == 5), selectedCol)), new Markup(GetUserEntryString(supply.SystemParams.OTP)), new Text("C"))
+                .AddRow(new Markup("[white]OTP[/]"), new Markup(GetUserEntryString(system.OTP, (selectedRow == 5), selectedCol)), new Markup(GetUserEntryString(supply.SystemParams.OTP)), new Text(" C"))
                 .AddRow(new Markup("[white]V[[usb]][/]"), new Text("---"), new Markup(GetUserEntryString(actual.VoltageUsb5V)), new Text("mV"))
                 .AddRow(new Markup("[white]V[[max]][/]"), new Text("---"), new Markup(GetUserEntryString(actual.VoltageOutputMax)), new Text("mV"))
                 .AddRow(new Markup("[white]V[[in]][/]"), new Text("---"), new Markup(GetUserEntryString(actual.VoltageInput)), new Text("mV"))
