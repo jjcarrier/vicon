@@ -787,8 +787,8 @@ namespace LibDP100
                 Console.WriteLine("  OPP (W)   : " + SystemParams.OPP / 10);
                 Console.WriteLine("  Backlight : " + SystemParams.Backlight);
                 Console.WriteLine("  Volume    : " + SystemParams.Volume);
-                Console.WriteLine("  RPP       : " + (SystemParams.RPP ? "ON" : "OFF"));
-                Console.WriteLine("  AUTO-ON   : " + (SystemParams.AutoOn ? "ON" : "OFF"));
+                Console.WriteLine("  RPP       : " + (SystemParams.RPP ? "Enabled" : "Disabled"));
+                Console.WriteLine("  AUTO-ON   : " + (SystemParams.AutoOn ? "Enabled" : "Disabled"));
             }
             else
             {
