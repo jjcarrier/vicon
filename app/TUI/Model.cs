@@ -1,10 +1,10 @@
-﻿namespace PowerSupplyApp
+namespace PowerSupplyApp
 {
     partial class Program
     {
-        private const ushort voltageOutputMax = 30000;
+        private const ushort voltageOutputMax = 30500;
         private const ushort voltageOutputMin = 0;
-        private const ushort currentOutputMax = 5000;
+        private const ushort currentOutputMax = 5050;
         private const ushort currentOutputMin = 0;
         private const ushort powerOutputMax = 1050; // 1050 * 0.1 = 105W
         private const ushort powerOutputMin = 0;
