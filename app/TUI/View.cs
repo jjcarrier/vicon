@@ -7,6 +7,50 @@ namespace PowerSupplyApp
 {
     partial class Program
     {
+        private static ColorScheme normalGreenScheme = new ColorScheme
+        {
+            TableAccentNormal = Color.Grey11,
+            TableAccentLocked = Color.Gold1,
+            TableAccentFault = Color.DarkRed,
+            RowHeader = new Style(Color.White, null, Decoration.Bold),
+            ColumnHeader = new Style(Color.White, null, Decoration.Bold),
+            Bar = new Style(Color.DarkGreen, Color.Grey11),
+            BarLocked = new Style(Color.Grey, Color.Grey11),
+            Preset = new Style(Color.White, Color.Grey11),
+            PresetSelected = new Style(Color.White, Color.DarkGreen),
+            PresetLocked = new Style(Color.White, Color.Grey),
+            Caption = new Style(Color.White, null, Decoration.Dim),
+            NumericData = new Style(Color.White, null),
+            VoidData = new Style(Color.White, null),
+            Units = new Style(Color.White, null),
+            OffMode = new Style(Color.White, null, Decoration.Dim),
+            ControlMode = new Style(Color.White, Color.DarkGreen),
+            FaultMessage = new Style(Color.White, Color.DarkRed),
+        };
+
+        private static ColorScheme normalRedScheme = new ColorScheme
+        {
+            TableAccentNormal = Color.Grey11,
+            TableAccentLocked = Color.Gold1,
+            TableAccentFault = Color.DarkRed,
+            RowHeader = new Style(Color.White, null, Decoration.Bold),
+            ColumnHeader = new Style(Color.White, null, Decoration.Bold),
+            Bar = new Style(Color.DarkRed, Color.Grey50),
+            BarLocked = new Style(Color.Grey, Color.Grey11),
+            Preset = new Style(Color.White, Color.Grey11),
+            PresetSelected = new Style(Color.White, Color.DarkRed),
+            PresetLocked = new Style(Color.White, Color.Grey),
+            Caption = new Style(Color.White, null, Decoration.Dim),
+            NumericData = new Style(Color.White, null),
+            VoidData = new Style(Color.White, null),
+            Units = new Style(Color.White, null),
+            OffMode = new Style(Color.White, null, Decoration.Dim),
+            ControlMode = new Style(Color.Black, Color.Grey),
+            FaultMessage = new Style(Color.White, Color.DarkRed),
+        };
+
+        private static ColorScheme scheme = normalRedScheme;
+
         private static ViewMode ViewMode { get; set; } = ViewMode.Normal;
         private static bool ControlsLocked
         {
@@ -21,9 +65,9 @@ namespace PowerSupplyApp
         }
 
         private static bool controlsLocked = false;
-        private static Color highlightBgColor = Color.DarkRed;
-        private static Color highlightFgColor = Color.White;
-        private static Color alternateBgColor = Color.DarkRed;
+        private static Color highlightBgColor = scheme.Bar.Background;
+        private static Color highlightFgColor = scheme.Bar.Foreground;
+        private static Color alternateBgColor = scheme.Bar.Background;
 
         private static void EnterAlternateScreenBuffer()
         {
@@ -85,7 +129,7 @@ namespace PowerSupplyApp
                 markupText += rawTextDigits;
             }
 
-            return $"[white]{markupText}[/]";
+            return markupText;
         }
 
         private static Grid GetDeviceInfoGrid()
@@ -123,12 +167,21 @@ namespace PowerSupplyApp
 
         private static Grid GetProtectionsGrid()
         {
+            int rowIndex = 0;
             return new Grid()
                 .AddColumns(2)
-                .AddRow(new Markup("[white]OVP (mV)[/]"), new Markup(GetUserEntryString(sp.OVP, (selectedRow == 0), selectedCol)))
-                .AddRow(new Markup("[white]OCP (mA)[/]"), new Markup(GetUserEntryString(sp.OCP, (selectedRow == 1), selectedCol)))
-                .AddRow(new Markup("[white]OPP (dW)[/]"), new Markup(GetUserEntryString(sys.OPP, (selectedRow == 2), selectedCol)))
-                .AddRow(new Markup("[white]OTP (C)[/]"), new Markup(GetUserEntryString(sys.OTP, (selectedRow == 3), selectedCol)));
+                .AddRow(
+                    new Markup("[white]OVP (mV)[/]", scheme.RowHeader),
+                    new Markup(GetUserEntryString(sp.OVP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData))
+                .AddRow(
+                    new Markup("[white]OCP (mA)[/]", scheme.RowHeader),
+                    new Markup(GetUserEntryString(sp.OCP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData))
+                .AddRow(
+                    new Markup("[white]OPP (dW)[/]", scheme.RowHeader),
+                    new Markup(GetUserEntryString(sys.OPP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData))
+                .AddRow(
+                    new Markup("[white]OTP (C)[/]", scheme.RowHeader),
+                    new Markup(GetUserEntryString(sys.OTP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData));
         }
 
         private static BreakdownChart GetBreakdown100(int actual, int limit)
@@ -138,8 +191,8 @@ namespace PowerSupplyApp
             int a = (limit == 0) ? 100 : 100 * actual / limit;
             breakdown = new BreakdownChart()
                 .HideTags()
-                .AddItem("ACT", a, alternateBgColor)
-                .AddItem("LIM", 100 - a, Color.Grey);
+                .AddItem("ACT", a, (controlsLocked) ? scheme.BarLocked.Foreground : scheme.Bar.Foreground)
+                .AddItem("LIM", 100 - a, (controlsLocked) ? scheme.BarLocked.Background : scheme.Bar.Background);
 
             return breakdown;
         }
@@ -156,28 +209,29 @@ namespace PowerSupplyApp
             return new Grid()
                 .AddColumns(2)
                 .Centered()
-                .AddRow(new Text("V"), vBreakdown)
-                .AddRow(new Text("I"), iBreakdown);
+                .AddRow(new Markup("V", scheme.RowHeader), vBreakdown)
+                .AddRow(new Markup("I", scheme.RowHeader), iBreakdown);
         }
 
         private static Grid GetPresetGrid()
         {
             Markup[] presetText =
             {
-                new Markup(" 1 ", new Style(Color.Black, Color.Grey)),
-                new Markup(" 2 ", new Style(Color.Black, Color.Grey)),
-                new Markup(" 3 ", new Style(Color.Black, Color.Grey)),
-                new Markup(" 4 ", new Style(Color.Black, Color.Grey)),
-                new Markup(" 5 ", new Style(Color.Black, Color.Grey)),
-                new Markup(" 6 ", new Style(Color.Black, Color.Grey)),
-                new Markup(" 7 ", new Style(Color.Black, Color.Grey)),
-                new Markup(" 8 ", new Style(Color.Black, Color.Grey)),
-                new Markup(" 9 ", new Style(Color.Black, Color.Grey))
+                new Markup(" 1 ", scheme.Preset),
+                new Markup(" 2 ", scheme.Preset),
+                new Markup(" 3 ", scheme.Preset),
+                new Markup(" 4 ", scheme.Preset),
+                new Markup(" 5 ", scheme.Preset),
+                new Markup(" 6 ", scheme.Preset),
+                new Markup(" 7 ", scheme.Preset),
+                new Markup(" 8 ", scheme.Preset),
+                new Markup(" 9 ", scheme.Preset)
             };
 
             if (psu.Output.Preset > 0)
             {
-                presetText[psu.Output.Preset - 1] = new Markup($" {psu.Output.Preset} ", GetSelectedPresetStyle());
+                Style presetStyle = controlsLocked ? scheme.PresetLocked : scheme.PresetSelected;
+                presetText[psu.Output.Preset - 1] = new Markup($" {psu.Output.Preset} ", presetStyle);
             }
 
             return new Grid()
@@ -201,18 +255,18 @@ namespace PowerSupplyApp
             switch (mode)
             {
                 case PowerSupplyOutputMode.OFF:
-                    markup = new Markup($"[dim]{text}[/]");
+                    markup = new Markup($" {text} ", scheme.OffMode);
                     break;
 
                 case PowerSupplyOutputMode.CC:
                 case PowerSupplyOutputMode.CV:
-                    markup = new Markup($" {text} ", new Style(Color.Black, Color.Grey));
+                    markup = new Markup($"  {text}  ", scheme.ControlMode);
                     break;
 
                 case PowerSupplyOutputMode.NoInput:
                 case PowerSupplyOutputMode.Invalid:
                 default:
-                    markup = new Markup($" {text} ", new Style(highlightFgColor, highlightBgColor));
+                    markup = new Markup($" {text} ", scheme.FaultMessage);
                     break;
             }
 
@@ -222,8 +276,8 @@ namespace PowerSupplyApp
         private static Markup GetLockStatusMarkup()
         {
             Markup lockStatus =
-                (wavegenMode) ? new Markup(" AWG ", new Style(Color.Black, Color.Gold1)) :
-                (ControlsLocked) ? new Markup(" LOCKED ", new Style(Color.Black, Color.Gold1)) :
+                wavegenMode ? new Markup(" AWG ", new Style(Color.Black, scheme.TableAccentLocked)) :
+                ControlsLocked ? new Markup(" LOCKED ", new Style(Color.Black, scheme.TableAccentLocked)) :
                     new Markup("        ", new Style(Color.Black, Color.Black));
 
             return lockStatus;
@@ -238,7 +292,7 @@ namespace PowerSupplyApp
             switch (status)
             {
                 case PowerSupplyFaultStatus.OK:
-                    faultStatus = new Markup("", new Style(Color.White, Color.DarkRed));
+                    faultStatus = new Markup("", new Style(Color.White, null));
                     break;
 
                 case PowerSupplyFaultStatus.OCP:
@@ -249,7 +303,7 @@ namespace PowerSupplyApp
                 case PowerSupplyFaultStatus.REP:
                 case PowerSupplyFaultStatus.Invalid:
                 default:
-                    faultStatus = new Markup($" {text} ", new Style(Color.White, Color.DarkRed));
+                    faultStatus = new Markup($" {text} ", scheme.FaultMessage);
                     break;
             }
 
@@ -263,11 +317,11 @@ namespace PowerSupplyApp
                 case PowerSupplyFaultStatus.OK:
                     if (ControlsLocked)
                     {
-                        return Color.Gold1;
+                        return scheme.TableAccentLocked;
                     }
                     else
                     {
-                        return Color.Grey;
+                        return scheme.TableAccentNormal;
                     }
 
                 case PowerSupplyFaultStatus.OCP:
@@ -278,7 +332,7 @@ namespace PowerSupplyApp
                 case PowerSupplyFaultStatus.REP:
                 case PowerSupplyFaultStatus.Invalid:
                 default:
-                    return Color.DarkRed;
+                    return scheme.TableAccentFault;
             }
         }
 
@@ -294,24 +348,81 @@ namespace PowerSupplyApp
             const int numHeaderFooterRows = 2;
             const int numExtraRows = 6; // Preset, 2x Empty, V-Row, I-Row, Help Row
             const int totalRows = numDataRows + numSeparatorRows + numHeaderFooterRows + numExtraRows;
+            int rowIndex = 0;
             int h = Console.BufferHeight;
             Table tab = new Table()
                 .Centered()
-                .AddColumn(new TableColumn(GetFaultStatusMarkup(actual.FaultStatus)).RightAligned().Footer(new Markup("[white]Timestamp[/]")))
-                .AddColumn(new TableColumn(new Markup("[white]Setpoint[/]")).Centered().Footer(""))
-                .AddColumn(new TableColumn(new Markup("[white]Actual[/]")).Centered().Footer(new Text($"{actual.Timestamp.Ticks:X08}").Centered()))
-                .AddColumn(new TableColumn(GetLockStatusMarkup()).Alignment(Justify.Left).Footer(""))
-                .AddRow(new Markup("[white]Voltage[/]"), new Markup(GetUserEntryString(setpoint.Voltage, (selectedRow == 0), selectedCol)), new Markup(GetUserEntryString(actual.Voltage)), new Text("mV"))
-                .AddRow(new Markup("[white]Current[/]"), new Markup(GetUserEntryString(setpoint.Current, (selectedRow == 1), selectedCol)), new Markup(GetUserEntryString(actual.Current)), new Text("mA"))
-                .AddRow(new Markup("[white]Power[/]"), new Text("---"), new Markup(GetUserEntryString((ushort)(actual.Voltage * actual.Current / 1000))), new Text("mW"))
-                .AddRow(new Markup("[white]OVP[/]"), new Markup(GetUserEntryString(setpoint.OVP, (selectedRow == 2), selectedCol)), new Markup(GetUserEntryString(supply.PresetParams[supply.Output.Preset].OVP)), new Text("mV"))
-                .AddRow(new Markup("[white]OCP[/]"), new Markup(GetUserEntryString(setpoint.OCP, (selectedRow == 3), selectedCol)), new Markup(GetUserEntryString(supply.PresetParams[supply.Output.Preset].OCP)), new Text("mA"))
-                .AddRow(new Markup("[white]OPP[/]"), new Markup(GetUserEntryString(system.OPP, (selectedRow == 4), selectedCol)), new Markup(GetUserEntryString(supply.SystemParams.OPP)), new Text("dW"))
-                .AddRow(new Markup("[white]OTP[/]"), new Markup(GetUserEntryString(system.OTP, (selectedRow == 5), selectedCol)), new Markup(GetUserEntryString(supply.SystemParams.OTP)), new Text(" C"))
-                .AddRow(new Markup("[white]V[[usb]][/]"), new Text("---"), new Markup(GetUserEntryString(actual.VoltageUsb5V)), new Text("mV"))
-                .AddRow(new Markup("[white]V[[max]][/]"), new Text("---"), new Markup(GetUserEntryString(actual.VoltageOutputMax)), new Text("mV"))
-                .AddRow(new Markup("[white]V[[in]][/]"), new Text("---"), new Markup(GetUserEntryString(actual.VoltageInput)), new Text("mV"))
-                .AddRow(new Markup("[white]Mode[/]"), new Text("---"), GetOutputModeMarkup(actual.OutputMode), new Text(""))
+                .AddColumn(
+                    new TableColumn(GetFaultStatusMarkup(actual.FaultStatus))
+                        .RightAligned()
+                        .Footer(new Markup("Timestamp", scheme.RowHeader)))
+                .AddColumn(
+                    new TableColumn(new Markup("Setpoint", scheme.ColumnHeader))
+                        .Centered()
+                        .Footer(""))
+                .AddColumn(
+                    new TableColumn(new Markup("Actual", scheme.ColumnHeader))
+                        .Centered()
+                        .Footer(new Markup($"{actual.Timestamp.Ticks:X08}", scheme.NumericData).Centered()))
+                .AddColumn(
+                    new TableColumn(GetLockStatusMarkup())
+                        .Alignment(Justify.Left)
+                        .Footer(""))
+                .AddRow(
+                    new Markup("Voltage", scheme.RowHeader),
+                    new Markup(GetUserEntryString(setpoint.Voltage, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
+                    new Markup(GetUserEntryString(actual.Voltage), scheme.NumericData),
+                    new Markup("mV", scheme.Units))
+                .AddRow(
+                    new Markup("Current", scheme.RowHeader),
+                    new Markup(GetUserEntryString(setpoint.Current, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
+                    new Markup(GetUserEntryString(actual.Current), scheme.NumericData),
+                    new Markup("mA", scheme.Units))
+                .AddRow(
+                    new Markup("Power", scheme.RowHeader),
+                    new Markup("---", scheme.VoidData),
+                    new Markup(GetUserEntryString((ushort)(actual.Voltage * actual.Current / 1000)), scheme.NumericData),
+                    new Markup("mW", scheme.Units))
+                .AddRow(
+                    new Markup("OVP", scheme.RowHeader),
+                    new Markup(GetUserEntryString(setpoint.OVP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
+                    new Markup(GetUserEntryString(supply.PresetParams[supply.Output.Preset].OVP), scheme.NumericData),
+                    new Markup("mV", scheme.Units))
+                .AddRow(
+                    new Markup("OCP", scheme.RowHeader),
+                    new Markup(GetUserEntryString(setpoint.OCP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
+                    new Markup(GetUserEntryString(supply.PresetParams[supply.Output.Preset].OCP), scheme.NumericData),
+                    new Markup("mA", scheme.Units))
+                .AddRow(
+                    new Markup("OPP", scheme.RowHeader),
+                    new Markup(GetUserEntryString(system.OPP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
+                    new Markup(GetUserEntryString(supply.SystemParams.OPP), scheme.NumericData),
+                    new Markup("dW", scheme.Units))
+                .AddRow(
+                    new Markup("OTP", scheme.RowHeader),
+                    new Markup(GetUserEntryString(system.OTP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
+                    new Markup(GetUserEntryString(supply.SystemParams.OTP), scheme.NumericData),
+                    new Markup(" C", scheme.Units))
+                .AddRow(
+                    new Markup("V[[usb]]", scheme.RowHeader),
+                    new Markup("---", scheme.VoidData),
+                    new Markup(GetUserEntryString(actual.VoltageUsb5V), scheme.NumericData),
+                    new Markup("mV", scheme.Units))
+                .AddRow(
+                    new Markup("V[[max]]", scheme.RowHeader),
+                    new Markup("---", scheme.VoidData),
+                    new Markup(GetUserEntryString(actual.VoltageOutputMax), scheme.NumericData),
+                    new Markup("mV", scheme.Units))
+                .AddRow(
+                    new Markup("V[[in]]", scheme.RowHeader),
+                    new Markup("---", scheme.VoidData),
+                    new Markup(GetUserEntryString(actual.VoltageInput), scheme.NumericData),
+                    new Markup("mV", scheme.Units))
+                .AddRow(
+                    new Markup("Mode", scheme.RowHeader),
+                    new Markup("---", scheme.VoidData),
+                    GetOutputModeMarkup(actual.OutputMode),
+                    new Text(""))
                 .Expand()
                 .Border(TableBorder.Horizontal)
                 .BorderColor(GetBorderColor(actual.FaultStatus));
@@ -364,7 +475,7 @@ namespace PowerSupplyApp
 
         private static Grid GetDataGrid(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActuals actual)
         {
-            string controlsCaption = (wavegenMode) ? "[dim]Press Q to Quit.[/]" : "[dim]Press Q to Quit. Press ? to Show Controls[/]";
+            string controlsCaption = wavegenMode ? "Press Q to Quit." : "Press Q to Quit. Press ? to Show Controls";
             return new Grid()
                 .AddColumns(1)
                 .AddRow(GetDataTable(supply, setpoint, system, actual))
@@ -372,7 +483,7 @@ namespace PowerSupplyApp
                 .AddEmptyRow()
                 .AddRow(GetBarChartGrid(actual))
                 .AddEmptyRow()
-                .AddRow(new Markup(controlsCaption).Centered());
+                .AddRow(new Markup(controlsCaption, scheme.Caption).Centered());
         }
 
         private static KeyboardEvent GetKeyboardEventExtended(ConsoleKeyInfo key)
