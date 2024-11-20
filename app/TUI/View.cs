@@ -355,6 +355,7 @@ namespace PowerSupplyApp
                 new SelectionPrompt<string>()
                     .Title("Connect to which device (serial number)?")
                     .PageSize(10)
+                    .EnableSearch()
                     .MoreChoicesText("[grey](Move up and down to reveal more devices)[/]")
                     .AddChoices(serialNumbers));
 
