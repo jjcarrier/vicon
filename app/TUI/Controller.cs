@@ -209,7 +209,6 @@ namespace PowerSupplyApp
                 case KeyboardEvent.SavePreset7:
                 case KeyboardEvent.SavePreset8:
                 case KeyboardEvent.SavePreset9:
-                    //psu.SavePreset((byte)(keyEvent - KeyboardEvent.SavePreset0), sp);
                     psu.SetSetpointPreset((byte)(keyEvent - KeyboardEvent.SavePreset0), sp);
                     break;
 
