@@ -17,8 +17,9 @@ namespace PowerSupplyApp
             Bar = new Style(Color.DarkGreen, Color.Grey11),
             BarLocked = new Style(Color.Grey, Color.Grey11),
             Preset = new Style(Color.White, Color.Grey11),
+            PresetLocked = new Style(Color.Grey, Color.Grey11),
             PresetSelected = new Style(Color.White, Color.DarkGreen),
-            PresetLocked = new Style(Color.White, Color.Grey),
+            PresetSelectedLocked = new Style(Color.Black, Color.Grey),
             Caption = new Style(Color.White, null, Decoration.Dim),
             NumericData = new Style(Color.White, null),
             VoidData = new Style(Color.White, null),
@@ -30,16 +31,17 @@ namespace PowerSupplyApp
 
         private static ColorScheme normalRedScheme = new ColorScheme
         {
-            TableAccentNormal = Color.Grey11,
+            TableAccentNormal = Color.Grey,
             TableAccentLocked = Color.Gold1,
             TableAccentFault = Color.DarkRed,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
             ColumnHeader = new Style(Color.White, null, Decoration.Bold),
             Bar = new Style(Color.DarkRed, Color.Grey50),
             BarLocked = new Style(Color.Grey, Color.Grey11),
-            Preset = new Style(Color.White, Color.Grey11),
+            Preset = new Style(Color.Black, Color.Grey),
+            PresetLocked = new Style(Color.Grey, Color.Grey11),
             PresetSelected = new Style(Color.White, Color.DarkRed),
-            PresetLocked = new Style(Color.White, Color.Grey),
+            PresetSelectedLocked = new Style(Color.Black, Color.Grey),
             Caption = new Style(Color.White, null, Decoration.Dim),
             NumericData = new Style(Color.White, null),
             VoidData = new Style(Color.White, null),
@@ -250,22 +252,23 @@ namespace PowerSupplyApp
 
         private static Grid GetPresetGrid()
         {
+            Style presetStyle = controlsLocked ? scheme.PresetLocked : scheme.Preset;
             Markup[] presetText =
             {
-                new Markup(" 1 ", scheme.Preset),
-                new Markup(" 2 ", scheme.Preset),
-                new Markup(" 3 ", scheme.Preset),
-                new Markup(" 4 ", scheme.Preset),
-                new Markup(" 5 ", scheme.Preset),
-                new Markup(" 6 ", scheme.Preset),
-                new Markup(" 7 ", scheme.Preset),
-                new Markup(" 8 ", scheme.Preset),
-                new Markup(" 9 ", scheme.Preset)
+                new Markup(" 1 ", presetStyle),
+                new Markup(" 2 ", presetStyle),
+                new Markup(" 3 ", presetStyle),
+                new Markup(" 4 ", presetStyle),
+                new Markup(" 5 ", presetStyle),
+                new Markup(" 6 ", presetStyle),
+                new Markup(" 7 ", presetStyle),
+                new Markup(" 8 ", presetStyle),
+                new Markup(" 9 ", presetStyle)
             };
 
             if (psu.Output.Preset > 0)
             {
-                Style presetStyle = controlsLocked ? scheme.PresetLocked : scheme.PresetSelected;
+                presetStyle = controlsLocked ? scheme.PresetSelectedLocked : scheme.PresetSelected;
                 presetText[psu.Output.Preset - 1] = new Markup($" {psu.Output.Preset} ", presetStyle);
             }
 
@@ -384,7 +387,7 @@ namespace PowerSupplyApp
         /// <returns>The data table containing the key power supply data.</returns>
         private static Table GetDataTable(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
         {
-            const int numDataRows = 11;
+            const int numDataRows = 12;
             const int numSeparatorRows = 4;
             const int numHeaderFooterRows = 2;
             const int numExtraRows = 6; // Preset, 2x Empty, V-Row, I-Row, Help Row
