@@ -41,7 +41,7 @@ namespace LibDP100
         public PowerSupplyOutput Output { get; private set; } = new PowerSupplyOutput();
 
         // The actual outputs sensed by the power supply.
-        public PowerSupplyActuals ActualOutput { get; private set; } = new PowerSupplyActuals();
+        public PowerSupplyActiveState ActiveState { get; private set; } = new PowerSupplyActiveState();
 
         // The stored presets on teh device.
         public PowerSupplySetpoint[] PresetParams { get; private set; } = new PowerSupplySetpoint[NumPresets];
@@ -73,9 +73,9 @@ namespace LibDP100
         #endregion Private fields
 
         // Set to application routine to receive updates when new V/I values are received.
-        public ActualOutputDelegate ActualOutputEvent { get; set; } = null;
+        public ActiveStateDelegate ActiveStateEvent { get; set; } = null;
 
-        public delegate void ActualOutputDelegate(PowerSupplyActuals output);
+        public delegate void ActiveStateDelegate(PowerSupplyActiveState activeState);
 
         // The thread that processes reading actual voltage and current.
         Thread workerThread;
@@ -158,22 +158,22 @@ namespace LibDP100
         {
             lock (ApiInstance)
             {
-                PowerSupplyActuals output = new PowerSupplyActuals
+                PowerSupplyActiveState activeState = new PowerSupplyActiveState
                 {
                     Timestamp = DateTime.Now,
                     Current = current,
                     Voltage = voltage
                 };
 
-                ActualOutput = output;
-                ParseSupplyData(output);
+                ActiveState = activeState;
+                ParseBasicInfoData(activeState);
 
-                if (ActualOutputEvent != null)
+                if (ActiveStateEvent != null)
                 {
                     // Give STDOUT back to the application during callback.
                     // During this time, no PSU calls should be made.
                     RestoreStdOutput();
-                    ActualOutputEvent(output);
+                    ActiveStateEvent(activeState);
                     NullStdOutput();
                 }
 
@@ -473,7 +473,7 @@ namespace LibDP100
             system.AutoOn = Convert.ToByte(elems[12], 16) != 0;
         }
 
-        private void ParseSupplyData(PowerSupplyActuals output)
+        private void ParseBasicInfoData(PowerSupplyActiveState activeState)
         {
             StringBuilder sb = stdoutReceiver.GetStringBuilder();
             string[] messages = sb.ToString().Split('\n');
@@ -510,14 +510,14 @@ namespace LibDP100
                 return;
             }
 
-            output.VoltageInput = ParseUInt16(elems, 5);
-            output.VoltageOutputMax = ParseUInt16(elems, 11);
-            output.VoltageUsb5V = ParseUInt16(elems, 17);
-            output.OutputMode = (PowerSupplyOutputMode)Convert.ToByte(elems[19], 16);
-            output.FaultStatus = (PowerSupplyFaultStatus)Convert.ToByte(elems[20], 16);
+            activeState.VoltageInput = ParseUInt16(elems, 5);
+            activeState.VoltageOutputMax = ParseUInt16(elems, 11);
+            activeState.VoltageUsb5V = ParseUInt16(elems, 17);
+            activeState.OutputMode = (PowerSupplyOutputMode)Convert.ToByte(elems[19], 16);
+            activeState.FaultStatus = (PowerSupplyFaultStatus)Convert.ToByte(elems[20], 16);
         }
 
-        public bool RefreshActualOutput()
+        public bool RefreshActiveState()
         {
             bool result;
 
@@ -719,7 +719,7 @@ namespace LibDP100
             return true;
         }
 
-        public bool PrintActualOutput()
+        public bool PrintActiveState()
         {
             if (!ApiInstance.ConnState)
             {
@@ -727,17 +727,17 @@ namespace LibDP100
                 return false;
             }
 
-            if (outputParamsValid || RefreshOutputParams())
+            if (outputParamsValid || RefreshActiveState())
             {
-                Console.WriteLine("[ ACTUAL_OUT ]");
-                Console.WriteLine($"  Time (ns)    : {ActualOutput.Timestamp.Ticks:X08}");
-                Console.WriteLine($"  Voltage (mV) : {ActualOutput.Voltage}");
-                Console.WriteLine($"  Current (mA) : {ActualOutput.Current}");
-                Console.WriteLine($"  Fault Status : {ActualOutput.FaultStatus}");
-                Console.WriteLine($"  Output Mode  : {ActualOutput.OutputMode}");
-                Console.WriteLine($"  V[max] (mV)  : {ActualOutput.VoltageOutputMax}");
-                Console.WriteLine($"  V[in] (mV)   : {ActualOutput.VoltageInput}");
-                Console.WriteLine($"  V[usb] (mV)  : {ActualOutput.VoltageUsb5V}");
+                Console.WriteLine("[ ACTIVE_STATE ]");
+                Console.WriteLine($"  Time (ns)    : {ActiveState.Timestamp.Ticks:X08}");
+                Console.WriteLine($"  Fault Status : {ActiveState.FaultStatus}");
+                Console.WriteLine($"  Output Mode  : {ActiveState.OutputMode}");
+                Console.WriteLine($"  V[usb] (mV)  : {ActiveState.VoltageUsb5V}");
+                Console.WriteLine($"  V[in] (mV)   : {ActiveState.VoltageInput}");
+                Console.WriteLine($"  V[max] (mV)  : {ActiveState.VoltageOutputMax}");
+                Console.WriteLine($"  Voltage (mV) : {ActiveState.Voltage}");
+                Console.WriteLine($"  Current (mA) : {ActiveState.Current}");
             }
             else
             {

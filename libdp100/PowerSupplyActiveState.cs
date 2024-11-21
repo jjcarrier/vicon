@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 
 namespace LibDP100
 {
-    public class PowerSupplyActuals
+    public class PowerSupplyActiveState
     {
         private const ushort InvalidVoltage = 0xFFFF;
         private const ushort InvalidCurrent = 0xFFFF;

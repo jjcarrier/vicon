@@ -294,7 +294,7 @@ namespace PowerSupplyApp
                         case "--read-act":
                         case "--ra":
                             readOp = true;
-                            op = Operation.ReadActuals;
+                            op = Operation.ReadActState;
                             break;
 
                         case "--read-out":
@@ -710,7 +710,7 @@ namespace PowerSupplyApp
 
             int optionalArgCount = CountArgsBetweenFlags(args, index);
 
-            if (op == Operation.ReadActuals && optionalArgCount <= 2)
+            if (op == Operation.ReadActState && optionalArgCount <= 2)
             {
                 uint ms = 0;
                 if ((optionalArgCount == 0) ||
@@ -768,8 +768,8 @@ namespace PowerSupplyApp
             {
                 switch (op)
                 {
-                    case Operation.ReadActuals:
-                        result = inst.RefreshActualOutput();
+                    case Operation.ReadActState:
+                        result = inst.RefreshActiveState();
                         break;
 
                     case Operation.ReadOutput:
@@ -800,19 +800,19 @@ namespace PowerSupplyApp
 
                 switch (op)
                 {
-                    case Operation.ReadActuals:
+                    case Operation.ReadActState:
                         if (serializeAsJson)
                         {
                             result = SerializeObject(new CommandResponse
                             {
                                 Command = op,
-                                Response = new { inst.ActualOutput }
+                                Response = new { inst.ActiveState }
                             });
                         }
                         else
                         {
                             Console.WriteLine();
-                            result = inst.PrintActualOutput();
+                            result = inst.PrintActiveState();
                         }
 
                         break;

@@ -1,10 +1,10 @@
-﻿namespace PowerSupplyApp
+namespace PowerSupplyApp
 {
     public enum Operation
     {
         None,
         ReadOutput,
-        ReadActuals,
+        ReadActState,
         ReadSystem,
         ReadDevice,
         ReadPreset,

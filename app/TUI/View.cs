@@ -232,14 +232,14 @@ namespace PowerSupplyApp
             return breakdown;
         }
 
-        private static Grid GetBarChartGrid(PowerSupplyActuals actual)
+        private static Grid GetBarChartGrid(PowerSupplyActiveState activeState)
         {
-            int vo_limit = (actual.VoltageOutputMax > psu.PresetParams[psu.Output.Preset].OVP) ?
-                psu.PresetParams[psu.Output.Preset].OVP : actual.VoltageOutputMax;
+            int vo_limit = (activeState.VoltageOutputMax > psu.PresetParams[psu.Output.Preset].OVP) ?
+                psu.PresetParams[psu.Output.Preset].OVP : activeState.VoltageOutputMax;
             int io_limit = psu.PresetParams[psu.Output.Preset].OCP;
 
-            BreakdownChart vBreakdown = GetBreakdown100(actual.Voltage, vo_limit);
-            BreakdownChart iBreakdown = GetBreakdown100(actual.Current, io_limit);
+            BreakdownChart vBreakdown = GetBreakdown100(activeState.Voltage, vo_limit);
+            BreakdownChart iBreakdown = GetBreakdown100(activeState.Current, io_limit);
 
             return new Grid()
                 .AddColumns(2)
@@ -380,9 +380,9 @@ namespace PowerSupplyApp
         /// <param name="supply">The power supply instance.</param>
         /// <param name="setpoint">The current setpoint data.</param>
         /// <param name="system">The current system data.</param>
-        /// <param name="actual">The current actual data.</param>
+        /// <param name="active">The current active data.</param>
         /// <returns>The data table containing the key power supply data.</returns>
-        private static Table GetDataTable(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActuals actual)
+        private static Table GetDataTable(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
         {
             const int numDataRows = 11;
             const int numSeparatorRows = 4;
@@ -394,7 +394,7 @@ namespace PowerSupplyApp
             Table tab = new Table()
                 .Centered()
                 .AddColumn(
-                    new TableColumn(GetFaultStatusMarkup(actual.FaultStatus))
+                    new TableColumn(GetFaultStatusMarkup(active.FaultStatus))
                         .RightAligned()
                         .Footer(new Markup("Timestamp", scheme.RowHeader)))
                 .AddColumn(
@@ -404,7 +404,7 @@ namespace PowerSupplyApp
                 .AddColumn(
                     new TableColumn(new Markup("Actual", scheme.ColumnHeader))
                         .Centered()
-                        .Footer(new Markup($"{actual.Timestamp.Ticks:X08}", scheme.NumericData).Centered()))
+                        .Footer(new Markup($"{active.Timestamp.Ticks:X08}", scheme.NumericData).Centered()))
                 .AddColumn(
                     new TableColumn(GetLockStatusMarkup())
                         .Alignment(Justify.Left)
@@ -412,17 +412,17 @@ namespace PowerSupplyApp
                 .AddRow(
                     new Markup("Voltage", scheme.RowHeader),
                     new Markup(GetUserEntryString(setpoint.Voltage, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
-                    new Markup(GetUserEntryString(actual.Voltage), scheme.NumericData),
+                    new Markup(GetUserEntryString(active.Voltage), scheme.NumericData),
                     new Markup("mV", scheme.Units))
                 .AddRow(
                     new Markup("Current", scheme.RowHeader),
                     new Markup(GetUserEntryString(setpoint.Current, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
-                    new Markup(GetUserEntryString(actual.Current), scheme.NumericData),
+                    new Markup(GetUserEntryString(active.Current), scheme.NumericData),
                     new Markup("mA", scheme.Units))
                 .AddRow(
                     new Markup("Power", scheme.RowHeader),
                     new Markup("---", scheme.VoidData),
-                    new Markup(GetUserEntryString((ushort)(actual.Voltage * actual.Current / 1000)), scheme.NumericData),
+                    new Markup(GetUserEntryString((ushort)(active.Voltage * active.Current / 1000)), scheme.NumericData),
                     new Markup("mW", scheme.Units))
                 .AddRow(
                     new Markup("OVP", scheme.RowHeader),
@@ -447,26 +447,26 @@ namespace PowerSupplyApp
                 .AddRow(
                     new Markup("V[[usb]]", scheme.RowHeader),
                     new Markup("---", scheme.VoidData),
-                    new Markup(GetUserEntryString(actual.VoltageUsb5V), scheme.NumericData),
+                    new Markup(GetUserEntryString(active.VoltageUsb5V), scheme.NumericData),
                     new Markup("mV", scheme.Units))
                 .AddRow(
                     new Markup("V[[max]]", scheme.RowHeader),
                     new Markup("---", scheme.VoidData),
-                    new Markup(GetUserEntryString(actual.VoltageOutputMax), scheme.NumericData),
+                    new Markup(GetUserEntryString(active.VoltageOutputMax), scheme.NumericData),
                     new Markup("mV", scheme.Units))
                 .AddRow(
                     new Markup("V[[in]]", scheme.RowHeader),
                     new Markup("---", scheme.VoidData),
-                    new Markup(GetUserEntryString(actual.VoltageInput), scheme.NumericData),
+                    new Markup(GetUserEntryString(active.VoltageInput), scheme.NumericData),
                     new Markup("mV", scheme.Units))
                 .AddRow(
                     new Markup("Mode", scheme.RowHeader),
                     new Markup("---", scheme.VoidData),
-                    GetOutputModeMarkup(actual.OutputMode),
+                    GetOutputModeMarkup(active.OutputMode),
                     new Text(""))
                 .Expand()
                 .Border(TableBorder.Horizontal)
-                .BorderColor(GetBorderColor(actual.FaultStatus));
+                .BorderColor(GetBorderColor(active.FaultStatus));
 
             for (int i = 0; i < h - totalRows; i++)
             {
@@ -528,17 +528,17 @@ namespace PowerSupplyApp
         /// <param name="supply">The supply instance.</param>
         /// <param name="setpoint">The current setpoint.</param>
         /// <param name="system">The current system parameters.</param>
-        /// <param name="actual">The actual values received by the power supply.</param>
+        /// <param name="active">The active values received by the power supply.</param>
         /// <returns>The grid containing the current state of the device.</returns>
-        private static Grid GetDataGrid(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActuals actual)
+        private static Grid GetDataGrid(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
         {
             string controlsCaption = wavegenMode ? "Press Q to Quit." : "Press Q to Quit. Press ? to Show Controls";
             return new Grid()
                 .AddColumns(1)
-                .AddRow(GetDataTable(supply, setpoint, system, actual))
+                .AddRow(GetDataTable(supply, setpoint, system, active))
                 .AddRow(Align.Center(GetPresetGrid()))
                 .AddEmptyRow()
-                .AddRow(GetBarChartGrid(actual))
+                .AddRow(GetBarChartGrid(active))
                 .AddEmptyRow()
                 .AddRow(new Markup(controlsCaption, scheme.Caption).Centered());
         }

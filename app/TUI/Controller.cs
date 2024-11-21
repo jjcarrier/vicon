@@ -45,7 +45,7 @@ namespace PowerSupplyApp
             sys = new PowerSupplySystemParams(psu.SystemParams);
             layout = new Layout("Root");
 
-            psu.ActualOutputEvent += ReceiveActualOutput;
+            psu.ActiveStateEvent += ReceiveActiveState;
             psu.StartWorkerThread(TimeSpan.FromMilliseconds(1));
 
             if (wavegenMode)
@@ -271,7 +271,7 @@ namespace PowerSupplyApp
             }
         }
 
-        static void ReceiveActualOutput(PowerSupplyActuals output)
+        static void ReceiveActiveState(PowerSupplyActiveState activeState)
         {
             if (showControls)
             {
@@ -283,7 +283,7 @@ namespace PowerSupplyApp
             }
             else
             {
-                layout["Root"].Update(GetDataGrid(psu, sp, sys, output));
+                layout["Root"].Update(GetDataGrid(psu, sp, sys, activeState));
             }
 
             Console.SetCursorPosition(0, 0);
