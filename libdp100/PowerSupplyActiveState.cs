@@ -6,6 +6,7 @@ namespace LibDP100
     {
         private const ushort InvalidVoltage = 0xFFFF;
         private const ushort InvalidCurrent = 0xFFFF;
+        private const ushort InvalidTemperature = 0xFFFF;
 
         // The time at which the reading was received.
         public DateTime Timestamp { get; set; }
@@ -31,5 +32,8 @@ namespace LibDP100
 
         // The sensed 5V USB rail (VBUS).
         public ushort VoltageUsb5V { get; set; } = InvalidVoltage;
+
+        // The temperature of the device.
+        public ushort Temperature { get; set; } = InvalidTemperature;
     }
 }

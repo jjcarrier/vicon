@@ -460,6 +460,11 @@ namespace PowerSupplyApp
                     new Markup(GetUserEntryString(active.VoltageInput), scheme.NumericData),
                     new Markup("mV", scheme.Units))
                 .AddRow(
+                    new Markup("Temp", scheme.RowHeader),
+                    new Markup("---", scheme.VoidData),
+                    new Markup(GetUserEntryString(active.Temperature), scheme.NumericData),
+                    new Markup("dC", scheme.Units))
+                .AddRow(
                     new Markup("Mode", scheme.RowHeader),
                     new Markup("---", scheme.VoidData),
                     GetOutputModeMarkup(active.OutputMode),

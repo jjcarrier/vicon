@@ -515,6 +515,7 @@ namespace LibDP100
 
             activeState.VoltageInput = ParseUInt16(elems, 5);
             activeState.VoltageOutputMax = ParseUInt16(elems, 11);
+            activeState.Temperature = ParseUInt16(elems, 13);
             activeState.VoltageUsb5V = ParseUInt16(elems, 17);
             activeState.OutputMode = (PowerSupplyOutputMode)Convert.ToByte(elems[19], 16);
             activeState.FaultStatus = (PowerSupplyFaultStatus)Convert.ToByte(elems[20], 16);
@@ -738,6 +739,7 @@ namespace LibDP100
                 Console.WriteLine($"  Time (ns)    : {ActiveState.Timestamp.Ticks:X08}");
                 Console.WriteLine($"  Fault Status : {ActiveState.FaultStatus}");
                 Console.WriteLine($"  Output Mode  : {ActiveState.OutputMode}");
+                Console.WriteLine($"  Temp (C)     : {(double)ActiveState.Temperature / 10}");
                 Console.WriteLine($"  V[usb] (mV)  : {ActiveState.VoltageUsb5V}");
                 Console.WriteLine($"  V[in] (mV)   : {ActiveState.VoltageInput}");
                 Console.WriteLine($"  V[max] (mV)  : {ActiveState.VoltageOutputMax}");
