@@ -62,6 +62,9 @@ namespace LibDP100
         // Indicates whether the supply output state and setpoint information is valid.
         private bool outputParamsValid = false;
 
+        // Indicates whether the supply active state information is valid.
+        private bool activeStateValid = false;
+
         // Indicates whether the preset information is valid.
         private bool[] presetParamsValid = new bool[NumPresets];
 
@@ -531,6 +534,8 @@ namespace LibDP100
                 RestoreStdOutput();
             }
 
+            activeStateValid = true;
+
             return result;
         }
 
@@ -727,7 +732,7 @@ namespace LibDP100
                 return false;
             }
 
-            if (outputParamsValid || RefreshActiveState())
+            if (activeStateValid || RefreshActiveState())
             {
                 Console.WriteLine("[ ACTIVE_STATE ]");
                 Console.WriteLine($"  Time (ns)    : {ActiveState.Timestamp.Ticks:X08}");
