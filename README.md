@@ -139,9 +139,9 @@ two CLI utilities to perform a more complicated task.
 ```pwsh
 vicon --off --delay 1000 --mv 7500 --ma 400 --on --ra 50 1 --json | `
   ForEach-Object { $_ | ConvertFrom-Json } | `
-  Where-Object { $_.Command -eq 'ReadActuals' } | `
+  Where-Object { $_.Command -eq 'ReadActState' } | `
   Select-Object -ExpandProperty Response | `
-  Select-Object -ExpandProperty ActualOutput | `
+  Select-Object -ExpandProperty ActiveState | `
   Select-Object -Property Timestamp,FaultStatus,OutputMode,Voltage,Current | `
   Format-Table
 ```
