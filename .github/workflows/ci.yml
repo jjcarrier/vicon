@@ -19,13 +19,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 'v4.8.1'
-
     - name: Restore dependencies
-      run: dotnet restore
+      run: nuget restore
 
     - name: Build
       run: dotnet build --no-restore --configuration Release
