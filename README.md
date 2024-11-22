@@ -52,8 +52,8 @@ Below is a basic overview of `vicon` functionality:
 - [x] Multi-device supported
   - Mechanisms such as `--enumerate` and `--serial` improve user experience when
     working with multiple DP100s.
+- [x] Supports a TUI lock function to prevent accidental button presses
 - [ ] Recorder/trace (support for logging all activity during interactive mode)
-- [ ] Supports a TUI lock function to prevent accidental button presses
 
 ## Software Requirements
 
