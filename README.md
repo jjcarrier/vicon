@@ -1,5 +1,7 @@
 # VICON: Power Controller
 
+[![CI](https://github.com/jjcarrier/vicon/actions/workflows/ci.yml/badge.svg)](https://github.com/jjcarrier/vicon/actions/workflows/ci.yml)
+
 > [!WARNING]
 > This repository is in an early release state and is subject to breaking
 > changes, faulty behavior, and/or incomplete functionality. Please use extra
@@ -60,6 +62,9 @@ Below is a basic overview of `vicon` functionality:
 - Requires .NET Framework (v4.8.1)
   - A future version will hopefully switch to .NET Core to make this tool
     cross-platform.
+- Visual Studio 2022 / MSBuild / NuGet
+  - With `.NET desktop environment` workload
+  - Dedicated nuget install: `winget install Microsoft.NuGet`
 
 ## Initial Setup
 
@@ -68,7 +73,7 @@ Checkout and configure the repository via:
 ```pwsh
 git clone https://github.com/jjcarrier/vicon.git
 cd vicon
-dotnet restore
+nuget restore
 ```
 
 Build the project via:
