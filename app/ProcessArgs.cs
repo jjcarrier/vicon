@@ -55,7 +55,7 @@ namespace PowerSupplyApp
             grid.AddRow("  [white]--read-out[/], [white]--ro[/]", "",
                 "Reads the current output parameters.");
             grid.AddRow("  [white]--read-act[/], [white]--ra[/]", "[silver][[CNT]] [[MS]][/]",
-                "Reads the actual (sensed) output levels, where [white]CNT[/] is the total number of times to read the output level, and [white]MS[/] is the delay time in milliseconds between each read operation.");
+                "Reads the active status, where [white]CNT[/] is the total number of times to read the status information, and [white]MS[/] is the delay time in milliseconds between each read operation.");
             grid.AddRow("  [white]--read-pre[/], [white]--rp[/]", "[silver][[IDX]] [[CNT]][/]",
                 "Reads the preset parameters from the specified preset index, [white]IDX[/] (units: index, range: 0-9, default = 0). The optional [white]CNT[/] parameter allows a range of presets to be read in a single command.");
             grid.AddRow("  [white]--on[/]", "",
