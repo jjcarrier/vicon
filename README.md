@@ -60,11 +60,13 @@ Below is a basic overview of `vicon` functionality:
 ## Software Requirements
 
 - Requires .NET Framework (v4.8.1)
+  - `winget install Microsoft.DotNet.Framework.DeveloperPack_4`
+    - NOTE: A system reboot is recommended after install.
   - A future version will hopefully switch to .NET Core to make this tool
     cross-platform.
 - Visual Studio 2022 / MSBuild / NuGet
-  - With `.NET desktop environment` workload
-  - Dedicated nuget install: `winget install Microsoft.NuGet`
+  - Visual Studio `.NET desktop environment` workload.
+  - Dedicated nuget install: `winget install Microsoft.NuGet`.
 
 ## Initial Setup
 
