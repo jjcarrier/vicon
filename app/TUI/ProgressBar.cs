@@ -33,12 +33,20 @@ namespace PowerSupplyApp
                 fractionalChar = string.Empty;
             }
 
-            string foregroundChars = new string('█', wholeChar);
-            string backgroundChars = new string('█', width - wholeChar - 1);
-            string bgColor = style.Background.ToMarkup();
             string fgColor = style.Foreground.ToMarkup();
+            string bgColor = style.Background.ToMarkup();
+            string foregroundChars = new string('█', wholeChar);
 
-            return new Markup($"[{fgColor}]{foregroundChars}{fractionalChar}[/][{bgColor}]{backgroundChars}[/]", style);
+            if (wholeChar == width)
+            {
+                return new Markup($"[{fgColor}]{foregroundChars}[/]", style);
+            }
+            else
+            {
+                string backgroundChars = new string('█', width - wholeChar - 1);
+
+                return new Markup($"[{fgColor}]{foregroundChars}{fractionalChar}[/][{bgColor}]{backgroundChars}[/]", style);
+            }
         }
     }
 }
