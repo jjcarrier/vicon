@@ -230,12 +230,13 @@ namespace PowerSupplyApp
             var width = Console.WindowWidth - 3;
             double vLoad = (double)activeState.Voltage / vo_limit;
             double iLoad = (double)activeState.Current / io_limit;
+            Style style = (controlsLocked) ? scheme.BarLocked : scheme.Bar;
 
             return new Grid()
                 .AddColumns(2)
                 .Centered()
-                .AddRow(new Markup("V", scheme.RowHeader), ProgressBar.GetMarkup(vLoad, width, scheme.Bar))
-                .AddRow(new Markup("I", scheme.RowHeader), ProgressBar.GetMarkup(iLoad, width, scheme.Bar));
+                .AddRow(new Markup("V", scheme.RowHeader), ProgressBar.GetMarkup(vLoad, width, style))
+                .AddRow(new Markup("I", scheme.RowHeader), ProgressBar.GetMarkup(iLoad, width, style));
         }
 
         private static Grid GetPresetGrid()
