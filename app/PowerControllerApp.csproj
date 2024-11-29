@@ -110,6 +110,7 @@
     <Compile Include="TUI\ColorScheme.cs" />
     <Compile Include="TUI\Controller.cs" />
     <Compile Include="TUI\KeyboardEvent.cs" />
+    <Compile Include="TUI\ProgressBar.cs" />
     <Compile Include="TUI\View.cs" />
     <Compile Include="TUI\ConsoleKeyEventQueue.cs" />
     <Compile Include="Operation.cs" />

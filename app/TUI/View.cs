@@ -214,40 +214,28 @@ namespace PowerSupplyApp
         }
 
         /// <summary>
-        /// Gets the breakdown chart for the specified values. This chart is meant to render the
-        /// actual/sensed values as a percentage of the limit. In a sense, it represents a
-        /// percent load.
+        /// Generate bar charts for indicating the percent load for voltage and current.
+        /// This offers at-a-glance feedback to the user how close the device is to the output
+        /// limits which may either result in regulation mode changes, or tripping fault
+        /// protection logic.
         /// </summary>
-        /// <param name="actual">The actual/sensed value.</param>
-        /// <param name="limit">The limit.</param>
-        /// <returns>The BreakdownChart representing the percent load.</returns>
-        private static BreakdownChart GetBreakdown100(int actual, int limit)
-        {
-            BreakdownChart breakdown;
-
-            int a = (limit == 0) ? 100 : 100 * actual / limit;
-            breakdown = new BreakdownChart()
-                .HideTags()
-                .AddItem("ACT", a, (controlsLocked) ? scheme.BarLocked.Foreground : scheme.Bar.Foreground)
-                .AddItem("LIM", 100 - a, (controlsLocked) ? scheme.BarLocked.Background : scheme.Bar.Background);
-
-            return breakdown;
-        }
-
+        /// <param name="activeState">The current state information of the device.</param>
+        /// <returns></returns>
         private static Grid GetBarChartGrid(PowerSupplyActiveState activeState)
         {
             int vo_limit = (activeState.VoltageOutputMax > psu.PresetParams[psu.Output.Preset].OVP) ?
                 psu.PresetParams[psu.Output.Preset].OVP : activeState.VoltageOutputMax;
             int io_limit = psu.PresetParams[psu.Output.Preset].OCP;
 
-            BreakdownChart vBreakdown = GetBreakdown100(activeState.Voltage, vo_limit);
-            BreakdownChart iBreakdown = GetBreakdown100(activeState.Current, io_limit);
+            var width = Console.WindowWidth - 3;
+            double vLoad = (double)activeState.Voltage / vo_limit;
+            double iLoad = (double)activeState.Current / io_limit;
 
             return new Grid()
                 .AddColumns(2)
                 .Centered()
-                .AddRow(new Markup("V", scheme.RowHeader), vBreakdown)
-                .AddRow(new Markup("I", scheme.RowHeader), iBreakdown);
+                .AddRow(new Markup("V", scheme.RowHeader), ProgressBar.GetMarkup(vLoad, width, scheme.Bar))
+                .AddRow(new Markup("I", scheme.RowHeader), ProgressBar.GetMarkup(iLoad, width, scheme.Bar));
         }
 
         private static Grid GetPresetGrid()
