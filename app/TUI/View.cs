@@ -305,7 +305,7 @@ namespace PowerSupplyApp
             Markup lockStatus =
                 wavegenMode ? new Markup(" AWG ", new Style(Color.Black, scheme.TableAccentLocked)) :
                 ControlsLocked ? new Markup(" LOCKED ", new Style(Color.Black, scheme.TableAccentLocked)) :
-                    new Markup("        ", new Style(Color.Black, Color.Black));
+                    new Markup("        ", new Style(null, null));
 
             return lockStatus;
         }
