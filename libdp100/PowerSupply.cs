@@ -260,7 +260,7 @@ namespace LibDP100
         {
             bool result = true;
 
-            if (Output.On)
+            if (Output.On || ActiveState.FaultStatus != PowerSupplyFaultStatus.OK)
             {
                 apiMutex.WaitOne();
                 NullStdOutput();
