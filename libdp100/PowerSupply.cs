@@ -394,6 +394,20 @@ namespace LibDP100
                 }
                 else
                 {
+                    if (index != Output.Preset)
+                    {
+                        // Mitigation measure for OCP false triggers.
+                        // This does not prevent it completely but avoids common occurrences.
+                        // The main continuing issue is seen when switching the output back ON
+                        // after changing to a more restrictive OCP setting when a VI setting
+                        // that is more demanding of current. Something inside the DP100
+                        // requires a settling time to stabilize and it seems like it can take
+                        // upwards to 2-3seconds.
+                        SetOutputOff();
+                        Output.Preset = index;
+                        Thread.Sleep(100);
+                    }
+
                     apiMutex.WaitOne();
                     NullStdOutput();
                     result = ApiInstance.UseGroup(
