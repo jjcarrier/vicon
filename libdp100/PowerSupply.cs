@@ -15,7 +15,7 @@ namespace LibDP100
     {
         const byte NumPresets = 10;
         const ushort InvalidVoltage = 0xFFFF;
-        const ushort InvalidByte= 0xFFFF;
+        const ushort InvalidByte = 0xFFFF;
 
         // The instance of the DP100 API.
         private ATKDP100API ApiInstance;
@@ -58,6 +58,11 @@ namespace LibDP100
 
         // Used for handling nested calls that may call NullStdOutput/RestoreStdOutput multiple times.
         private int disableOutputLevel = 0;
+
+        // Used for addressing an issue with DP100 UseGroup behavior.
+        // When preset0 is active, there logic will skip calls to UseGroup until the output is turned on.
+        private bool preset0Active = false;
+        private byte preset0DelayedTransition = 0;
 
         // Indicates whether the supply output state and setpoint information is valid.
         private bool outputParamsValid = false;
@@ -241,16 +246,29 @@ namespace LibDP100
 
             if (!Output.On)
             {
-                apiMutex.WaitOne();
-                NullStdOutput();
-                result = ApiInstance.OpenOut(Output.Preset, Output.Setpoint.Current, Output.Setpoint.Voltage);
-                apiMutex.ReleaseMutex();
-                RestoreStdOutput();
-
-                if (result)
+                if (preset0Active && preset0DelayedTransition != 0)
                 {
+                    // Set the Output.On = true to bypass logic in SetOutputToPreset()
+                    // that would otherwise turn the output off every other preset transition
+                    // will normally turn the output OFF not ON.
+                    preset0Active = false;
                     Output.On = true;
+                    result = SetOutputToPreset(preset0DelayedTransition);
+                    if (!result)
+                    {
+                        preset0Active = true;
+                    }
                 }
+                else
+                {
+                    apiMutex.WaitOne();
+                    NullStdOutput();
+                    result = ApiInstance.OpenOut(Output.Preset, Output.Setpoint.Current, Output.Setpoint.Voltage);
+                    apiMutex.ReleaseMutex();
+                    RestoreStdOutput();
+                }
+
+                Output.On = result;
             }
 
             return result;
@@ -362,26 +380,38 @@ namespace LibDP100
 
             if (result)
             {
-                apiMutex.WaitOne();
-                NullStdOutput();
-                result = ApiInstance.UseGroup(
-                    index,
-                    PresetParams[index].Current,
-                    PresetParams[index].Voltage,
-                    PresetParams[index].OCP,
-                    PresetParams[index].OVP);
-                apiMutex.ReleaseMutex();
-                RestoreStdOutput();
+                if (preset0Active)
+                {
+                    // IMPORTANT:
+                    // A transition from preset 0 to another preset
+                    // will result in the output being turned on.
+                    // This is likely a bug in the DP100 firmware (v1.4).
+                    // To prevent this, the UseGroup API will be
+                    // postponed until the user requests that the
+                    // output to be turned ON.
+                    preset0DelayedTransition = index;
+                    Output.Preset = index;
+                }
+                else
+                {
+                    apiMutex.WaitOne();
+                    NullStdOutput();
+                    result = ApiInstance.UseGroup(
+                        index,
+                        PresetParams[index].Current,
+                        PresetParams[index].Voltage,
+                        PresetParams[index].OCP,
+                        PresetParams[index].OVP);
+                    apiMutex.ReleaseMutex();
+                    RestoreStdOutput();
+                }
             }
 
             if (result)
             {
                 if (index != Output.Preset)
                 {
-                    // The DP100 turns output off when switching presets.
-                    // Do the same on the host side, to keep things in sync.
-                    Output.On = false;
-                    Output.Preset = index;
+                    RefreshOutputParams();
                 }
 
                 SetSetpoint(PresetParams[index]);
