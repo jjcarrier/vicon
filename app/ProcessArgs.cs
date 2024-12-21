@@ -536,7 +536,7 @@ namespace PowerSupplyApp
                     }
                     else
                     {
-                        Console.WriteLine("Output: ON");
+                        Console.WriteLine("Set Output : ON");
                     }
                     break;
 
@@ -551,7 +551,7 @@ namespace PowerSupplyApp
                     }
                     else
                     {
-                        Console.WriteLine("Output: OFF");
+                        Console.WriteLine("Set Output : OFF");
                     }
                     break;
 
@@ -561,12 +561,16 @@ namespace PowerSupplyApp
                         result = SerializeObject(new CommandResponse
                         {
                             Command = op,
-                            Response = inst.Output.Setpoint
+                            Response = new { inst.Output.Preset, inst.Output.Setpoint }
                         });
                     }
                     else
                     {
-                        Console.WriteLine($"Set Preset: {parsedValue}");
+                        Console.WriteLine($"Set Preset : {inst.Output.Preset}");
+                        Console.WriteLine($"  V (mV)   : {inst.Output.Setpoint.Voltage}");
+                        Console.WriteLine($"  I (mA)   : {inst.Output.Setpoint.Current}");
+                        Console.WriteLine($"  OVP (mV) : {inst.Output.Setpoint.OVP}");
+                        Console.WriteLine($"  OCP (mA) : {inst.Output.Setpoint.OCP}");
                     }
                     break;
 
@@ -581,7 +585,7 @@ namespace PowerSupplyApp
                     }
                     else
                     {
-                        Console.WriteLine($"Set voltage (mV): {sp.Voltage}");
+                        Console.WriteLine($"Set Voltage (mV) : {sp.Voltage}");
                     }
                     break;
 
@@ -596,7 +600,7 @@ namespace PowerSupplyApp
                     }
                     else
                     {
-                        Console.WriteLine($"Set current (mA): {sp.Current}");
+                        Console.WriteLine($"Set Current (mA) : {sp.Current}");
                     }
                     break;
 
@@ -611,7 +615,7 @@ namespace PowerSupplyApp
                     }
                     else
                     {
-                        Console.WriteLine($"Set OVP (mV): {sp.OVP}");
+                        Console.WriteLine($"Set OVP (mV) : {sp.OVP}");
                     }
                     break;
 
@@ -626,7 +630,7 @@ namespace PowerSupplyApp
                     }
                     else
                     {
-                        Console.WriteLine($"Set OCP (mA): {sp.OCP}");
+                        Console.WriteLine($"Set OCP (mA) : {sp.OCP}");
                     }
                     break;
 
@@ -641,7 +645,7 @@ namespace PowerSupplyApp
                     }
                     else
                     {
-                        Console.WriteLine($"Set OPP (mW): {sys.OPP}");
+                        Console.WriteLine($"Set OPP (mW) : {sys.OPP}");
                     }
                     break;
 
@@ -656,7 +660,7 @@ namespace PowerSupplyApp
                     }
                     else
                     {
-                        Console.WriteLine($"Set OTP (C): {sys.OTP}");
+                        Console.WriteLine($"Set OTP (C) : {sys.OTP}");
                     }
                     break;
             }

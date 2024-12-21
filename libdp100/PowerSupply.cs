@@ -810,10 +810,10 @@ namespace LibDP100
             {
                 Console.WriteLine("[ DEV_INFO ] ");
                 Console.WriteLine("  Type   : " + Device.Type);
-                Console.WriteLine("  Status : " + Device.SoftwareState);
                 Console.WriteLine("  SN     : " + Device.SerialNumber);
                 Console.WriteLine("  HW     : " + Device.HardwareVersion);
                 Console.WriteLine("  SW     : " + Device.SoftwareVersion);
+                Console.WriteLine("  Status : " + Device.SoftwareState);
             }
             else
             {
