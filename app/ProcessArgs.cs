@@ -65,7 +65,7 @@ namespace PowerSupplyApp
             grid.AddRow("  [white]--millivolts[/], [white]--mv[/]", "[silver]<MV>[/]",
                 "Sets the (maximum) output voltage in millivolts.");
             grid.AddRow("  [white]--milliamps[/], [white]--ma[/]", "[silver]<MA>[/]",
-                "Sets the (maximum) output current in milliamps.");
+                "Sets the (maximum) output current in milliamperes.");
             grid.AddRow("  [white]--ovp[/]", "[silver]<MV>[/]",
                 "Sets the Over-Voltage Protection level. Reaching or exceeding this limit will switch the output OFF. (units: mV)");
             grid.AddRow("  [white]--ocp[/]", "[silver]<MA>[/]",
