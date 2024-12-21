@@ -610,6 +610,7 @@ namespace LibDP100
                 Output.Setpoint.OCP = ocp;
 
                 outputParamsValid = true;
+                preset0Active = Output.Preset == 0;
             }
 
             return result;
