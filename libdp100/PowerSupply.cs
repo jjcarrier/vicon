@@ -96,7 +96,11 @@ namespace LibDP100
 
         // A temporary stringwriter instance for suppressing and/or selectively
         // parsing stdout for data not exposed via the API.
-        StringWriter stdoutReceiver = new StringWriter();
+        StringWriter stdoutReceiver;
+
+        // A stream writer for restoring output to the console. This is used in between
+        // the ApiInstance commands to allow the application to interact with the console.
+        StreamWriter standardOutput = new StreamWriter(Console.OpenStandardOutput());
 
         // Mutex to ensure single-access to underlying API.
         private static Mutex apiMutex = new Mutex();
@@ -110,6 +114,7 @@ namespace LibDP100
             ApiInstance.ReceBasicInfoEvent += ReceiveActualVI;
             // This API does not appear to be functional.
             //ApiInstance.DevStateChanageEvent += DevStateChange;
+            standardOutput.AutoFlush = true;
         }
 
         private void DevStateChange(bool state)
@@ -477,8 +482,7 @@ namespace LibDP100
 
         private void ParseSystemData(PowerSupplySystemParams system)
         {
-            StringBuilder sb = stdoutReceiver.GetStringBuilder();
-            string[] messages = sb.ToString().Split('\n');
+            string[] messages = stdoutReceiver.GetStringBuilder().ToString().Split('\n');
             int sysParamsIndex = -1;
             for (int i = 0; i < messages.Length; i++)
             {
@@ -522,8 +526,7 @@ namespace LibDP100
 
         private void ParseBasicInfoData(PowerSupplyActiveState activeState)
         {
-            StringBuilder sb = stdoutReceiver.GetStringBuilder();
-            string[] messages = sb.ToString().Split('\n');
+            string[] messages = stdoutReceiver.GetStringBuilder().ToString().Split('\n');
             int basicInfoIndex = -1;
             for (int i = 0; i < messages.Length; i++)
             {
@@ -862,7 +865,7 @@ namespace LibDP100
             }
 
             disableOutputLevel++;
-            stdoutReceiver.Flush();
+            stdoutReceiver = new StringWriter();
             Console.SetOut(stdoutReceiver);
         }
 
@@ -880,8 +883,7 @@ namespace LibDP100
 
             if (disableOutputLevel == 0)
             {
-                var standardOutput = new StreamWriter(Console.OpenStandardOutput());
-                standardOutput.AutoFlush = true;
+                stdoutReceiver.Dispose();
                 Console.SetOut(standardOutput);
             }
         }
