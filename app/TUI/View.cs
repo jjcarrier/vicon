@@ -283,7 +283,7 @@ namespace PowerSupplyApp
         /// protection logic.
         /// </summary>
         /// <param name="activeState">The current state information of the device.</param>
-        /// <returns></returns>
+        /// <returns>The grid.</returns>
         private static Grid GetBarChartGrid(PowerSupplyActiveState activeState)
         {
             int vo_limit = (activeState.VoltageOutputMax > psu.PresetParams[psu.Output.Preset].OVP) ?
@@ -301,6 +301,10 @@ namespace PowerSupplyApp
                 .AddRow(new Markup("I", scheme.RowHeader), ProgressBar.GetMarkup(iLoad, width, scheme.Bar));
         }
 
+        /// <summary>
+        /// Gets the grid object for displaying the preset selection.
+        /// </summary>
+        /// <returns>The grid.</returns>
         private static Grid GetPresetGrid()
         {
             Markup[] presetText =
