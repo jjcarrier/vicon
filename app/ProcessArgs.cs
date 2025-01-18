@@ -566,11 +566,11 @@ namespace PowerSupplyApp
                     }
                     else
                     {
-                        Console.WriteLine($"Set Preset : {inst.Output.Preset}");
-                        Console.WriteLine($"  V (mV)   : {inst.Output.Setpoint.Voltage}");
-                        Console.WriteLine($"  I (mA)   : {inst.Output.Setpoint.Current}");
-                        Console.WriteLine($"  OVP (mV) : {inst.Output.Setpoint.OVP}");
-                        Console.WriteLine($"  OCP (mA) : {inst.Output.Setpoint.OCP}");
+                        Console.WriteLine($"Set Preset     : {inst.Output.Preset}");
+                        Console.WriteLine($"  Voltage (mV) : {inst.Output.Setpoint.Voltage}");
+                        Console.WriteLine($"  Current (mA) : {inst.Output.Setpoint.Current}");
+                        Console.WriteLine($"  OVP (mV)     : {inst.Output.Setpoint.OVP}");
+                        Console.WriteLine($"  OCP (mA)     : {inst.Output.Setpoint.OCP}");
                     }
                     break;
 

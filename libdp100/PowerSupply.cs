@@ -733,10 +733,10 @@ namespace LibDP100
             if (presetParamsValid[index] || RefreshPreset(index))
             {
                 Console.WriteLine("[ PRESET " + index + " ]");
-                Console.WriteLine("  V (mV)   : " + PresetParams[index].Voltage);
-                Console.WriteLine("  I (mA)   : " + PresetParams[index].Current);
-                Console.WriteLine("  OVP (mV) : " + PresetParams[index].OVP);
-                Console.WriteLine("  OCP (mA) : " + PresetParams[index].OCP);
+                Console.WriteLine("  Voltage (mV) : " + PresetParams[index].Voltage);
+                Console.WriteLine("  Current (mA) : " + PresetParams[index].Current);
+                Console.WriteLine("  OVP (mV)     : " + PresetParams[index].OVP);
+                Console.WriteLine("  OCP (mA)     : " + PresetParams[index].OCP);
             }
             else
             {
