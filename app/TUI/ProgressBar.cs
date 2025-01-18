@@ -1,7 +1,7 @@
 using System;
 using Spectre.Console;
 
-namespace PowerSupplyApp
+namespace PowerSupplyApp.TUI
 {
     /// <summary>
     /// Provides a simple mechanism to generate a progress bar using extended unicode characters.
