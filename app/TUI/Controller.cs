@@ -2,6 +2,7 @@ using LibDP100;
 using Spectre.Console;
 using System;
 using System.Threading;
+using PowerSupplyApp.TUI;
 
 namespace PowerSupplyApp
 {

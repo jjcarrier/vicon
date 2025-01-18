@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using Spectre.Console;
+using PowerSupplyApp.TUI;
 
 namespace PowerSupplyApp
 {

@@ -1,4 +1,4 @@
-namespace PowerSupplyApp
+namespace PowerSupplyApp.TUI
 {
     enum KeyboardEvent
     {

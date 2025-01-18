@@ -2,6 +2,7 @@ using LibDP100;
 using System;
 using Spectre.Console;
 using System.Collections.Generic;
+using PowerSupplyApp.TUI;
 
 namespace PowerSupplyApp
 {
@@ -22,6 +23,7 @@ namespace PowerSupplyApp
             Units = new Style(Color.White, null),
             OffMode = new Style(Color.White, null, Decoration.Dim),
             ControlMode = new Style(Color.White, Color.DarkGreen),
+            UserControl = new Style(Color.White, Color.DarkGreen),
             FaultMessage = new Style(Color.White, Color.DarkRed),
         };
 
@@ -40,6 +42,7 @@ namespace PowerSupplyApp
             Units = new Style(Color.White, null),
             OffMode = new Style(Color.White, null, Decoration.Dim),
             ControlMode = new Style(Color.Black, Color.Grey),
+            UserControl = new Style(Color.White, Color.Grey),
             FaultMessage = new Style(Color.White, Color.DarkRed),
         };
 
@@ -58,6 +61,7 @@ namespace PowerSupplyApp
             Units = new Style(Color.White, null),
             OffMode = new Style(Color.White, null, Decoration.Dim),
             ControlMode = new Style(Color.Black, Color.Grey),
+            UserControl = new Style(Color.Black, Color.Gold1),
             FaultMessage = new Style(Color.White, Color.DarkRed),
         };
 
@@ -76,6 +80,7 @@ namespace PowerSupplyApp
             Units = new Style(Color.White, null),
             OffMode = new Style(Color.White, null, Decoration.Dim),
             ControlMode = new Style(Color.Black, Color.Grey),
+            UserControl = new Style(Color.White, Color.Grey),
             FaultMessage = new Style(Color.White, Color.DarkRed),
         };
 
@@ -367,8 +372,8 @@ namespace PowerSupplyApp
         private static Markup GetLockStatusMarkup()
         {
             Markup lockStatus =
-                wavegenMode ? new Markup(" AWG ", new Style(Color.Black, lockScheme.TableAccent)) :
-                ControlsLocked ? new Markup(" LOCKED ", new Style(Color.Black, lockScheme.TableAccent)) :
+                wavegenMode ? new Markup(" AWG ", lockScheme.UserControl) :
+                ControlsLocked ? new Markup(" LOCKED ", lockScheme.UserControl) :
                     new Markup("        ", new Style(null, null));
 
             return lockStatus;

@@ -1,6 +1,6 @@
 using Spectre.Console;
 
-namespace PowerSupplyApp
+namespace PowerSupplyApp.TUI
 {
     public class ColorScheme
     {
@@ -17,6 +17,7 @@ namespace PowerSupplyApp
         public Style VoidData { get; set; }
         public Style OffMode { get; set; }
         public Style ControlMode { get; set; }
+        public Style UserControl { get; set; }
         public Style FaultMessage { get; set; }
     }
 }

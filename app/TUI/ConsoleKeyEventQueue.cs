@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace PowerSupplyApp
+namespace PowerSupplyApp.TUI
 {
     public class ConsoleKeyEventQueue
     {
