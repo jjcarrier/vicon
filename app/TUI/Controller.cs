@@ -199,7 +199,7 @@ namespace PowerSupplyApp
                     psu.SetOutputToPreset((byte)(keyEvent - KeyboardEvent.SetPreset0));
                     sp = new PowerSupplySetpoint(psu.Output.Setpoint);
                     break;
-                case KeyboardEvent.SavePreset0:
+                case KeyboardEvent.SavePreset0: // Saving to Preset 0 does not appear to work.
                 case KeyboardEvent.SavePreset1:
                 case KeyboardEvent.SavePreset2:
                 case KeyboardEvent.SavePreset3:

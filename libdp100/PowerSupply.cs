@@ -433,6 +433,8 @@ namespace LibDP100
                     RefreshOutputParams();
                 }
 
+                // NOTE: Ideally this should not set the output to OFF as this may clear a fault
+                // which should only be done if the user explicitly requests "OFF".
                 SetSetpoint(PresetParams[index]);
             }
 
