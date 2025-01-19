@@ -39,6 +39,8 @@ namespace PowerSupplyApp
                 "Connects to the power supply that matches the specified [white]SERIAL[/] number.");
             grid.AddRow("  [white]--interactive[/]", "",
                 "Switches into interactive mode.");
+            grid.AddRow("  [white]--theme[/]", "<THEME>",
+                "Sets the interactive-mode's theme. Persists between executions. The [white]THEME[/] may be one of the following: 'classic', 'black-and-white', 'grey', 'dark-red', 'dark-green', 'dark-magenta', 'cyan', 'gold', 'blue', 'blue-violet'.");
             grid.AddRow("  [white]--json[/]", "",
                 "Enables JSON output mode which may be used to integrate with other JSON-compatible tools.");
             grid.AddRow("  [white]--json-list[/]", "",
@@ -105,6 +107,19 @@ namespace PowerSupplyApp
                             return ProcessArgsResult.OkExitNow;
                         case "--debug":
                             debug = true;
+                            break;
+                        case "--theme":
+                            if ((i + 1 >= args.Length) || args[i + 1].StartsWith("-"))
+                            {
+                                Console.WriteLine($"ERROR: Missing <THEME_NAME> parameter for '{args[i]}'.");
+                                return ProcessArgsResult.MissingParameter;
+                            }
+
+                            if (!JsonTheme.StoreJsonTheme(args[i + 1]))
+                            {
+                                Console.WriteLine("Failed to set theme!");
+                                return ProcessArgsResult.Error;
+                            }
                             break;
                         case "--enumerate":
                             enumerate = true;
@@ -198,6 +213,7 @@ namespace PowerSupplyApp
             return ProcessArgsResult.Ok;
         }
 
+
         static ProcessArgsResult ProcessArgs(PowerSupply inst, string[] args)
         {
             if (args.Length > 0)
@@ -224,6 +240,10 @@ namespace PowerSupplyApp
                         case "--enumerate":
                             // Do nothing, already handled in first pass.
                             break;
+                        case "--theme":
+                            // Do nothing, already handled in first pass.
+                            i++;
+                            break;
 
                         case "--serial":
                         case "--sn":
@@ -232,6 +252,7 @@ namespace PowerSupplyApp
                             break;
 
                         case "--interactive":
+                            theme = JsonTheme.LoadJsonTheme();
                             RunInteractiveMode();
                             break;
 
