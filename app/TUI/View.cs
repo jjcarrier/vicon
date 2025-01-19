@@ -8,90 +8,13 @@ namespace PowerSupplyApp
 {
     partial class Program
     {
-        private static ColorScheme normalGreenScheme = new ColorScheme
-        {
-            TableAccent = Color.Grey11,
-            RowHeader = new Style(Color.White, null, Decoration.Bold),
-            ColumnHeader = new Style(Color.White, null, Decoration.Bold),
-            Bar = new Style(Color.DarkGreen, Color.Grey11),
-            Preset = new Style(Color.White, Color.Grey11),
-            PresetSelected = new Style(Color.White, Color.DarkGreen),
-            Caption = new Style(Color.White, null, Decoration.Dim),
-            NumericData = new Style(Color.White, null),
-            NumericDataChanged = new Style(Color.White, null, Decoration.Invert),
-            VoidData = new Style(Color.White, null),
-            Units = new Style(Color.White, null),
-            OffMode = new Style(Color.White, null, Decoration.Dim),
-            ControlMode = new Style(Color.White, Color.DarkGreen),
-            UserControl = new Style(Color.White, Color.DarkGreen),
-            FaultMessage = new Style(Color.White, Color.DarkRed),
-        };
-
-        private static ColorScheme normalRedScheme = new ColorScheme
-        {
-            TableAccent = Color.Grey,
-            RowHeader = new Style(Color.White, null, Decoration.Bold),
-            ColumnHeader = new Style(Color.White, null, Decoration.Bold),
-            Bar = new Style(Color.DarkRed, Color.Grey50),
-            Preset = new Style(Color.Black, Color.Grey),
-            PresetSelected = new Style(Color.White, Color.DarkRed),
-            Caption = new Style(Color.White, null, Decoration.Dim),
-            NumericData = new Style(Color.White, null),
-            NumericDataChanged = new Style(Color.White, null, Decoration.Invert),
-            VoidData = new Style(Color.White, null),
-            Units = new Style(Color.White, null),
-            OffMode = new Style(Color.White, null, Decoration.Dim),
-            ControlMode = new Style(Color.Black, Color.Grey),
-            UserControl = new Style(Color.White, Color.Grey),
-            FaultMessage = new Style(Color.White, Color.DarkRed),
-        };
-
-        private static ColorScheme lockSchemeGold = new ColorScheme
-        {
-            TableAccent = Color.Gold1,
-            RowHeader = new Style(Color.White, null, Decoration.Bold),
-            ColumnHeader = new Style(Color.White, null, Decoration.Bold),
-            Bar = new Style(Color.Grey, Color.Grey11),
-            Preset = new Style(Color.Grey, Color.Grey11),
-            PresetSelected = new Style(Color.Black, Color.Grey),
-            Caption = new Style(Color.White, null, Decoration.Dim),
-            NumericData = new Style(Color.White, null),
-            NumericDataChanged = new Style(Color.White, null, Decoration.Invert),
-            VoidData = new Style(Color.White, null),
-            Units = new Style(Color.White, null),
-            OffMode = new Style(Color.White, null, Decoration.Dim),
-            ControlMode = new Style(Color.Black, Color.Grey),
-            UserControl = new Style(Color.Black, Color.Gold1),
-            FaultMessage = new Style(Color.White, Color.DarkRed),
-        };
-
-        private static ColorScheme faultedSchemeRed = new ColorScheme
-        {
-            TableAccent = Color.DarkRed,
-            RowHeader = new Style(Color.White, null, Decoration.Bold),
-            ColumnHeader = new Style(Color.White, null, Decoration.Bold),
-            Bar = new Style(Color.DarkRed, Color.Grey50),
-            Preset = new Style(Color.Black, Color.Grey),
-            PresetSelected = new Style(Color.White, Color.DarkRed),
-            Caption = new Style(Color.White, null, Decoration.Dim),
-            NumericData = new Style(Color.White, null),
-            NumericDataChanged = new Style(Color.White, null, Decoration.Invert),
-            VoidData = new Style(Color.White, null),
-            Units = new Style(Color.White, null),
-            OffMode = new Style(Color.White, null, Decoration.Dim),
-            ControlMode = new Style(Color.Black, Color.Grey),
-            UserControl = new Style(Color.White, Color.Grey),
-            FaultMessage = new Style(Color.White, Color.DarkRed),
-        };
-
-        // The schemes selected for the different operational states.
-        private static ColorScheme normalScheme = normalRedScheme;
-        private static ColorScheme lockScheme = lockSchemeGold;
-        private static ColorScheme faultScheme = faultedSchemeRed;
+        // The theme that is actively being applied to the TUI.
+        private static ColorTheme theme = ColorThemes.Classic;
 
         // The scheme that is actively being applied to the TUI.
-        private static ColorScheme scheme = normalScheme;
+        private static ColorScheme scheme = ColorThemes.Classic.Normal;
 
+        // The current view mode of the TUI.
         private static ViewMode ViewMode { get; set; } = ViewMode.Normal;
 
         private static bool Faulted
@@ -102,15 +25,15 @@ namespace PowerSupplyApp
                 faulted = value;
                 if (faulted)
                 {
-                    scheme = faultScheme;
+                    scheme = theme.Faulted;
                 }
                 else if (ControlsLocked)
                 {
-                    scheme = lockScheme;
+                    scheme = theme.Locked;
                 }
                 else
                 {
-                    scheme = normalScheme;
+                    scheme = theme.Normal;
                 }
             }
         }
@@ -123,15 +46,15 @@ namespace PowerSupplyApp
                 controlsLocked = value;
                 if (faulted)
                 {
-                    scheme = faultScheme;
+                    scheme = theme.Faulted;
                 }
                 else if (ControlsLocked)
                 {
-                    scheme = lockScheme;
+                    scheme = theme.Locked;
                 }
                 else
                 {
-                    scheme = normalScheme;
+                    scheme = theme.Normal;
                 }
             }
         }
@@ -268,17 +191,17 @@ namespace PowerSupplyApp
             return new Grid()
                 .AddColumns(2)
                 .AddRow(
-                    new Markup("[white]OVP (mV)[/]", normalScheme.RowHeader),
-                    new Markup(GetUserEntryString(sp.OVP, (selectedRow == rowIndex++), selectedCol), normalScheme.NumericData))
+                    new Markup("[white]OVP (mV)[/]", theme.Normal.RowHeader),
+                    new Markup(GetUserEntryString(sp.OVP, (selectedRow == rowIndex++), selectedCol), theme.Normal.NumericData))
                 .AddRow(
-                    new Markup("[white]OCP (mA)[/]", normalScheme.RowHeader),
-                    new Markup(GetUserEntryString(sp.OCP, (selectedRow == rowIndex++), selectedCol), normalScheme.NumericData))
+                    new Markup("[white]OCP (mA)[/]", theme.Normal.RowHeader),
+                    new Markup(GetUserEntryString(sp.OCP, (selectedRow == rowIndex++), selectedCol), theme.Normal.NumericData))
                 .AddRow(
-                    new Markup("[white]OPP (dW)[/]", normalScheme.RowHeader),
-                    new Markup(GetUserEntryString(sys.OPP, (selectedRow == rowIndex++), selectedCol), normalScheme.NumericData))
+                    new Markup("[white]OPP (dW)[/]", theme.Normal.RowHeader),
+                    new Markup(GetUserEntryString(sys.OPP, (selectedRow == rowIndex++), selectedCol), theme.Normal.NumericData))
                 .AddRow(
-                    new Markup("[white]OTP (C)[/]", normalScheme.RowHeader),
-                    new Markup(GetUserEntryString(sys.OTP, (selectedRow == rowIndex++), selectedCol), normalScheme.NumericData));
+                    new Markup("[white]OTP (C)[/]", theme.Normal.RowHeader),
+                    new Markup(GetUserEntryString(sys.OTP, (selectedRow == rowIndex++), selectedCol), theme.Normal.NumericData));
         }
 
         /// <summary>
@@ -372,8 +295,8 @@ namespace PowerSupplyApp
         private static Markup GetLockStatusMarkup()
         {
             Markup lockStatus =
-                wavegenMode ? new Markup(" AWG ", lockScheme.UserControl) :
-                ControlsLocked ? new Markup(" LOCKED ", lockScheme.UserControl) :
+                wavegenMode ? new Markup(" AWG ", scheme.UserControl) :
+                ControlsLocked ? new Markup(" LOCKED ", scheme.UserControl) :
                     new Markup("        ", new Style(null, null));
 
             return lockStatus;
@@ -509,7 +432,7 @@ namespace PowerSupplyApp
                     new Text(""))
                 .Expand()
                 .Border(TableBorder.Horizontal)
-                .BorderColor(scheme.TableAccent);
+                .BorderStyle(scheme.TableAccent);
 
             for (int i = 0; i < h - totalRows; i++)
             {
