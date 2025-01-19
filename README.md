@@ -55,6 +55,8 @@ Below is a basic overview of `vicon` functionality:
   - Mechanisms such as `--enumerate` and `--serial` improve user experience when
     working with multiple DP100s.
 - [x] Supports a TUI lock function to prevent accidental button presses
+- [x] Supports basic TUI theme option for user to select from one of the pre-defined
+  color themes.
 - [ ] Recorder/trace (support for logging all activity during interactive mode)
 
 ## Software Requirements
@@ -197,6 +199,25 @@ vicon --interactive
 > for post-interactive commands to execute. This way, a safe series of operations
 > may be performed at conclusion of this mode regardless of whether the user
 > exits with `q` keystroke or `ctrl+c`.
+
+### Themes
+
+Currently themes are provided via predefined configurations. A future update may
+introduce customizable themes.
+
+The below are the basic themes available. More may be defined in future updates,
+see `--help` for more details on the `--theme` option.
+
+- `classic`
+  The (mostly) original theme used in this application. Offers mixed coloring to
+  help convey operating status.
+- `black-and-white`
+  A (mostly) black-and-white option that is perhaps the best option for terminal
+  compatibility.
+- `grey`
+  A monotone color palette, for those that like to keep things simple.
+- Various color-accented themes:
+  - `dark-red`, `dark-green`, `blue`, `blue-violet`, `dark-magenta`, `cyan`, `gold`
 
 ## Additional
 
