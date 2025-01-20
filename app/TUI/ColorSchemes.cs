@@ -68,15 +68,15 @@ namespace PowerSupplyApp.TUI
             ColumnHeader = new Style(Color.White, null, Decoration.Bold),
             Bar = new Style(Color.Grey, Color.Grey11),
             Preset = new Style(Color.Grey, Color.Grey11),
-            PresetSelected = new Style(Color.White, Color.Grey),
+            PresetSelected = new Style(Color.Black, Color.Grey),
             Caption = new Style(Color.White, null, Decoration.Dim),
             NumericData = new Style(Color.White, null),
             VoidData = new Style(Color.White, null),
             Units = new Style(Color.White, null),
             OffMode = new Style(Color.White, null, Decoration.Dim),
             ControlMode = new Style(Color.Black, Color.Grey),
-            UserControl = new Style(Color.White, Color.Grey),
-            FaultMessage = new Style(Color.White, Color.Grey)
+            UserControl = new Style(Color.Black, Color.Grey),
+            FaultMessage = new Style(Color.Black, Color.Grey)
         };
 
         public static ColorScheme DarkRed = new ColorScheme
