@@ -174,17 +174,17 @@ namespace PowerSupplyApp.TUI
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
             ColumnHeader = new Style(Color.White, null, Decoration.Bold),
-            Bar = new Style(Color.Blue, Color.Grey11),
+            Bar = new Style(Color.DodgerBlue2, Color.Grey11),
             Preset = new Style(Color.White, Color.Grey11),
-            PresetSelected = new Style(Color.Black, Color.Blue),
+            PresetSelected = new Style(Color.White, Color.DodgerBlue2),
             Caption = new Style(Color.White, null, Decoration.Dim),
             NumericData = new Style(Color.White, null),
             VoidData = new Style(Color.White, null),
             Units = new Style(Color.White, null),
             OffMode = new Style(Color.White, null, Decoration.Dim),
-            ControlMode = new Style(Color.Black, Color.Blue),
-            UserControl = new Style(Color.Black, Color.Blue),
-            FaultMessage = new Style(Color.Black, Color.Blue)
+            ControlMode = new Style(Color.White, Color.DodgerBlue2),
+            UserControl = new Style(Color.White, Color.DodgerBlue2),
+            FaultMessage = new Style(Color.White, Color.DodgerBlue2)
         };
 
         public static ColorScheme BlueViolet = new ColorScheme
