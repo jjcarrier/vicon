@@ -219,6 +219,16 @@ see `--help` for more details on the `--theme` option.
 - Various color-accented themes:
   - `dark-red`, `dark-green`, `blue`, `blue-violet`, `dark-magenta`, `cyan`, `gold`
 
+<!-- markdownlint-disable -->
+<p align="center">
+  <img src="images/theme-black-and-white.png" alt="black-and-white-theme" style="width:300px;"/><img src="images/theme-grey.png" alt="grey-theme" style="width:300px;"/>
+  <img src="images/theme-dark-red.png" alt="dark-red-theme" style="width:300px;"/><img src="images/theme-dark-green.png" alt="dark-green-theme" style="width:300px;"/>
+  <img src="images/theme-dark-magenta.png" alt="dark-magenta-theme" style="width:300px;"/><img src="images/theme-blue.png" alt="blue-theme" style="width:300px;"/>
+  <img src="images/theme-blue-violet.png" alt="blue-violet-theme" style="width:300px;"/><img src="images/theme-cyan.png" alt="cyan-theme" style="width:300px;"/>
+  <img src="images/theme-gold.png" alt="gold-theme" style="width:300px;"/>
+</p>
+<!-- markdownlint-enable -->
+
 ## Additional
 
 ### Tab-Completions
