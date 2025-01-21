@@ -47,6 +47,11 @@ namespace PowerSupplyApp.TUI
             string themeFilePath = Path.Combine(exeDirectory, themeFilename);
             ColorTheme theme = ColorThemes.Classic;
 
+            if (!File.Exists(themeFilePath))
+            {
+                return theme;
+            }
+
             using (StreamReader r = new StreamReader(themeFilePath))
             {
                 try
