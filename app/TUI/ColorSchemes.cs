@@ -84,7 +84,7 @@ namespace PowerSupplyApp.TUI
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
             ColumnHeader = new Style(Color.White, null, Decoration.Bold),
-            Bar = new Style(Color.DarkRed, Color.Grey50),
+            Bar = new Style(Color.DarkRed, new Color(22, 22, 22)),
             Preset = new Style(Color.White, Color.Grey11),
             PresetSelected = new Style(Color.White, Color.DarkRed),
             Caption = new Style(Color.White, null, Decoration.Dim),
