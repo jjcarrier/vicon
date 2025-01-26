@@ -102,6 +102,29 @@ namespace PowerSupplyApp
             }
         }
 
+        public static void RunBlinker()
+        {
+            string blinkMsg;
+            int blinkCount = 10;
+            runInteractive = true;
+            Console.CancelKeyPress += OnCancelKeyPress;
+            Console.Title = psu.Device.Type;
+            ExitAlternateScreenBuffer();
+            blinkMsg = $"Blinking: {psuSerialNumber} ...";
+
+            while (blinkCount-- > 0 && runInteractive)
+            {
+                psu.ActiveStateEvent += Blinker;
+                Console.WriteLine(blinkMsg);
+                psu.StartWorkerThread(TimeSpan.FromMilliseconds(1));
+                Thread.Sleep(50);
+                psu.StopWorkerThread();
+                Thread.Sleep(950);
+            }
+
+            Console.WriteLine("Done.");
+        }
+
         private static void ProcessControlValueChange(int increment)
         {
             const int numSetpointControls = 4;
@@ -289,6 +312,11 @@ namespace PowerSupplyApp
 
             Console.SetCursorPosition(0, 0);
             AnsiConsole.Write(layout);
+        }
+
+        static void Blinker(PowerSupplyActiveState activeState)
+        {
+            // Nothing to do.
         }
     }
 }
