@@ -35,6 +35,8 @@ namespace PowerSupplyApp
                 "Enables debug output of underlying driver. (Only intended for CLI mode)");
             grid.AddRow("  [white]--enumerate[/]", "",
                 "Enumerates all connected power supplies and returns device information for each. If set, all other processing is ignored.");
+            grid.AddRow("  [white]--blink[/]", "",
+                "For visual identification, the lock indicator will blink 10x (~1x per second).");
             grid.AddRow("  [white]--serial[/], [white]--sn[/]", "[silver]<SERIAL>[/]",
                 "Connects to the power supply that matches the specified [white]SERIAL[/] number.");
             grid.AddRow("  [white]--interactive[/]", "",
@@ -167,6 +169,11 @@ namespace PowerSupplyApp
                                 return ProcessArgsResult.Error;
                             }
                             break;
+                        case "--blink":
+                            // Blink is understood as a basic "interactive" mode, but will
+                            // not invoke the TUI.
+                            interactiveMode = true;
+                            break;
                         case "--preset":
                         case "-p":
                         case "--read-out":
@@ -249,6 +256,10 @@ namespace PowerSupplyApp
                         case "--sn":
                             // Only increment the index, already handled in first pass.
                             i++;
+                            break;
+
+                        case "--blink":
+                            RunBlinker();
                             break;
 
                         case "--interactive":
