@@ -182,29 +182,6 @@ namespace PowerSupplyApp
         }
 
         /// <summary>
-        /// Gets the Grid for the protections.
-        /// </summary>
-        /// <returns>The Grid containing the protections.</returns>
-        private static Grid GetProtectionsGrid()
-        {
-            int rowIndex = 0;
-            return new Grid()
-                .AddColumns(2)
-                .AddRow(
-                    new Markup("[white]OVP (mV)[/]", theme.Normal.RowHeader),
-                    new Markup(GetUserEntryString(sp.OVP, (selectedRow == rowIndex++), selectedCol), theme.Normal.NumericData))
-                .AddRow(
-                    new Markup("[white]OCP (mA)[/]", theme.Normal.RowHeader),
-                    new Markup(GetUserEntryString(sp.OCP, (selectedRow == rowIndex++), selectedCol), theme.Normal.NumericData))
-                .AddRow(
-                    new Markup("[white]OPP (dW)[/]", theme.Normal.RowHeader),
-                    new Markup(GetUserEntryString(sys.OPP, (selectedRow == rowIndex++), selectedCol), theme.Normal.NumericData))
-                .AddRow(
-                    new Markup("[white]OTP (C)[/]", theme.Normal.RowHeader),
-                    new Markup(GetUserEntryString(sys.OTP, (selectedRow == rowIndex++), selectedCol), theme.Normal.NumericData));
-        }
-
-        /// <summary>
         /// Generate bar charts for indicating the percent load for voltage and current.
         /// This offers at-a-glance feedback to the user how close the device is to the output
         /// limits which may either result in regulation mode changes, or tripping fault
