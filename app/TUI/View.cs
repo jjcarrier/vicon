@@ -17,6 +17,24 @@ namespace PowerSupplyApp
         // The current view mode of the TUI.
         private static ViewMode ViewMode { get; set; } = ViewMode.Normal;
 
+        private static NumericDataString voltageEntry =  new NumericDataString(6, 3);
+        private static NumericDataString voltageActive = new NumericDataString(6, 3);
+        private static NumericDataString voltageLimit= new NumericDataString(6, 3);
+
+        private static NumericDataString currentEntry = new NumericDataString(6, 3);
+        private static NumericDataString currentActive = new NumericDataString(6, 3);
+        private static NumericDataString currentLimit = new NumericDataString(6, 3);
+
+        private static NumericDataString powerActive = new NumericDataString(6, 2);
+        private static NumericDataString powerLimit = new NumericDataString(6, 1);
+
+        private static NumericDataString tempActive = new NumericDataString(6, 1);
+        private static NumericDataString tempLimit = new NumericDataString(5);
+
+        private static NumericDataString voltageUsb = new NumericDataString(6, 3);
+        private static NumericDataString voltageMax = new NumericDataString(6, 3);
+        private static NumericDataString voltageInput = new NumericDataString(6, 3);
+
         private static bool Faulted
         {
             get { return faulted; }
@@ -80,64 +98,6 @@ namespace PowerSupplyApp
             // Exit alt-screen buffer and show cursor.
             Console.Write($"{(char)27}[?1049l");
             Console.Write($"{(char)27}[?25h");
-        }
-
-        /// <summary>
-        /// Convert the input value to it visual representation where leading zeros are dim
-        /// and if the value is currently the selected row, highlight the current digit that
-        /// is to be controlled.
-        /// </summary>
-        /// <param name="value">The current value to convert.</param>
-        /// <param name="selected">Indicates that the value is selected by the user.</param>
-        /// <param name="selectedDigit">Indicates which digit is currently being controlled.</param>
-        /// <returns>The converted markup text</returns>
-        private static string GetUserEntryString(ushort value, bool selected = false, int selectedDigit = 0)
-        {
-            const int totalDigits = 5;
-            string rawTextDigits = $"{value}";
-            string markupText = "";
-
-            if (totalDigits - rawTextDigits.Length > 0)
-            {
-                markupText = "[dim]";
-
-                for (int i = totalDigits - 1; i >= rawTextDigits.Length; i--)
-                {
-                    if (selected && (i == selectedDigit))
-                    {
-                        markupText += $"[underline]0[/]";
-                    }
-                    else
-                    {
-                        markupText += "0";
-                    }
-                }
-                markupText += "[/]";
-            }
-
-            if (selected)
-            {
-
-                for (int i = 0; i < rawTextDigits.Length; i++)
-                {
-                    if (i == ((rawTextDigits.Length - 1) - selectedDigit))
-                    {
-                        markupText += $"[underline]{rawTextDigits[i]}[/]";
-                    }
-                    else
-                    {
-                        markupText += rawTextDigits[i];
-                    }
-
-                }
-
-            }
-            else
-            {
-                markupText += rawTextDigits;
-            }
-
-            return markupText;
         }
 
         /// <summary>
@@ -319,9 +279,10 @@ namespace PowerSupplyApp
         /// <returns>The data table containing the key power supply data.</returns>
         private static Table GetDataTable(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
         {
-            const int numDataRows = 12;
+            const string voidDataString = "----";
+            const int numDataRows = 8;
             const int numSeparatorRows = 4;
-            const int numHeaderFooterRows = 2;
+            const int numHeaderFooterRows = 0;
             const int numExtraRows = 6; // Preset, 2x Empty, V-Row, I-Row, Help Row
             const int totalRows = numDataRows + numSeparatorRows + numHeaderFooterRows + numExtraRows;
             int rowIndex = 0;
@@ -329,82 +290,111 @@ namespace PowerSupplyApp
 
             Faulted = active.FaultStatus != PowerSupplyFaultStatus.OK;
 
+            bool ovpModified = setpoint.OVP != supply.PresetParams[supply.Output.Preset].OVP;
+            bool ocpModified = setpoint.OCP != supply.PresetParams[supply.Output.Preset].OCP;
+            bool oppModified = system.OPP != supply.SystemParams.OPP;
+            bool otpModified = system.OTP != supply.SystemParams.OTP;
+
+            voltageEntry.UpdateValue(setpoint.Voltage);
+            voltageEntry.Selected = (selectedRow == rowIndex++);
+            voltageEntry.SelectedDigitIndex = selectedCol;
+
+            currentEntry.UpdateValue(setpoint.Current);
+            currentEntry.Selected = (selectedRow == rowIndex++);
+            currentEntry.SelectedDigitIndex = selectedCol;
+
+            voltageActive.UpdateValue(active.Voltage);
+            currentActive.UpdateValue(active.Current);
+            powerActive.UpdateValue((ushort)(active.Voltage * active.Current / 10000));
+            tempActive.UpdateValue(active.Temperature);
+
+            voltageLimit.UpdateValue(setpoint.OVP);
+            voltageLimit.Selected = (selectedRow == rowIndex++);
+            voltageLimit.SelectedDigitIndex = selectedCol;
+            voltageLimit.Modified = ovpModified;
+
+            currentLimit.UpdateValue(setpoint.OCP);
+            currentLimit.Selected = (selectedRow == rowIndex++);
+            currentLimit.SelectedDigitIndex = selectedCol;
+            currentLimit.Modified = ocpModified;
+
+            powerLimit.UpdateValue(system.OPP);
+            powerLimit.Selected = (selectedRow == rowIndex++);
+            powerLimit.SelectedDigitIndex = selectedCol;
+            powerLimit.Modified = oppModified;
+
+            tempLimit.UpdateValue(system.OTP);
+            tempLimit.Selected = (selectedRow == rowIndex++);
+            tempLimit.SelectedDigitIndex = selectedCol;
+            tempLimit.Modified = otpModified;
+
+            voltageUsb.UpdateValue(active.VoltageUsb5V);
+            voltageMax.UpdateValue(active.VoltageOutputMax);
+            voltageInput.UpdateValue(active.VoltageInput);
+
             Table tab = new Table()
                 .Centered()
                 .AddColumn(
                     new TableColumn(GetFaultStatusMarkup(active.FaultStatus))
-                        .RightAligned()
-                        .Footer(new Markup("Timestamp", scheme.RowHeader)))
+                        .RightAligned())
                 .AddColumn(
                     new TableColumn(new Markup("Setpoint", scheme.ColumnHeader))
-                        .Centered()
-                        .Footer(""))
+                        .Centered())
+                .AddColumn(
+                    new TableColumn(new Markup("Limits", scheme.ColumnHeader))
+                        .Centered())
                 .AddColumn(
                     new TableColumn(new Markup("Actual", scheme.ColumnHeader))
-                        .Centered()
-                        .Footer(new Markup($"{active.Timestamp.Ticks:X08}", scheme.NumericData).Centered()))
+                        .Centered())
                 .AddColumn(
                     new TableColumn(GetLockStatusMarkup())
-                        .Alignment(Justify.Left)
-                        .Footer(""))
+                        .Alignment(Justify.Left))
                 .AddRow(
                     new Markup("Voltage", scheme.RowHeader),
-                    new Markup(GetUserEntryString(setpoint.Voltage, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
-                    new Markup(GetUserEntryString(active.Voltage), scheme.NumericData),
-                    new Markup("mV", scheme.Units))
+                    new Markup(voltageEntry.ToMarkupString(), scheme.NumericData),
+                    new Markup(voltageLimit.ToMarkupString(), scheme.NumericData),
+                    new Markup(voltageActive.ToMarkupString(), scheme.NumericData),
+                    new Markup("V", scheme.Units))
                 .AddRow(
                     new Markup("Current", scheme.RowHeader),
-                    new Markup(GetUserEntryString(setpoint.Current, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
-                    new Markup(GetUserEntryString(active.Current), scheme.NumericData),
-                    new Markup("mA", scheme.Units))
+                    new Markup(currentEntry.ToMarkupString(), scheme.NumericData),
+                    new Markup(currentLimit.ToMarkupString(), scheme.NumericData),
+                    new Markup(currentActive.ToMarkupString(), scheme.NumericData),
+                    new Markup("A", scheme.Units))
                 .AddRow(
                     new Markup("Power", scheme.RowHeader),
-                    new Markup("---", scheme.VoidData),
-                    new Markup(GetUserEntryString((ushort)(active.Voltage * active.Current / 1000)), scheme.NumericData),
-                    new Markup("mW", scheme.Units))
-                .AddRow(
-                    new Markup("OVP", scheme.RowHeader),
-                    new Markup(GetUserEntryString(setpoint.OVP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
-                    new Markup(GetUserEntryString(supply.PresetParams[supply.Output.Preset].OVP), scheme.NumericData),
-                    new Markup("mV", scheme.Units))
-                .AddRow(
-                    new Markup("OCP", scheme.RowHeader),
-                    new Markup(GetUserEntryString(setpoint.OCP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
-                    new Markup(GetUserEntryString(supply.PresetParams[supply.Output.Preset].OCP), scheme.NumericData),
-                    new Markup("mA", scheme.Units))
-                .AddRow(
-                    new Markup("OPP", scheme.RowHeader),
-                    new Markup(GetUserEntryString(system.OPP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
-                    new Markup(GetUserEntryString(supply.SystemParams.OPP), scheme.NumericData),
-                    new Markup("dW", scheme.Units))
-                .AddRow(
-                    new Markup("OTP", scheme.RowHeader),
-                    new Markup(GetUserEntryString(system.OTP, (selectedRow == rowIndex++), selectedCol), scheme.NumericData),
-                    new Markup(GetUserEntryString(supply.SystemParams.OTP), scheme.NumericData),
-                    new Markup(" C", scheme.Units))
-                .AddRow(
-                    new Markup("V[[usb]]", scheme.RowHeader),
-                    new Markup("---", scheme.VoidData),
-                    new Markup(GetUserEntryString(active.VoltageUsb5V), scheme.NumericData),
-                    new Markup("mV", scheme.Units))
-                .AddRow(
-                    new Markup("V[[max]]", scheme.RowHeader),
-                    new Markup("---", scheme.VoidData),
-                    new Markup(GetUserEntryString(active.VoltageOutputMax), scheme.NumericData),
-                    new Markup("mV", scheme.Units))
-                .AddRow(
-                    new Markup("V[[in]]", scheme.RowHeader),
-                    new Markup("---", scheme.VoidData),
-                    new Markup(GetUserEntryString(active.VoltageInput), scheme.NumericData),
-                    new Markup("mV", scheme.Units))
+                    new Markup(voidDataString, scheme.VoidData),
+                    new Markup(powerLimit.ToMarkupString(), scheme.NumericData),
+                    new Markup(powerActive.ToMarkupString(), scheme.NumericData),
+                    new Markup("W", scheme.Units))
                 .AddRow(
                     new Markup("Temp", scheme.RowHeader),
-                    new Markup("---", scheme.VoidData),
-                    new Markup(GetUserEntryString(active.Temperature), scheme.NumericData),
-                    new Markup("dC", scheme.Units))
+                    new Markup(voidDataString, scheme.VoidData),
+                    new Markup($"{tempLimit.ToMarkupString()}.", scheme.NumericData),
+                    new Markup(tempActive.ToMarkupString(), scheme.NumericData),
+                    new Markup("C", scheme.Units))
+                .AddRow(
+                    new Markup("V[[usb]]", scheme.RowHeader),
+                    new Markup(voidDataString, scheme.VoidData),
+                    new Markup(voidDataString, scheme.VoidData),
+                    new Markup(voltageUsb.ToMarkupString(), scheme.NumericData),
+                    new Markup("V", scheme.Units))
+                .AddRow(
+                    new Markup("V[[max]]", scheme.RowHeader),
+                    new Markup(voidDataString, scheme.VoidData),
+                    new Markup(voidDataString, scheme.VoidData),
+                    new Markup(voltageMax.ToMarkupString(), scheme.NumericData),
+                    new Markup("V", scheme.Units))
+                .AddRow(
+                    new Markup("V[[in]]", scheme.RowHeader),
+                    new Markup(voidDataString, scheme.VoidData),
+                    new Markup(voidDataString, scheme.VoidData),
+                    new Markup(voltageInput.ToMarkupString(), scheme.NumericData),
+                    new Markup("V", scheme.Units))
                 .AddRow(
                     new Markup("Mode", scheme.RowHeader),
-                    new Markup("---", scheme.VoidData),
+                    new Markup(voidDataString, scheme.VoidData),
+                    new Markup(voidDataString, scheme.VoidData),
                     GetOutputModeMarkup(active.OutputMode),
                     new Text(""))
                 .Expand()
