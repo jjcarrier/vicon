@@ -470,7 +470,7 @@ namespace PowerSupplyApp
                 .AddColumns(1)
                 .AddRow(GetDataTable(supply, setpoint, system, active))
                 .AddRow(Align.Center(GetPresetGrid()))
-                .AddEmptyRow()
+                .AddRow(new Rule().RuleStyle(scheme.TableAccent))
                 .AddRow(GetBarChartGrid(active))
                 .AddEmptyRow()
                 .AddRow(new Markup(controlsCaption, scheme.Caption).Centered());
