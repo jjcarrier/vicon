@@ -211,7 +211,7 @@ namespace PowerSupplyApp
             switch (mode)
             {
                 case PowerSupplyOutputMode.OFF:
-                    markup = new Markup($" {text} ", scheme.OffMode);
+                    markup = new Markup($"   {text}", scheme.OffMode);
                     break;
 
                 case PowerSupplyOutputMode.CC:
