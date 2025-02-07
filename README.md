@@ -200,6 +200,31 @@ vicon --interactive
 > may be performed at conclusion of this mode regardless of whether the user
 > exits with `q` keystroke or `ctrl+c`.
 
+### TUI Overview
+
+The Text-Based User Interface (TUI) consists of three primary columns of
+information.
+
+#### Setpoint Column
+
+This column is responsible for setting the desired voltage and current levels
+on the output.
+
+#### Limit Column
+
+This column is responsible for setting the desired limits for voltage (OVP),
+current (OCP), power (OPP), and temperature (OTP). OVP and OCP are applied at
+a per-preset level and are not automatically applied (i.e. the user must issue
+`Alt + 0-9` to store/apply the value). When these values are modified, the data
+entry will blink to indicate that the modified value has not been applied to the
+device. For OPP and OTP, these are applied at the system-level and are applied
+immediately. If for whatever reason these are not applied, the value will also
+blink.
+
+#### Actual Column
+
+This column reports the actual values sensed/reported by the device.
+
 ### Themes
 
 Currently themes are provided via predefined configurations. A future update may
@@ -223,8 +248,8 @@ see `--help` for more details on the `--theme` option.
 <p align="center">
   <img src="images/theme-black-and-white.png" alt="black-and-white-theme" style="width:300px;"/><img src="images/theme-grey.png" alt="grey-theme" style="width:300px;"/>
   <img src="images/theme-dark-red.png" alt="dark-red-theme" style="width:300px;"/><img src="images/theme-dark-green.png" alt="dark-green-theme" style="width:300px;"/>
-  <img src="images/theme-dark-magenta.png" alt="dark-magenta-theme" style="width:300px;"/><img src="images/theme-blue.png" alt="blue-theme" style="width:300px;"/>
-  <img src="images/theme-blue-violet.png" alt="blue-violet-theme" style="width:300px;"/><img src="images/theme-cyan.png" alt="cyan-theme" style="width:300px;"/>
+  <img src="images/theme-blue.png" alt="blue-theme" style="width:300px;"/><img src="images/theme-blue-violet.png" alt="blue-violet-theme" style="width:300px;"/>
+  <img src="images/theme-dark-magenta.png" alt="dark-magenta-theme" style="width:300px;"/><img src="images/theme-cyan.png" alt="cyan-theme" style="width:300px;"/>
   <img src="images/theme-gold.png" alt="gold-theme" style="width:300px;"/>
 </p>
 <!-- markdownlint-enable -->
