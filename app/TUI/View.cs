@@ -341,7 +341,7 @@ namespace PowerSupplyApp
                     new TableColumn(new Markup("Setpoint", scheme.ColumnHeader))
                         .Centered())
                 .AddColumn(
-                    new TableColumn(new Markup("Limits", scheme.ColumnHeader))
+                    new TableColumn(new Markup(" Limit", scheme.ColumnHeader))
                         .Centered())
                 .AddColumn(
                     new TableColumn(new Markup("Actual", scheme.ColumnHeader))
