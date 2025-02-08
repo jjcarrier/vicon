@@ -68,7 +68,7 @@ namespace PowerSupplyApp
 
         public static void RunWaveGenMode()
         {
-            while (runInteractive)
+            while (runInteractive && psu.Connected)
             {
                 WaveGen.Run();
 
@@ -95,7 +95,7 @@ namespace PowerSupplyApp
 
         public static void RunNormalMode()
         {
-            while (runInteractive)
+            while (runInteractive && psu.Connected)
             {
                 ProcessKeys(psu);
                 Thread.Sleep(10);
@@ -112,7 +112,7 @@ namespace PowerSupplyApp
             ExitAlternateScreenBuffer();
             blinkMsg = $"Blinking: {psuSerialNumber} ...";
 
-            while (blinkCount-- > 0 && runInteractive)
+            while (blinkCount-- > 0 && runInteractive && psu.Connected)
             {
                 psu.ActiveStateEvent += Blinker;
                 Console.WriteLine(blinkMsg);
