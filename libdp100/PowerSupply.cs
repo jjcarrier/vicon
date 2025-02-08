@@ -35,7 +35,9 @@ namespace LibDP100
         }
 
         // Indicates whether the device is currently connected.
-        private bool Connected { get; set; } = false;
+        public bool Connected {
+            get { return ApiInstance.ConnState; }
+        }
 
         // The configured output state information.
         public PowerSupplyOutput Output { get; private set; } = new PowerSupplyOutput();
@@ -142,6 +144,7 @@ namespace LibDP100
 
         private void WorkerThread()
         {
+            TimeSpan timeout = TimeSpan.FromSeconds(3);
             Stopwatch sw = new Stopwatch();
             int milliseconds;
             NullStdOutput();
@@ -153,7 +156,10 @@ namespace LibDP100
                     sw.Start();
                     apiMutex.WaitOne();
                     ApiInstance.GetBasicInfo();
-                    Monitor.Wait(ApiInstance);
+                    if (!Monitor.Wait(ApiInstance, timeout))
+                    {
+                        continue;
+                    }
                     apiMutex.ReleaseMutex();
                     sw.Stop();
                     milliseconds = workerThreadSleepTime.Milliseconds - (int)sw.ElapsedMilliseconds;
