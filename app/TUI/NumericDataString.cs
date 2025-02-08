@@ -35,7 +35,6 @@ namespace PowerSupplyApp.TUI
         private string paddedTextValue = null;
         private string markupText = string.Empty;
 
-        private bool stateChanged = true;
         private int RawValue { get; set; } = -1;
         private int NumChars { get; set; }
         private int PointIndex { get; set; }
