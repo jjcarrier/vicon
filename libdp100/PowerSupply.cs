@@ -847,7 +847,7 @@ namespace LibDP100
             {
                 Console.WriteLine("[ SYS_PARAMS ] ");
                 Console.WriteLine("  OTP (C)   : " + SystemParams.OTP);
-                Console.WriteLine("  OPP (W)   : " + SystemParams.OPP / 10);
+                Console.WriteLine("  OPP (W)   : " + SystemParams.OPP / 10.0f);
                 Console.WriteLine("  Backlight : " + SystemParams.Backlight);
                 Console.WriteLine("  Volume    : " + SystemParams.Volume);
                 Console.WriteLine("  RPP       : " + (SystemParams.RPP ? "Enabled" : "Disabled"));
