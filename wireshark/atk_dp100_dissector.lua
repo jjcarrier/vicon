@@ -124,7 +124,7 @@ function usb_hid_proto.dissector(buffer, pinfo, tree)
         subtree_dev_info:add(buffer(4 + 0, 16), "Device: " .. dev_type)
 
         subtree_dev_info:add(buffer(4 + 16, 2), "Data length: " .. data_len)
-        subtree_dev_info:add(buffer(4 + 17, 2), "Encrpt Pos: " .. enc_pos)
+        subtree_dev_info:add(buffer(4 + 17, 2), "Encrypt Pos: " .. enc_pos)
 
         subtree_dev_info:add(buffer(4 + 18, 2), "HW Version: " .. hw_ver / 10)
         subtree_dev_info:add(buffer(4 + 20, 2), "APP Version: " .. app_ver / 10)
