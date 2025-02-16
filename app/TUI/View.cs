@@ -282,8 +282,8 @@ namespace PowerSupplyApp
             const string voidDataString = "----";
             const int numDataRows = 8;
             const int numSeparatorRows = 4;
-            const int numHeaderFooterRows = 0;
-            const int numExtraRows = 6; // Preset, 2x Empty, V-Row, I-Row, Help Row
+            const int numHeaderFooterRows = 1;
+            const int numExtraRows = 5; // Preset, 1x Empty, V-Row, I-Row, Help Row
             const int totalRows = numDataRows + numSeparatorRows + numHeaderFooterRows + numExtraRows;
             int rowIndex = 0;
             int h = Console.BufferHeight;
