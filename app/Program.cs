@@ -64,6 +64,7 @@ namespace PowerSupplyApp
                 if (psuReady)
                 {
                     psu.RefreshOutputParams();
+                    psu.RefreshSystemParams();
                 }
             }
             else if (psuCount == 1)
@@ -71,6 +72,7 @@ namespace PowerSupplyApp
                 psuSerialNumber = Enumerator.GetSerialNumbers()[0];
                 psu = Enumerator.GetDeviceByIndex(0);
                 psu.RefreshOutputParams();
+                psu.RefreshSystemParams();
                 psuReady = true;
             }
 
