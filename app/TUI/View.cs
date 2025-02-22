@@ -1,8 +1,6 @@
 using LibDP100;
-using System;
-using Spectre.Console;
-using System.Collections.Generic;
 using PowerSupplyApp.TUI;
+using Spectre.Console;
 
 namespace PowerSupplyApp
 {
@@ -131,8 +129,8 @@ namespace PowerSupplyApp
                 .AddRow(new Markup("[blue]v[/]/[blue]V[/]"), new Markup("Decrement Millivolts (x1/x10)"))
                 .AddRow(new Markup("[blue]d[/]/[blue]D[/]"), new Markup("Increment Milliamps (x1/x10)"))
                 .AddRow(new Markup("[blue]a[/]/[blue]A[/]"), new Markup("Decrement Milliamps (x1/x10)"))
-                .AddRow(new Markup("[blue]1[/]-[blue]9[/]"), new Markup("Preset Selection"))
-                .AddRow(new Markup("[blue]Alt[/] + [blue]1[/]-[blue]9[/]"), new Markup("Alter/Store Current Setpoints to Preset"))
+                .AddRow(new Markup("[blue]0[/]-[blue]9[/]"), new Markup("Preset Selection"))
+                .AddRow(new Markup("[blue]Alt[/] + [blue]0[/]-[blue]9[/]"), new Markup("Alter/Store Current Setpoints to Preset"))
                 .AddRow(new Markup("[blue]↑[/]/[blue]↓[/]/[blue]←[/]/[blue]→[/]"), new Markup("Entry Navigation"))
                 .AddRow(new Markup("[blue]Shift[/] + [blue]↑[/]/[blue]↓[/]"), new Markup("Digit Modification"))
                 .AddRow(new Markup("[blue]Control[/] + [blue]Shift[/] + [blue]L[/]"), new Markup("Lock/Unlock Device Controls"))
@@ -151,9 +149,9 @@ namespace PowerSupplyApp
         /// <returns>The grid.</returns>
         private static Grid GetBarChartGrid(PowerSupplyActiveState activeState)
         {
-            int vo_limit = (activeState.VoltageOutputMax > psu.PresetParams[psu.Output.Preset].OVP) ?
-                psu.PresetParams[psu.Output.Preset].OVP : activeState.VoltageOutputMax;
-            int io_limit = psu.PresetParams[psu.Output.Preset].OCP;
+            int vo_limit = (activeState.VoltageOutputMax > psu.Presets[psu.Output.Preset].OVP) ?
+                psu.Presets[psu.Output.Preset].OVP : activeState.VoltageOutputMax;
+            int io_limit = psu.Presets[psu.Output.Preset].OCP;
 
             var width = Console.WindowWidth - 3;
             double vLoad = (double)activeState.Voltage / vo_limit;
@@ -290,8 +288,8 @@ namespace PowerSupplyApp
 
             Faulted = active.FaultStatus != PowerSupplyFaultStatus.OK;
 
-            bool ovpModified = setpoint.OVP != supply.PresetParams[supply.Output.Preset].OVP;
-            bool ocpModified = setpoint.OCP != supply.PresetParams[supply.Output.Preset].OCP;
+            bool ovpModified = setpoint.OVP != supply.Presets[supply.Output.Preset].OVP;
+            bool ocpModified = setpoint.OCP != supply.Presets[supply.Output.Preset].OCP;
             bool oppModified = system.OPP != supply.SystemParams.OPP;
             bool otpModified = system.OTP != supply.SystemParams.OTP;
 
@@ -306,7 +304,7 @@ namespace PowerSupplyApp
             voltageActive.UpdateValue(active.Voltage);
             currentActive.UpdateValue(active.Current);
             powerActive.UpdateValue((ushort)(active.Voltage * active.Current / 10000));
-            tempActive.UpdateValue(active.Temperature);
+            tempActive.UpdateValue(active.Temperature1);
 
             voltageLimit.UpdateValue(setpoint.OVP);
             voltageLimit.Selected = (selectedRow == rowIndex++);
