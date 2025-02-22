@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PowerControllerApp": {
+      "commandName": "Project",
+      "commandLineArgs": "--interactive"
+    }
+  }
+}
