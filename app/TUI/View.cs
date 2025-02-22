@@ -172,6 +172,7 @@ namespace PowerSupplyApp
         {
             Markup[] presetText =
             {
+                new Markup(" 0 ", scheme.Preset),
                 new Markup(" 1 ", scheme.Preset),
                 new Markup(" 2 ", scheme.Preset),
                 new Markup(" 3 ", scheme.Preset),
@@ -183,13 +184,10 @@ namespace PowerSupplyApp
                 new Markup(" 9 ", scheme.Preset)
             };
 
-            if (psu.Output.Preset > 0)
-            {
-                presetText[psu.Output.Preset - 1] = new Markup($" {psu.Output.Preset} ", scheme.PresetSelected);
-            }
+            presetText[psu.Output.Preset] = new Markup($" {psu.Output.Preset} ", scheme.PresetSelected);
 
             return new Grid()
-                .AddColumns(9)
+                .AddColumns(10)
                 .AddRow(presetText[0],
                         presetText[1],
                         presetText[2],
@@ -198,7 +196,8 @@ namespace PowerSupplyApp
                         presetText[5],
                         presetText[6],
                         presetText[7],
-                        presetText[8]);
+                        presetText[8],
+                        presetText[9]);
         }
 
         private static Markup GetOutputModeMarkup(PowerSupplyOutputMode mode)
@@ -525,6 +524,7 @@ namespace PowerSupplyApp
             {
                 switch (key.Key)
                 {
+                    case ConsoleKey.D0:
                     case ConsoleKey.D1:
                     case ConsoleKey.D2:
                     case ConsoleKey.D3:

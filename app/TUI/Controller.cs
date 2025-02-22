@@ -208,7 +208,6 @@ namespace PowerSupplyApp
                     runInteractive = false;
                     break;
                 case KeyboardEvent.SetPreset0:
-                    break;
                 case KeyboardEvent.SetPreset1:
                 case KeyboardEvent.SetPreset2:
                 case KeyboardEvent.SetPreset3:
