@@ -1,6 +1,4 @@
-﻿using LibDP100;
-using System;
-using System.Collections.Generic;
+using LibDP100;
 
 namespace PowerSupplyApp
 {
@@ -8,21 +6,16 @@ namespace PowerSupplyApp
     // enumeration mechanisms.
     public static class Enumerator
     {
-        private class EnumeratedSupply : IComparable
+        private class EnumeratedSupply(PowerSupply psu, bool selected) : IComparable
         {
-            public PowerSupply Instance { get; set; }
-            public bool Selected { get; set; }
+            public PowerSupply Instance { get; set; } = psu;
+            public bool Selected { get; set; } = selected;
 
-            public EnumeratedSupply(PowerSupply psu, bool selected)
+            /// <inheritdoc/>
+            public int CompareTo(object? obj)
             {
-                Instance = psu;
-                Selected = selected;
-            }
-
-            public int CompareTo(object obj)
-            {
-                var other = (EnumeratedSupply)obj;
-                return Instance.CompareTo(other.Instance);
+                var other = (EnumeratedSupply?)obj;
+                return string.Compare(Instance.Device.SerialNumber, other?.Instance.Device.SerialNumber);
             }
         }
 
@@ -44,12 +37,12 @@ namespace PowerSupplyApp
             while (true)
             {
                 PowerSupply psu = new PowerSupply();
-                if (!psu.Connect())
+                if (psu.Connect() != PowerSupplyResult.OK)
                 {
                     break;
                 }
 
-                if (psu.RefreshDevInfo())
+                if (psu.GetDeviceInfo() == PowerSupplyResult.OK)
                 {
                     supplies.Add(new EnumeratedSupply(psu, false));
                 }

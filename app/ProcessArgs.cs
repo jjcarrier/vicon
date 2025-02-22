@@ -1,11 +1,8 @@
 using LibDP100;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System;
-using System.IO;
-using System.Threading;
-using Spectre.Console;
 using PowerSupplyApp.TUI;
+using Spectre.Console;
 
 namespace PowerSupplyApp
 {
@@ -367,7 +364,7 @@ namespace PowerSupplyApp
                         case "--preset":
                         case "-p":
                             writeOp = true;
-                            op = Operation.WritePreset;
+                            op = Operation.UsePreset;
                             break;
 
                         case "--mv":
@@ -437,20 +434,20 @@ namespace PowerSupplyApp
 
                 case Operation.WriteOutputOn:
                     argsToProcess = 1;
-                    result = inst.SetOutputOn();
+                    result = inst.SetOutputOn() == PowerSupplyResult.OK;
                     break;
 
                 case Operation.WriteOutputOff:
                     argsToProcess = 1;
-                    result = inst.SetOutputOff();
+                    result = inst.SetOutputOff() == PowerSupplyResult.OK;
                     break;
 
-                case Operation.WritePreset:
+                case Operation.UsePreset:
                     argsToProcess = 2;
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
-                        result = inst.SetOutputToPreset((byte)parsedValue);
+                        result = inst.UsePreset((byte)parsedValue) == PowerSupplyResult.OK;
                     }
                     break;
 
@@ -460,7 +457,7 @@ namespace PowerSupplyApp
                     if (result)
                     {
                         sp.Voltage = parsedValue;
-                        result = inst.SetSetpoint(sp);
+                        result = inst.SetOutput(sp) == PowerSupplyResult.OK;
                         if (!result)
                         {
                             sp.Copy(inst.Output.Setpoint);
@@ -474,7 +471,7 @@ namespace PowerSupplyApp
                     if (result)
                     {
                         sp.Current = parsedValue;
-                        result = inst.SetSetpoint(sp);
+                        result = inst.SetOutput(sp) == PowerSupplyResult.OK;
                         if (!result)
                         {
                             sp.Copy(inst.Output.Setpoint);
@@ -488,7 +485,7 @@ namespace PowerSupplyApp
                     if (result)
                     {
                         sp.OVP = parsedValue;
-                        result = inst.SetSetpointPreset(inst.Output.Preset, sp);
+                        result = inst.SetPreset(inst.Output.Preset, sp) == PowerSupplyResult.OK;
                         if (!result)
                         {
                             sp.Copy(inst.Output.Setpoint);
@@ -502,7 +499,7 @@ namespace PowerSupplyApp
                     if (result)
                     {
                         sp.OCP = parsedValue;
-                        result = inst.SetSetpointPreset(inst.Output.Preset, sp);
+                        result = inst.SetPreset(inst.Output.Preset, sp) == PowerSupplyResult.OK;
                         if (!result)
                         {
                             sp.Copy(inst.Output.Setpoint);
@@ -516,7 +513,7 @@ namespace PowerSupplyApp
                     if (result)
                     {
                         sys.OPP = parsedValue;
-                        result = inst.SetSystemParams(sys);
+                        result = inst.SetOTP(sys.OPP) == PowerSupplyResult.OK;
                         if (!result)
                         {
                             sys.Copy(inst.SystemParams);
@@ -530,7 +527,7 @@ namespace PowerSupplyApp
                     if (result)
                     {
                         sys.OTP = parsedValue;
-                        result = inst.SetSystemParams(sys);
+                        result = inst.SetOTP(sys.OTP) == PowerSupplyResult.OK;
                         if (!result)
                         {
                             sys.Copy(inst.SystemParams);
@@ -588,7 +585,7 @@ namespace PowerSupplyApp
                     }
                     break;
 
-                case Operation.WritePreset:
+                case Operation.UsePreset:
                     if (serializeAsJson)
                     {
                         result = SerializeObject(new CommandResponse
@@ -806,23 +803,23 @@ namespace PowerSupplyApp
                 switch (op)
                 {
                     case Operation.ReadActState:
-                        result = inst.RefreshActiveState();
+                        result = inst.GetActiveStatus() == PowerSupplyResult.OK;
                         break;
 
                     case Operation.ReadOutput:
-                        result = inst.RefreshOutputParams();
+                        result = inst.GetOutput() == PowerSupplyResult.OK;
                         break;
 
                     case Operation.ReadDevice:
-                        result = inst.RefreshDevInfo();
+                        result = inst.GetDeviceInfo() == PowerSupplyResult.OK;
                         break;
 
                     case Operation.ReadSystem:
-                        result = inst.RefreshSystemParams();
+                        result = inst.GetSystemParams() == PowerSupplyResult.OK;
                         break;
 
                     case Operation.ReadPreset:
-                        result = inst.RefreshPreset(preset);
+                        result = inst.GetPreset(preset) == PowerSupplyResult.OK;
                         break;
 
                     default:
@@ -849,7 +846,8 @@ namespace PowerSupplyApp
                         else
                         {
                             Console.WriteLine();
-                            result = inst.PrintActiveState();
+                            result = true;
+                            inst.ActiveState.Print();
                         }
 
                         break;
@@ -866,7 +864,8 @@ namespace PowerSupplyApp
                         else
                         {
                             Console.WriteLine();
-                            result = inst.PrintOutputParams();
+                            result = true;
+                            inst.Output.Print();
                         }
 
                         break;
@@ -883,7 +882,8 @@ namespace PowerSupplyApp
                         else
                         {
                             Console.WriteLine();
-                            result = inst.PrintDevInfo();
+                            result = true;
+                            inst.Device.Print();
                         }
 
                         break;
@@ -900,7 +900,8 @@ namespace PowerSupplyApp
                         else
                         {
                             Console.WriteLine();
-                            result = inst.PrintSystemParams();
+                            result = true;
+                            inst.SystemParams.Print();
                         }
 
                         break;
@@ -913,14 +914,15 @@ namespace PowerSupplyApp
                                 Command = op,
                                 Response = new {
                                     Index = preset,
-                                    Preset = inst.PresetParams[preset]
+                                    Preset = inst.Presets[preset]
                                 }
                             });
                         }
                         else
                         {
                             Console.WriteLine();
-                            result = inst.PrintPreset(preset);
+                            result = true;
+                            inst.Presets[preset].Print();
                         }
 
                         preset++;

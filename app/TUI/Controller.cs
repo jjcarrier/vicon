@@ -1,8 +1,6 @@
 using LibDP100;
-using Spectre.Console;
-using System;
-using System.Threading;
 using PowerSupplyApp.TUI;
+using Spectre.Console;
 
 namespace PowerSupplyApp
 {
@@ -41,8 +39,8 @@ namespace PowerSupplyApp
             Console.CancelKeyPress += OnCancelKeyPress;
             Console.Title = psu.Device.Type;
 
-            psu.RefreshPreset(psu.Output.Preset);
-            psu.RefreshSystemParams();
+            psu.GetPreset(psu.Output.Preset);
+            psu.GetSystemParams();
             sys = new PowerSupplySystemParams(psu.SystemParams);
             layout = new Layout("Root");
 
@@ -156,7 +154,7 @@ namespace PowerSupplyApp
 
             if (selectedRow <= numSetpointControls - 1)
             {
-                psu.SetSetpoint(sp);
+                psu.SetOutput(sp);
             }
             else
             {
@@ -220,7 +218,7 @@ namespace PowerSupplyApp
                 case KeyboardEvent.SetPreset7:
                 case KeyboardEvent.SetPreset8:
                 case KeyboardEvent.SetPreset9:
-                    psu.SetOutputToPreset((byte)(keyEvent - KeyboardEvent.SetPreset0));
+                    psu.UsePreset((byte)(keyEvent - KeyboardEvent.SetPreset0));
                     sp = new PowerSupplySetpoint(psu.Output.Setpoint);
                     break;
                 case KeyboardEvent.SavePreset0: // Saving to Preset 0 does not appear to work.
@@ -233,40 +231,40 @@ namespace PowerSupplyApp
                 case KeyboardEvent.SavePreset7:
                 case KeyboardEvent.SavePreset8:
                 case KeyboardEvent.SavePreset9:
-                    psu.SetSetpointPreset((byte)(keyEvent - KeyboardEvent.SavePreset0), sp);
+                    psu.SetPreset((byte)(keyEvent - KeyboardEvent.SavePreset0), sp);
                     break;
 
                 case KeyboardEvent.IncrementVoltage:
                     VoltageOutput++;
-                    psu.SetSetpoint(sp);
+                    psu.SetOutput(sp);
                     break;
                 case KeyboardEvent.DecrementVoltage:
                     VoltageOutput--;
-                    psu.SetSetpoint(sp);
+                    psu.SetOutput(sp);
                     break;
                 case KeyboardEvent.IncrementVoltage10x:
                     VoltageOutput += largeIncrement;
-                    psu.SetSetpoint(sp);
+                    psu.SetOutput(sp);
                     break;
                 case KeyboardEvent.DecrementVoltage10x:
                     VoltageOutput -= largeIncrement;
-                    psu.SetSetpoint(sp);
+                    psu.SetOutput(sp);
                     break;
                 case KeyboardEvent.IncrementCurrent:
                     CurrentOutput++;
-                    psu.SetSetpoint(sp);
+                    psu.SetOutput(sp);
                     break;
                 case KeyboardEvent.DecrementCurrent:
                     CurrentOutput--;
-                    psu.SetSetpoint(sp);
+                    psu.SetOutput(sp);
                     break;
                 case KeyboardEvent.IncrementCurrent10x:
                     CurrentOutput += largeIncrement;
-                    psu.SetSetpoint(sp);
+                    psu.SetOutput(sp);
                     break;
                 case KeyboardEvent.DecrementCurrent10x:
                     CurrentOutput -= largeIncrement;
-                    psu.SetSetpoint(sp);
+                    psu.SetOutput(sp);
                     break;
                 case KeyboardEvent.OutputOn:
                     psu.SetOutputOn();
