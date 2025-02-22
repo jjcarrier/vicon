@@ -1,7 +1,5 @@
 using LibDP100;
 using Newtonsoft.Json;
-using System.IO;
-using System.Threading;
 
 namespace PowerSupplyApp
 {
@@ -121,7 +119,7 @@ namespace PowerSupplyApp
 
             sp.Current = point.Milliamps;
             sp.Voltage = point.Millivolts;
-            if (!psu.SetSetpoint(sp))
+            if (psu.SetOutput(sp) != PowerSupplyResult.OK)
             {
                 LastErrorCode = WaveGenStatus.SetpointFailure;
                 awgBusy = false;

@@ -151,9 +151,9 @@ namespace PowerSupplyApp
         /// <returns>The grid.</returns>
         private static Grid GetBarChartGrid(PowerSupplyActiveState activeState)
         {
-            int vo_limit = (activeState.VoltageOutputMax > psu.PresetParams[psu.Output.Preset].OVP) ?
-                psu.PresetParams[psu.Output.Preset].OVP : activeState.VoltageOutputMax;
-            int io_limit = psu.PresetParams[psu.Output.Preset].OCP;
+            int vo_limit = (activeState.VoltageOutputMax > psu.Presets[psu.Output.Preset].OVP) ?
+                psu.Presets[psu.Output.Preset].OVP : activeState.VoltageOutputMax;
+            int io_limit = psu.Presets[psu.Output.Preset].OCP;
 
             var width = Console.WindowWidth - 3;
             double vLoad = (double)activeState.Voltage / vo_limit;
@@ -290,8 +290,8 @@ namespace PowerSupplyApp
 
             Faulted = active.FaultStatus != PowerSupplyFaultStatus.OK;
 
-            bool ovpModified = setpoint.OVP != supply.PresetParams[supply.Output.Preset].OVP;
-            bool ocpModified = setpoint.OCP != supply.PresetParams[supply.Output.Preset].OCP;
+            bool ovpModified = setpoint.OVP != supply.Presets[supply.Output.Preset].OVP;
+            bool ocpModified = setpoint.OCP != supply.Presets[supply.Output.Preset].OCP;
             bool oppModified = system.OPP != supply.SystemParams.OPP;
             bool otpModified = system.OTP != supply.SystemParams.OTP;
 

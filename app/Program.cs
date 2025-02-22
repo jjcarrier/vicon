@@ -1,4 +1,3 @@
-using System;
 using LibDP100;
 
 namespace PowerSupplyApp
@@ -27,7 +26,6 @@ namespace PowerSupplyApp
                 return (int)result;
             }
 
-            bool psuReady = false;
             int psuCount = Enumerator.Enumerate();
 
             if (enumerate)
@@ -59,28 +57,28 @@ namespace PowerSupplyApp
             if (psuSerialNumber != null)
             {
                 psu = Enumerator.GetDeviceBySerial(psuSerialNumber);
-                psuReady = (psu != null);
-
-                if (psuReady)
-                {
-                    psu.RefreshOutputParams();
-                    psu.RefreshSystemParams();
-                }
             }
             else if (psuCount == 1)
             {
                 psuSerialNumber = Enumerator.GetSerialNumbers()[0];
                 psu = Enumerator.GetDeviceByIndex(0);
-                psu.RefreshOutputParams();
-                psu.RefreshSystemParams();
-                psuReady = true;
             }
 
             // Device selection done, release unused instances so that other
             // applications may connect to them.
             Enumerator.Done();
 
-            if (!psuReady)
+            if (psu != null)
+            {
+                psu.GetDeviceInfo();
+                psu.GetOutput();
+                psu.GetSystemParams();
+                for (byte i = 0; i < psu.Presets.Length; i++)
+                {
+                    psu.GetPreset(i);
+                }
+            }
+            else
             {
                 Console.WriteLine("ERROR: Could not initialize DP100!");
                 return 1;
@@ -137,7 +135,8 @@ namespace PowerSupplyApp
                 else
                 {
                     Console.WriteLine();
-                    res = dev.PrintDevInfo();
+                    res = true;
+                    dev.Device.Print();
                 }
 
                 if (!res)

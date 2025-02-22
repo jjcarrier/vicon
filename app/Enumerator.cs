@@ -1,6 +1,4 @@
-﻿using LibDP100;
-using System;
-using System.Collections.Generic;
+using LibDP100;
 
 namespace PowerSupplyApp
 {
@@ -44,12 +42,12 @@ namespace PowerSupplyApp
             while (true)
             {
                 PowerSupply psu = new PowerSupply();
-                if (!psu.Connect())
+                if (psu.Connect() != PowerSupplyResult.OK)
                 {
                     break;
                 }
 
-                if (psu.RefreshDevInfo())
+                if (psu.GetDeviceInfo() == PowerSupplyResult.OK)
                 {
                     supplies.Add(new EnumeratedSupply(psu, false));
                 }
