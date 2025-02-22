@@ -23,6 +23,13 @@ namespace PowerSupplyApp.TUI
             string[] fractionalChars = { " ", "▏", "▎", "▍", "▌", "▋", "▊", "▉" };
             progress = Math.Min(1, Math.Max(0, progress));
             double remainderWidth = (progress * width) % 1;
+
+            if (progress is double.NaN)
+            {
+                progress = 0;
+                remainderWidth = 0;
+            }
+
             int wholeChar = (int)Math.Floor(progress * width);
             int factionalCharIndex = (int)Math.Floor(remainderWidth * 8);
             string fractionalChar = fractionalChars[factionalCharIndex];
