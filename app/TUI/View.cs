@@ -4,7 +4,7 @@ using Spectre.Console;
 
 namespace PowerSupplyApp
 {
-    partial class Program
+    internal partial class Program
     {
         // The theme that is actively being applied to the TUI.
         private static ColorTheme theme = ColorThemes.Classic;

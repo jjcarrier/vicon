@@ -23,7 +23,7 @@ namespace PowerSupplyApp
         // The boolean is used to determine which instances have been requested by the application
         // to determine which instances to close during cleanup so that separate applications
         // may take control of the device.
-        static List<EnumeratedSupply> supplies = new List<EnumeratedSupply>();
+        private static List<EnumeratedSupply> supplies = new List<EnumeratedSupply>();
 
         /// <summary>
         /// Obtain list of device instances which may be used to present connection

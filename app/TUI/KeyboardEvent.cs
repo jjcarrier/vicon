@@ -1,6 +1,6 @@
 namespace PowerSupplyApp.TUI
 {
-    enum KeyboardEvent
+    internal enum KeyboardEvent
     {
         None,
         Quit,
