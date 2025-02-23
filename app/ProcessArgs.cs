@@ -69,9 +69,9 @@ namespace PowerSupplyApp
             grid.AddRow("  [white]--milliamps[/], [white]--ma[/]", "[silver]<MA>[/]",
                 "Sets the (maximum) output current in milliamperes.");
             grid.AddRow("  [white]--ovp[/]", "[silver]<MV>[/]",
-                "Sets the Over-Voltage Protection level. Reaching or exceeding this limit will switch the output OFF. (units: mV)");
+                "Sets the Over-Voltage Protection level. Please note, the current setpoint parameters will be used to update the currently configured preset. Reaching or exceeding this limit will switch the output OFF. (units: mV)");
             grid.AddRow("  [white]--ocp[/]", "[silver]<MA>[/]",
-                "Sets the Over-Current Protection level. Reaching or exceeding this limit will switch the output OFF. (units: mA)");
+                "Sets the Over-Current Protection level. Please note, the current setpoint parameters will be used to update the currently configured preset. Reaching or exceeding this limit will switch the output OFF. (units: mA)");
             grid.AddRow("  [white]--opp[/]", "[silver]<DECI_W>[/]",
                 "Sets the Over-Power Protection level. Reaching or exceeding this limit will switch the output OFF. (units: 0.1 W, range: 0-1050)");
             grid.AddRow("  [white]--otp[/]", "[silver]<DECI_C>[/]",
