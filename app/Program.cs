@@ -2,20 +2,18 @@ using LibDP100;
 
 namespace PowerSupplyApp
 {
-    partial class Program
+    internal partial class Program
     {
-        static bool debug = false;
-        static bool serializeAsJson = false;
-        static bool serializeAsJsonArray = false;
+        private static bool debug = false;
+        private static bool serializeAsJson = false;
+        private static bool serializeAsJsonArray = false;
+        private static int serializedOutput = 0;
+        private static int numSerializedOutputs = 0;
+        private static PowerSupply psu;
+        private static PowerSupplySetpoint sp;
+        private static PowerSupplySystemParams sys;
 
-        static int serializedOutput = 0;
-        static int numSerializedOutputs = 0;
-
-        static PowerSupply psu;
-        static PowerSupplySetpoint sp;
-        static PowerSupplySystemParams sys;
-
-        static int Main(string[] args)
+        private static int Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             ProcessArgsResult result = PreProcessArgs(args);
@@ -104,7 +102,7 @@ namespace PowerSupplyApp
             return (int)result;
         }
 
-        static int PrintEnumeration()
+        private static int PrintEnumeration()
         {
             numSerializedOutputs = Enumerator.GetDeviceCount();
             if (numSerializedOutputs == 0)

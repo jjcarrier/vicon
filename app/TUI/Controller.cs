@@ -4,7 +4,7 @@ using Spectre.Console;
 
 namespace PowerSupplyApp
 {
-    partial class Program
+    internal partial class Program
     {
         private const int numDataRows = 19;
         private const int numUserEntryRows = 6;
@@ -26,7 +26,7 @@ namespace PowerSupplyApp
         // this is from right to left and is meant to reflect the digit in a parameter that is selected.
         private static int selectedCol = 0;
 
-        static void OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        private static void OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
             runInteractive = false;
             e.Cancel = true;
@@ -292,7 +292,7 @@ namespace PowerSupplyApp
             }
         }
 
-        static void ReceiveActiveState(PowerSupplyActiveState activeState)
+        private static void ReceiveActiveState(PowerSupplyActiveState activeState)
         {
             if (showControls)
             {
@@ -311,7 +311,7 @@ namespace PowerSupplyApp
             AnsiConsole.Write(layout);
         }
 
-        static void Blinker(PowerSupplyActiveState activeState)
+        private static void Blinker(PowerSupplyActiveState activeState)
         {
             // Nothing to do.
         }

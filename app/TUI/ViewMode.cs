@@ -3,7 +3,7 @@ namespace PowerSupplyApp.TUI
     /// <summary>
     /// Enumeration for the different views available in the user-interface.
     /// </summary>
-    enum ViewMode
+    internal enum ViewMode
     {
         Normal,
         Controls,

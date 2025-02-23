@@ -1,6 +1,6 @@
 namespace PowerSupplyApp
 {
-    partial class Program
+    internal partial class Program
     {
         private const ushort voltageOutputMax = 30500;
         private const ushort voltageOutputMin = 0;

@@ -6,14 +6,14 @@ using Spectre.Console;
 
 namespace PowerSupplyApp
 {
-    partial class Program
+    internal partial class Program
     {
-        static bool interactiveMode = false;
-        static bool wavegenMode = false;
-        static bool enumerate = false;
-        static string psuSerialNumber;
+        private static bool interactiveMode = false;
+        private static bool wavegenMode = false;
+        private static bool enumerate = false;
+        private static string psuSerialNumber;
 
-        static void ShowHelp()
+        private static void ShowHelp()
         {
             // Example for generating a sinusoid in powershell.
             // 0..255 | % { $mv = [int](2500 * [Math]::sin(2 * [Math]::PI * $_ / 256) + 2500); "{`"mv`": $mv, `"ma`": 1000}," }
@@ -83,7 +83,7 @@ namespace PowerSupplyApp
             AnsiConsole.Write(grid);
         }
 
-        static ProcessArgsResult PreProcessArgs(string[] args)
+        private static ProcessArgsResult PreProcessArgs(string[] args)
         {
             // First pass, to check for --help or --json args
             if (args.Length > 0)
@@ -217,8 +217,7 @@ namespace PowerSupplyApp
             return ProcessArgsResult.Ok;
         }
 
-
-        static ProcessArgsResult ProcessArgs(PowerSupply inst, string[] args)
+        private static ProcessArgsResult ProcessArgs(PowerSupply inst, string[] args)
         {
             if (args.Length > 0)
             {
@@ -420,7 +419,7 @@ namespace PowerSupplyApp
             return 0;
         }
 
-        static int ProcessWrite(PowerSupply inst, Operation op, string[] args, int index)
+        private static int ProcessWrite(PowerSupply inst, Operation op, string[] args, int index)
         {
             bool result;
             ushort parsedValue = 0;
@@ -698,7 +697,7 @@ namespace PowerSupplyApp
             return result ? argsToProcess : 0;
         }
 
-        static int CountArgsBetweenFlags(string[] args, int index)
+        private static int CountArgsBetweenFlags(string[] args, int index)
         {
             int count = 0;
             bool betweenFlags = false;
@@ -733,7 +732,7 @@ namespace PowerSupplyApp
         /// <param name="args"></param>
         /// <param name="index"></param>
         /// <returns>The number of arguments processed. <= 0 indicates an error.</returns>
-        static int ProcessRead(PowerSupply inst, Operation op, string[] args, int index)
+        private static int ProcessRead(PowerSupply inst, Operation op, string[] args, int index)
         {
             const byte maxPresetIndex= 9;
             int argsToProcess;
@@ -944,7 +943,7 @@ namespace PowerSupplyApp
             return result ? argsToProcess : 0;
         }
 
-        static bool CheckResult(int numArgsProcessed, string[] args, ref int index)
+        private static bool CheckResult(int numArgsProcessed, string[] args, ref int index)
         {
             if (numArgsProcessed > 0)
             {
@@ -959,7 +958,7 @@ namespace PowerSupplyApp
             }
         }
 
-        static bool CheckResult(bool result, string arg)
+        private static bool CheckResult(bool result, string arg)
         {
             if (result)
             {
@@ -972,7 +971,7 @@ namespace PowerSupplyApp
             }
         }
 
-        static bool CheckResult(bool result, string[] args, ref int index)
+        private static bool CheckResult(bool result, string[] args, ref int index)
         {
             if (result)
             {
@@ -986,7 +985,7 @@ namespace PowerSupplyApp
             }
         }
 
-        static bool SerializeObject(object response)
+        private static bool SerializeObject(object response)
         {
             IsoDateTimeConverter dtFmt = new IsoDateTimeConverter()
             {
@@ -1027,7 +1026,7 @@ namespace PowerSupplyApp
             return true;
         }
 
-        static void PrintResponse(object param, string message)
+        private static void PrintResponse(object param, string message)
         {
             if (serializeAsJson)
             {
@@ -1039,7 +1038,7 @@ namespace PowerSupplyApp
             }
         }
 
-        static void PrintResponse(object param, string format, ushort arg)
+        private static void PrintResponse(object param, string format, ushort arg)
         {
             if (serializeAsJson)
             {
