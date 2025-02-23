@@ -18,6 +18,9 @@ namespace PowerSupplyApp
         WriteOCP,
         WriteOTP,
         WriteOPP,
-        // TODO WriteAWG
+        WriteRPP,
+        WriteAutoOn,
+        WriteVolume,
+        WriteBacklight
     };
 }
