@@ -76,6 +76,14 @@ namespace PowerSupplyApp
                 "Sets the Over-Power Protection level. Reaching or exceeding this limit will switch the output OFF. (units: 0.1 W, range: 0-1050)");
             grid.AddRow("  [white]--otp[/]", "[silver]<DECI_C>[/]",
                 "Sets the Over-Temperature Protection level. Reaching or exceeding this limit will switch the output OFF. (units: 0.1 C, range: 500-800)");
+            grid.AddRow("  [white]--rpp[/]", "[silver]<STATE>[/]",
+                "Sets the Reverse Polarity Protection. (range: 0-1)");
+            grid.AddRow("  [white]--auto-on[/]", "[silver]<STATE>[/]",
+                "Sets the Automatic Output ON function. When enabled, the output will automatically turn on when the device is powered on. (range: 0-1)");
+            grid.AddRow("  [white]--volume[/]", "[silver]<VALUE>[/]",
+                "Sets the volume of the device's audible feedback. (range: 0-4)");
+            grid.AddRow("  [white]--backlight[/]", "[silver]<BRIGHTNESS>[/]",
+                "Sets the brightness of the device's LCD backlight. (range: 0-4)");
 
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine("A CLI interface for the AlienTek DP100 100W USB-C digital power supply.");
@@ -191,6 +199,11 @@ namespace PowerSupplyApp
                         case "--ocp":
                         case "--opp":
                         case "--otp":
+                        case "--rpp":
+                        case "--auto-on":
+                        case "--volume":
+                        case "--backlight":
+                        case "--":
                         case "--on":
                         case "--off":
                             numSerializedOutputs++;
@@ -397,6 +410,26 @@ namespace PowerSupplyApp
                             writeOp = true;
                             op = Operation.WriteOTP;
                             break;
+
+                        case "--rpp":
+                            writeOp = true;
+                            op = Operation.WriteRPP;
+                            break;
+
+                        case "--auto-on":
+                            writeOp = true;
+                            op = Operation.WriteAutoOn;
+                            break;
+
+                        case "--volume":
+                            writeOp = true;
+                            op = Operation.WriteVolume;
+                            break;
+
+                        case "--backlight":
+                            writeOp = true;
+                            op = Operation.WriteBacklight;
+                            break;
                     }
 
                     if (readOp)
@@ -527,6 +560,62 @@ namespace PowerSupplyApp
                     {
                         sys.OTP = parsedValue;
                         result = inst.SetOTP(sys.OTP) == PowerSupplyResult.OK;
+                        if (!result)
+                        {
+                            sys.Copy(inst.SystemParams);
+                        }
+                    }
+                    break;
+
+                case Operation.WriteRPP:
+                    argsToProcess = 2;
+                    result = ushort.TryParse(args[index + 1], out parsedValue);
+                    if (result)
+                    {
+                        sys.RPP = parsedValue != 0;
+                        result = inst.SetRPP(sys.RPP) == PowerSupplyResult.OK;
+                        if (!result)
+                        {
+                            sys.Copy(inst.SystemParams);
+                        }
+                    }
+                    break;
+
+                case Operation.WriteAutoOn:
+                    argsToProcess = 2;
+                    result = ushort.TryParse(args[index + 1], out parsedValue);
+                    if (result)
+                    {
+                        sys.AutoOn = parsedValue != 0;
+                        result = inst.SetAutoOn(sys.AutoOn) == PowerSupplyResult.OK;
+                        if (!result)
+                        {
+                            sys.Copy(inst.SystemParams);
+                        }
+                    }
+                    break;
+
+                case Operation.WriteVolume:
+                    argsToProcess = 2;
+                    result = ushort.TryParse(args[index + 1], out parsedValue);
+                    if (result)
+                    {
+                        sys.Volume = (byte)parsedValue;
+                        result = inst.SetVolume(sys.Volume) == PowerSupplyResult.OK;
+                        if (!result)
+                        {
+                            sys.Copy(inst.SystemParams);
+                        }
+                    }
+                    break;
+
+                case Operation.WriteBacklight:
+                    argsToProcess = 2;
+                    result = ushort.TryParse(args[index + 1], out parsedValue);
+                    if (result)
+                    {
+                        sys.Backlight = (byte)parsedValue;
+                        result = inst.SetBacklight(sys.Backlight) == PowerSupplyResult.OK;
                         if (!result)
                         {
                             sys.Copy(inst.SystemParams);
@@ -690,6 +779,66 @@ namespace PowerSupplyApp
                     else
                     {
                         Console.WriteLine($"Set OTP (C) : {sys.OTP}");
+                    }
+                    break;
+
+                case Operation.WriteRPP:
+                    if (serializeAsJson)
+                    {
+                        result = SerializeObject(new CommandResponse
+                        {
+                            Command = op,
+                            Response = inst.SystemParams
+                        });
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Set RPP : {sys.RPP}");
+                    }
+                    break;
+
+                case Operation.WriteAutoOn:
+                    if (serializeAsJson)
+                    {
+                        result = SerializeObject(new CommandResponse
+                        {
+                            Command = op,
+                            Response = inst.SystemParams
+                        });
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Set AutoOn : {sys.AutoOn}");
+                    }
+                    break;
+
+                case Operation.WriteVolume:
+                    if (serializeAsJson)
+                    {
+                        result = SerializeObject(new CommandResponse
+                        {
+                            Command = op,
+                            Response = inst.SystemParams
+                        });
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Set Volume : {sys.Volume}");
+                    }
+                    break;
+
+                case Operation.WriteBacklight:
+                    if (serializeAsJson)
+                    {
+                        result = SerializeObject(new CommandResponse
+                        {
+                            Command = op,
+                            Response = inst.SystemParams
+                        });
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Set Backlight : {sys.Backlight}");
                     }
                     break;
             }
