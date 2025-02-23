@@ -107,7 +107,6 @@ namespace PowerSupplyApp
             runInteractive = true;
             Console.CancelKeyPress += OnCancelKeyPress;
             Console.Title = psu.Device.Type;
-            ExitAlternateScreenBuffer();
             blinkMsg = $"Blinking: {psuSerialNumber} ...";
 
             while (blinkCount-- > 0 && runInteractive && psu.Connected)
