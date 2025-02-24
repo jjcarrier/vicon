@@ -195,37 +195,80 @@ vicon --interactive
 <!-- markdownlint-enable -->
 
 > [!IMPORTANT]
-> The `ctrl+c` keystroke will immediately exit interactive-mode but will allow
+> The `Ctrl + C` keystroke will immediately exit interactive-mode but will allow
 > for post-interactive commands to execute. This way, a safe series of operations
 > may be performed at conclusion of this mode regardless of whether the user
-> exits with `q` keystroke or `ctrl+c`.
+> exits with `q` keystroke or `Ctrl + C`.
 
 ### TUI Overview
+
+#### Columns
 
 The Text-Based User Interface (TUI) consists of three primary columns of
 information.
 
-#### Setpoint Column
+| Column   | Description                                                       |
+|----------|-------------------------------------------------------------------|
+| Setpoint | Responsible for setting the desired voltage and current levels on the output. |
+| Limit    | Responsible for setting the desired limits for voltage (OVP), current (OCP), power (OPP), and temperature (OTP). OVP and OCP are applied at a per-preset level and are not automatically applied (i.e. the user must issue `Alt + 0-9` to store/apply the value). When these values are modified, the data entry will blink to indicate that the modified value has not been applied to the device. For OPP and OTP, these are applied at the system-level and are applied immediately. If for whatever reason these are not applied, the value will also blink. |
+| Actual   | Reports the actual values sensed/reported by the device. |
 
-This column is responsible for setting the desired voltage and current levels
-on the output.
+#### Presets
 
-#### Limit Column
+Below the tabular data of the TUI is a row of numbers from `0`-`9`. These
+represent the presets. The one that is highlighted represents the currently
+loaded preset, though the `voltage` and `current` values stored in this preset
+may differ from the values currently set on the output. To load/recall a preset
+simply involves pressing the corresponding number. If the output is currently `ON`
+the output will switch to `OFF`.
 
-This column is responsible for setting the desired limits for voltage (OVP),
-current (OCP), power (OPP), and temperature (OTP). OVP and OCP are applied at
-a per-preset level and are not automatically applied (i.e. the user must issue
-`Alt + 0-9` to store/apply the value). When these values are modified, the data
-entry will blink to indicate that the modified value has not been applied to the
-device. For OPP and OTP, these are applied at the system-level and are applied
-immediately. If for whatever reason these are not applied, the value will also
-blink.
+> [!NOTE]
+> It is possible during transition from one preset to another that `OVP`/`OCP`
+> faults trigger. In favor of keeping the UI responsive only moderate delay
+> logic has been applied to mitigate the majority of these events, but the
+> time required for completely mitigating the issue is in the realm of seconds.
 
-#### Actual Column
+#### Bar Graphs
 
-This column reports the actual values sensed/reported by the device.
+At the bottom of the interface are two bar graphs that represent the voltage
+and current output levels in respect to their corresponding limits (`OVP`/`OCP`).
 
-### Themes
+If `V[max]` is below `OVP` then this is considered the referenced voltage
+limit.
+
+This graph uses special characters to provide high-resolution display
+allowing the user to visually detect fluctuations in the outputs and how much
+margin there is between the corresponding limits.
+
+#### Fault State
+
+When a fault occurs the corresponding fault status will be prominently displayed
+in the top left of the interface. Depending on the applied-theme, the UI color
+scheme may switch to further differentiate this state from the normal state.
+
+#### Locked State
+
+The TUI supports a locked state enabled via `Ctrl + Shift + L`. This prevents
+accidental modification of the output while `LOCKED` is displayed in the top right
+of the interface. Depending on the applied-theme, the UI color scheme may switch
+to further differentiate this state from the normal state.
+
+#### AWG Mode
+
+Similar to the `LOCKED` state, the `AWG` will be presented in the top right of
+the interface. While in the mode most interactive functionality is disabled.
+The arbitrary waveform generation logic is solely driven by the loaded json
+configuration.
+
+#### Non-Volatile Parameters
+
+When non-volatile parameters are modified, the corresponding elements in the TUI
+will start to blink and remain in this state until the values have actually been
+written to non-volatile memory. This is done automatically with system
+parameters, but for `presets` the user must manually save the presets via the
+corresponding `Alt + 0-9` key stroke.
+
+#### Themes
 
 Currently themes are provided via predefined configurations. A future update may
 introduce customizable themes.
@@ -258,7 +301,7 @@ see `--help` for more details on the `--theme` option.
 
 ### Tab-Completions
 
-A tab-completer is available in the `completion` folder, offerring an improved
+A tab-completer is available in the `completion` folder, offering an improved
 user-experience. This module leverages [PS-HelpParser](https://github.com/jjcarrier/PS-HelpParser)
 to automatically parse the help documentation and provide tab-completion results
 to the user.
@@ -294,6 +337,6 @@ This project is licensed under the MIT license. For more details please refer to
 [LICENSE](./LICENSE). This software depends on the following third party
 components:
 
-- AlientTek's ATK-DP100DLL
 - Spectre.Console (https://github.com/spectreconsole/spectre.console/LICENSE.md)
 - Newtonsoft.Json (https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md)
+- HidSharp (https://github.com/IntergatedCircuits/HidSharp/blob/master/License.txt)
