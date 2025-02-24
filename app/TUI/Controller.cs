@@ -59,8 +59,6 @@ namespace PowerSupplyApp
             }
 
             psu.StopWorkerThread();
-            Thread.Sleep(500);
-
             ExitAlternateScreenBuffer();
         }
 
