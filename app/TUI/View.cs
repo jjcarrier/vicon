@@ -15,9 +15,9 @@ namespace PowerSupplyApp
         // The current view mode of the TUI.
         private static ViewMode ViewMode { get; set; } = ViewMode.Normal;
 
-        private static NumericDataString voltageEntry =  new NumericDataString(6, 3);
+        private static NumericDataString voltageEntry = new NumericDataString(6, 3);
         private static NumericDataString voltageActive = new NumericDataString(6, 3);
-        private static NumericDataString voltageLimit= new NumericDataString(6, 3);
+        private static NumericDataString voltageLimit = new NumericDataString(6, 3);
 
         private static NumericDataString currentEntry = new NumericDataString(6, 3);
         private static NumericDataString currentActive = new NumericDataString(6, 3);

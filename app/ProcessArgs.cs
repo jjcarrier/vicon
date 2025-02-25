@@ -883,7 +883,7 @@ namespace PowerSupplyApp
         /// <returns>The number of arguments processed. <= 0 indicates an error.</returns>
         private static int ProcessRead(PowerSupply inst, Operation op, string[] args, int index)
         {
-            const byte maxPresetIndex= 9;
+            const byte maxPresetIndex = 9;
             int argsToProcess;
             bool result = true;
             uint loopCount = 1;
@@ -1060,7 +1060,8 @@ namespace PowerSupplyApp
                             result = SerializeObject(new CommandResponse
                             {
                                 Command = op,
-                                Response = new {
+                                Response = new
+                                {
                                     Index = preset,
                                     Preset = inst.Presets[preset]
                                 }

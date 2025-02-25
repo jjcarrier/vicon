@@ -3,9 +3,11 @@ namespace PowerSupplyApp.TUI
     public class NumericDataString
     {
         private bool modified = false;
-        public bool Modified {
+        public bool Modified
+        {
             get { return modified; }
-            set {
+            set
+            {
                 modified = value;
             }
         }
