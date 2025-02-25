@@ -155,7 +155,7 @@ namespace PowerSupplyApp
 
         public static void Generate()
         {
-            while (Run()) {}
+            while (Run()) { }
         }
     }
 }
