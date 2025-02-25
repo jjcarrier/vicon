@@ -462,7 +462,7 @@ namespace PowerSupplyApp
         /// <returns>The grid containing the current state of the device.</returns>
         private static Grid GetDataGrid(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
         {
-            string controlsCaption = wavegenMode ? "Press Q to Quit." : "Press Q to Quit. Press ? to Show Controls";
+            string controlsCaption = wavegenMode ? "Press Q to Quit." : "Press Q to Quit. Press ? to Show Controls.";
             return new Grid()
                 .AddColumns(1)
                 .AddRow(GetDataTable(supply, setpoint, system, active))
