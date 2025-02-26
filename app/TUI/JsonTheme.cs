@@ -1,4 +1,5 @@
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PowerSupplyApp.TUI
 {
@@ -7,7 +8,7 @@ namespace PowerSupplyApp.TUI
         /// <summary>
         /// Defines the theme for interactive mode.
         /// </summary>
-        [JsonProperty("theme")]
+        [JsonPropertyName("theme")]
         public string Theme { get; set; } = "classic";
 
         /// <summary>
@@ -25,7 +26,7 @@ namespace PowerSupplyApp.TUI
         public static bool StoreJsonTheme(string themeName)
         {
             JsonTheme theme = new JsonTheme() { Theme = themeName };
-            string text = JsonConvert.SerializeObject(theme);
+            string text = JsonSerializer.Serialize(theme);
             string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string themeFilePath = Path.Combine(exeDirectory, themeFilename);
             using (StreamWriter outputFile = new StreamWriter(themeFilePath))
@@ -55,8 +56,8 @@ namespace PowerSupplyApp.TUI
                 try
                 {
                     string json = r.ReadToEnd();
-                    JsonTheme loadedTheme = JsonConvert.DeserializeObject<JsonTheme>(json);
-                    switch (loadedTheme.Theme)
+                    JsonTheme? loadedTheme = JsonSerializer.Deserialize<JsonTheme>(json, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                    switch (loadedTheme?.Theme)
                     {
                         default:
                         case "classic":

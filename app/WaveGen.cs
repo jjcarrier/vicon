@@ -1,5 +1,5 @@
 using LibDP100;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace PowerSupplyApp
 {
@@ -10,7 +10,7 @@ namespace PowerSupplyApp
 
         private static PowerSupply psu;
         private static PowerSupplySetpoint sp;
-        private static ArbitraryWaveformGen awg;
+        private static ArbitraryWaveformGen? awg;
         private static bool awgBusy = false;
         private static int awgIndex = 0;
 
@@ -57,10 +57,10 @@ namespace PowerSupplyApp
                 return false;
             }
 
-            using (StreamReader file = File.OpenText(filepath))
+            using (var reader = new StreamReader(filepath))
             {
-                JsonSerializer serializer = new JsonSerializer();
-                awg = (ArbitraryWaveformGen)serializer.Deserialize(file, typeof(ArbitraryWaveformGen));
+                string data = reader.ReadToEnd();
+                awg = JsonSerializer.Deserialize<ArbitraryWaveformGen>(data, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
             }
 
             if (awg == null)

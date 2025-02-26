@@ -1,30 +1,30 @@
-using Newtonsoft.Json;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace PowerSupplyApp
 {
     public class WaveformPoint
     {
-        [JsonProperty(PropertyName = "mv")]
+        [JsonPropertyName("mv")]
         public ushort Millivolts { get; set; }
 
-        [JsonProperty(PropertyName = "ma")]
+        [JsonPropertyName("ma")]
         public ushort Milliamps { get; set; }
 
-        [JsonProperty(PropertyName = "ms", DefaultValueHandling = DefaultValueHandling.Populate)]
+        [JsonPropertyName("ms")] //, DefaultValueHandling = DefaultValueHandling.Populate)]
         [DefaultValue(-1)]
         public int Milliseconds { get; set; }
     }
 
     public class ArbitraryWaveformGen
     {
-        [JsonProperty(PropertyName = "loop-count")]
+        [JsonPropertyName("loop-count")]
         public int LoopCount { get; set; }
 
-        [JsonProperty(PropertyName = "milliseconds")]
+        [JsonPropertyName("milliseconds")]
         public uint Milliseconds { get; set; }
 
-        [JsonProperty(PropertyName = "points")]
+        [JsonPropertyName("points")]
         public List<WaveformPoint> Points { get; set; }
     }
 }
