@@ -23,7 +23,7 @@ namespace PowerSupplyApp
         // The boolean is used to determine which instances have been requested by the application
         // to determine which instances to close during cleanup so that separate applications
         // may take control of the device.
-        private static List<EnumeratedSupply> supplies = new List<EnumeratedSupply>();
+        private static readonly List<EnumeratedSupply> supplies = new();
 
         /// <summary>
         /// Obtain list of device instances which may be used to present connection
@@ -36,7 +36,7 @@ namespace PowerSupplyApp
         {
             while (true)
             {
-                PowerSupply psu = new PowerSupply();
+                PowerSupply psu = new();
                 if (psu.Connect() != PowerSupplyResult.OK)
                 {
                     break;
@@ -92,7 +92,7 @@ namespace PowerSupplyApp
         /// The matching PowerSupply instance. If no match found, this method
         /// will return null.
         /// </returns>
-        public static PowerSupply GetDeviceBySerial(string serial)
+        public static PowerSupply? GetDeviceBySerial(string serial)
         {
             foreach (var psu in supplies)
             {
@@ -116,7 +116,7 @@ namespace PowerSupplyApp
         /// </remarks>
         /// <param name="index">The index of the PowerSupply.</param>
         /// <returns>The PowerSupply at the specified index.</returns>
-        public static PowerSupply GetDeviceByIndex(int index)
+        public static PowerSupply? GetDeviceByIndex(int index)
         {
             if (index >= supplies.Count)
             {
@@ -133,7 +133,7 @@ namespace PowerSupplyApp
         /// <returns>The list of serial numbers</returns>
         public static List<string> GetSerialNumbers()
         {
-            List<string> list = new List<string>();
+            List<string> list = new();
 
             foreach (var psu in supplies)
             {

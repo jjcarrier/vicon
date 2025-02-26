@@ -1,6 +1,6 @@
 using LibDP100;
-using PowerSupplyApp.TUI;
 using PowerControllerApp;
+using PowerSupplyApp.TUI;
 using Spectre.Console;
 using System.Text.Json;
 
@@ -11,7 +11,7 @@ namespace PowerSupplyApp
         private static bool interactiveMode = false;
         private static bool wavegenMode = false;
         private static bool enumerate = false;
-        private static string psuSerialNumber;
+        private static string psuSerialNumber = string.Empty;
 
         private static void ShowHelp()
         {
@@ -116,7 +116,7 @@ namespace PowerSupplyApp
                             debug = true;
                             break;
                         case "--theme":
-                            if ((i + 1 >= args.Length) || args[i + 1].StartsWith("-"))
+                            if ((i + 1 >= args.Length) || args[i + 1].StartsWith('-'))
                             {
                                 Console.WriteLine($"ERROR: Missing <THEME_NAME> parameter for '{args[i]}'.");
                                 return ProcessArgsResult.MissingParameter;
@@ -136,9 +136,9 @@ namespace PowerSupplyApp
                             if (argIndex + 1 < args.Length)
                             {
                                 psuSerialNumber = args[argIndex + 1];
-                                if (psuSerialNumber.StartsWith("-"))
+                                if (psuSerialNumber.StartsWith('-'))
                                 {
-                                    psuSerialNumber = null;
+                                    psuSerialNumber = string.Empty;
                                     return ProcessArgsResult.MissingParameter;
                                 }
                             }
@@ -162,7 +162,7 @@ namespace PowerSupplyApp
                             break;
                         case "--awg":
                         case "--wavegen":
-                            if ((i + 1 >= args.Length) || args[i + 1].StartsWith("-"))
+                            if ((i + 1 >= args.Length) || args[i + 1].StartsWith('-'))
                             {
                                 Console.WriteLine($"ERROR: Missing <FILE_PATH> parameter for '{args[i]}'.");
                                 return ProcessArgsResult.MissingParameter;
@@ -209,7 +209,7 @@ namespace PowerSupplyApp
                             numSerializedOutputs++;
                             break;
                         default:
-                            if (arg.StartsWith("-"))
+                            if (arg.StartsWith('-'))
                             {
                                 Console.WriteLine($"Unsupported argument '{arg}'." + Environment.NewLine +
                                                   "Use -?, -h, or --help for help information.");
@@ -312,7 +312,7 @@ namespace PowerSupplyApp
                         case "-d":
                         case "--delay":
                             if ((i + 1 < args.Length) &&
-                                (!args[i + 1].StartsWith("-")))
+                                (!args[i + 1].StartsWith('-')))
                             {
                                 int milliseconds;
                                 result = int.TryParse(args[i + 1], out milliseconds);
@@ -857,7 +857,7 @@ namespace PowerSupplyApp
 
             for (int i = index; i < args.Length; i++)
             {
-                if (args[i].StartsWith("--") || args[i].StartsWith("-"))
+                if (args[i].StartsWith("--") || args[i].StartsWith('-'))
                 {
                     if (betweenFlags)
                     {
@@ -1139,7 +1139,7 @@ namespace PowerSupplyApp
             }
         }
 
-        private static bool SerializeObject(object response)
+        private static bool SerializeObject(object? response)
         {
             JsonSerializerOptions options = new JsonSerializerOptions
             {

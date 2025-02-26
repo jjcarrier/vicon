@@ -8,8 +8,8 @@ namespace PowerSupplyApp
         public static bool Running { get; set; } = false;
         public static WaveGenStatus LastErrorCode { get; set; } = WaveGenStatus.Ok;
 
-        private static PowerSupply psu;
-        private static PowerSupplySetpoint sp;
+        private static PowerSupply psu = new();
+        private static PowerSupplySetpoint sp = new PowerSupplySetpoint(0);
         private static ArbitraryWaveformGen? awg;
         private static bool awgBusy = false;
         private static int awgIndex = 0;
@@ -98,6 +98,16 @@ namespace PowerSupplyApp
 
         public static WaveformPoint GetCurrentWaveformPoint()
         {
+            if (awg == null)
+            {
+                return new WaveformPoint()
+                {
+                    Millivolts = 0,
+                    Milliamps = 0,
+                    Milliseconds = 0
+                };
+            }
+
             WaveformPoint point = awg.Points[awgIndex];
 
             if (point.Milliseconds < 0)
@@ -110,7 +120,7 @@ namespace PowerSupplyApp
 
         public static bool Run()
         {
-            if (!awgBusy)
+            if (!awgBusy || awg == null)
             {
                 return awgBusy;
             }

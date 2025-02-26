@@ -7,6 +7,6 @@ namespace PowerSupplyApp
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public Operation Command { get; set; }
 
-        public object Response { get; set; }
+        public required object Response { get; set; }
     }
 }
