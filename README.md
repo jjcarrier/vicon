@@ -75,10 +75,15 @@ Below is a basic overview of `vicon` functionality:
 Checkout and configure the repository via:
 
 ```pwsh
-git clone https://github.com/jjcarrier/vicon.git
+git clone --recurse-submodules https://github.com/jjcarrier/vicon.git
 cd vicon
 nuget restore
 ```
+
+> [!NOTE]
+> If the `--recurse-submodules` option was skipped in the clone step, please run
+> the following prior to continuing:
+> `git submodule update --init --recursive`
 
 Build the project via:
 
@@ -338,5 +343,4 @@ This project is licensed under the MIT license. For more details please refer to
 components:
 
 - Spectre.Console (https://github.com/spectreconsole/spectre.console/LICENSE.md)
-- Newtonsoft.Json (https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md)
 - HidSharp (https://github.com/IntergatedCircuits/HidSharp/blob/master/License.txt)

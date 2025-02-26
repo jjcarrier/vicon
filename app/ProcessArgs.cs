@@ -1,8 +1,8 @@
 using LibDP100;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using PowerSupplyApp.TUI;
+using PowerControllerApp;
 using Spectre.Console;
+using System.Text.Json;
 
 namespace PowerSupplyApp
 {
@@ -516,6 +516,8 @@ namespace PowerSupplyApp
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
+                        // TODO: consider reworking this to use inst.Preset where only OVP is modified.
+                        // Perhaps also add "--write-pre <PRESET> <MV> <MA> <OVP> <OCP>"
                         sp.OVP = parsedValue;
                         result = inst.SetPreset(inst.Output.Preset, sp) == PowerSupplyResult.OK;
                         if (!result)
@@ -530,6 +532,8 @@ namespace PowerSupplyApp
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
+                        // TODO: consider reworking this to use inst.Preset where only OVP is modified.
+                        // Perhaps also add "--write-pre <PRESET> <MV> <MA> <OVP> <OCP>"
                         sp.OCP = parsedValue;
                         result = inst.SetPreset(inst.Output.Preset, sp) == PowerSupplyResult.OK;
                         if (!result)
@@ -1137,15 +1141,15 @@ namespace PowerSupplyApp
 
         private static bool SerializeObject(object response)
         {
-            IsoDateTimeConverter dtFmt = new IsoDateTimeConverter()
+            JsonSerializerOptions options = new JsonSerializerOptions
             {
-                DateTimeFormat = "HH:mm:ss.fffffff"
+                Converters = { new CustomDateTimeConverter() }
             };
 
             if (!serializeAsJsonArray)
             {
                 serializedOutput++;
-                Console.WriteLine(JsonConvert.SerializeObject(response, dtFmt));
+                Console.WriteLine(JsonSerializer.Serialize(response, options));
             }
             else
             {
@@ -1160,7 +1164,7 @@ namespace PowerSupplyApp
 
                 if (response != null)
                 {
-                    Console.WriteLine(JsonConvert.SerializeObject(response, dtFmt));
+                    Console.WriteLine(JsonSerializer.Serialize(response, options));
                 }
 
                 if (last)
