@@ -9,9 +9,11 @@ namespace PowerSupplyApp
         private static bool serializeAsJsonArray = false;
         private static int serializedOutput = 0;
         private static int numSerializedOutputs = 0;
-        private static PowerSupply psu;
-        private static PowerSupplySetpoint sp;
-        private static PowerSupplySystemParams sys;
+        private static PowerSupply? psu;
+
+        // Holds the user requested setpoint (which may or may not match the actual state of the device).
+        private static PowerSupplySetpoint sp = new(0);
+        private static PowerSupplySystemParams sys = new();
 
         private static int Main(string[] args)
         {
@@ -37,7 +39,7 @@ namespace PowerSupplyApp
                 return 1;
             }
 
-            if ((psuSerialNumber == null) && (psuCount > 1))
+            if ((psuSerialNumber == string.Empty) && (psuCount > 1))
             {
                 if (interactiveMode)
                 {
@@ -52,7 +54,7 @@ namespace PowerSupplyApp
                 }
             }
 
-            if (psuSerialNumber != null)
+            if (!string.IsNullOrEmpty(psuSerialNumber))
             {
                 psu = Enumerator.GetDeviceBySerial(psuSerialNumber);
             }
@@ -83,7 +85,7 @@ namespace PowerSupplyApp
             }
 
             // Only permit debug mode in non-interactive mode.
-            psu.DebugMode = (interactiveMode) ? false : debug;
+            psu.DebugMode = !interactiveMode && debug;
 
             sp = new PowerSupplySetpoint(psu.Output.Setpoint);
 
@@ -121,6 +123,11 @@ namespace PowerSupplyApp
             {
                 var dev = Enumerator.GetDeviceByIndex(i);
                 bool res;
+
+                if (dev == null)
+                {
+                    return -1;
+                }
 
                 if (serializeAsJson)
                 {

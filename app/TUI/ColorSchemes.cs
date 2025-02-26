@@ -2,12 +2,12 @@ using Spectre.Console;
 
 namespace PowerSupplyApp.TUI
 {
-    public class ColorSchemes
+    public static class ColorSchemes
     {
         // Schemes typically used for normal operation.
         #region Normal Schemes
 
-        public static ColorScheme ClassicRed = new ColorScheme
+        public static readonly ColorScheme ClassicRed = new()
         {
             TableAccent = Color.Grey,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -25,7 +25,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.DarkRed)
         };
 
-        public static ColorScheme ClassicGold = new ColorScheme
+        public static readonly ColorScheme ClassicGold = new()
         {
             TableAccent = Color.Gold1,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -43,7 +43,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.Gold1)
         };
 
-        public static ColorScheme BlackAndWhite = new ColorScheme
+        public static readonly ColorScheme BlackAndWhite = new()
         {
             TableAccent = Color.White,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -61,7 +61,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.Black, Color.White)
         };
 
-        public static ColorScheme Grey = new ColorScheme
+        public static readonly ColorScheme Grey = new()
         {
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -79,7 +79,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.Black, Color.Grey)
         };
 
-        public static ColorScheme DarkRed = new ColorScheme
+        public static readonly ColorScheme DarkRed = new()
         {
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -97,7 +97,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.DarkRed)
         };
 
-        public static ColorScheme DarkGreen = new ColorScheme
+        public static readonly ColorScheme DarkGreen = new()
         {
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -115,7 +115,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.DarkGreen)
         };
 
-        public static ColorScheme DarkMagenta = new ColorScheme
+        public static readonly ColorScheme DarkMagenta = new()
         {
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -133,7 +133,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.DarkMagenta)
         };
 
-        public static ColorScheme Cyan = new ColorScheme
+        public static readonly ColorScheme Cyan = new()
         {
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -151,7 +151,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.Black, Color.Cyan1)
         };
 
-        public static ColorScheme Gold = new ColorScheme
+        public static readonly ColorScheme Gold = new()
         {
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -169,7 +169,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.Gold1)
         };
 
-        public static ColorScheme Blue = new ColorScheme
+        public static readonly ColorScheme Blue = new()
         {
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -187,7 +187,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.DodgerBlue2)
         };
 
-        public static ColorScheme BlueViolet = new ColorScheme
+        public static readonly ColorScheme BlueViolet = new()
         {
             TableAccent = Color.Grey11,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -210,7 +210,7 @@ namespace PowerSupplyApp.TUI
         // Schemes typically used for indication "fault" status.
         #region Faulted Schemes
 
-        public static ColorScheme FaultedDarkRed = new ColorScheme
+        public static readonly ColorScheme FaultedDarkRed = new()
         {
             TableAccent = Color.DarkRed,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -228,7 +228,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.DarkRed)
         };
 
-        public static ColorScheme FaultedDarkGreen = new ColorScheme
+        public static readonly ColorScheme FaultedDarkGreen = new()
         {
             TableAccent = Color.DarkGreen,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -246,7 +246,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.DarkGreen)
         };
 
-        public static ColorScheme FaultedDarkMagenta = new ColorScheme
+        public static readonly ColorScheme FaultedDarkMagenta = new()
         {
             TableAccent = Color.DarkMagenta,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -264,7 +264,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.DarkMagenta)
         };
 
-        public static ColorScheme FaultedCyan = new ColorScheme
+        public static readonly ColorScheme FaultedCyan = new()
         {
             TableAccent = Color.Cyan1,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -282,7 +282,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.Black, Color.Cyan1)
         };
 
-        public static ColorScheme FaultedGold = new ColorScheme
+        public static readonly ColorScheme FaultedGold = new()
         {
             TableAccent = Color.Gold1,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -300,7 +300,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.Black, Color.Gold1)
         };
 
-        public static ColorScheme FaultedGrey = new ColorScheme
+        public static readonly ColorScheme FaultedGrey = new()
         {
             TableAccent = Color.Grey,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -318,7 +318,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.White, Color.Grey)
         };
 
-        public static ColorScheme FaultedBlue = new ColorScheme
+        public static readonly ColorScheme FaultedBlue = new()
         {
             TableAccent = Color.Blue,
             RowHeader = new Style(Color.White, null, Decoration.Bold),
@@ -336,7 +336,7 @@ namespace PowerSupplyApp.TUI
             FaultMessage = new Style(Color.Black, Color.Blue)
         };
 
-        public static ColorScheme FaultedBlueViolet = new ColorScheme
+        public static readonly ColorScheme FaultedBlueViolet = new()
         {
             TableAccent = Color.BlueViolet,
             RowHeader = new Style(Color.White, null, Decoration.Bold),

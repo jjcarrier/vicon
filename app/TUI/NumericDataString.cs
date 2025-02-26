@@ -34,7 +34,7 @@ namespace PowerSupplyApp.TUI
 
         private string rawLeftTextValue = string.Empty;
         private string rawRightTextValue = string.Empty;
-        private string paddedTextValue = null;
+        private string paddedTextValue = string.Empty;
         private string markupText = string.Empty;
 
         private int RawValue { get; set; } = -1;

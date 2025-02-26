@@ -15,23 +15,23 @@ namespace PowerSupplyApp
         // The current view mode of the TUI.
         private static ViewMode ViewMode { get; set; } = ViewMode.Normal;
 
-        private static NumericDataString voltageEntry = new NumericDataString(6, 3);
-        private static NumericDataString voltageActive = new NumericDataString(6, 3);
-        private static NumericDataString voltageLimit = new NumericDataString(6, 3);
+        private static readonly NumericDataString voltageEntry = new(6, 3);
+        private static readonly NumericDataString voltageActive = new(6, 3);
+        private static readonly NumericDataString voltageLimit = new(6, 3);
 
-        private static NumericDataString currentEntry = new NumericDataString(6, 3);
-        private static NumericDataString currentActive = new NumericDataString(6, 3);
-        private static NumericDataString currentLimit = new NumericDataString(6, 3);
+        private static readonly NumericDataString currentEntry = new(6, 3);
+        private static readonly NumericDataString currentActive = new(6, 3);
+        private static readonly NumericDataString currentLimit = new(6, 3);
 
-        private static NumericDataString powerActive = new NumericDataString(6, 2);
-        private static NumericDataString powerLimit = new NumericDataString(6, 1);
+        private static readonly NumericDataString powerActive = new(6, 2);
+        private static readonly NumericDataString powerLimit = new(6, 1);
 
-        private static NumericDataString tempActive = new NumericDataString(6, 1);
-        private static NumericDataString tempLimit = new NumericDataString(5);
+        private static readonly NumericDataString tempActive = new(6, 1);
+        private static readonly NumericDataString tempLimit = new(5);
 
-        private static NumericDataString voltageUsb = new NumericDataString(6, 3);
-        private static NumericDataString voltageMax = new NumericDataString(6, 3);
-        private static NumericDataString voltageInput = new NumericDataString(6, 3);
+        private static readonly NumericDataString voltageUsb = new(6, 3);
+        private static readonly NumericDataString voltageMax = new(6, 3);
+        private static readonly NumericDataString voltageInput = new(6, 3);
 
         private static bool Faulted
         {
@@ -101,16 +101,17 @@ namespace PowerSupplyApp
         /// <summary>
         /// Gets the Grid for the device information.
         /// </summary>
+        /// <param name="info">Power supply device information.</param>
         /// <returns>The Grid containing the device information.</returns>
-        private static Grid GetDeviceInfoGrid()
+        private static Grid GetDeviceInfoGrid(PowerSupplyInfo info)
         {
             return new Grid()
                 .AddColumns(2)
-                .AddRow(new Markup("[blue]Device[/]"), new Markup(psu.Device.Type))
-                .AddRow(new Markup("[blue]Serial Num[/]"), new Markup(psu.Device.SerialNumber))
-                .AddRow(new Markup("[blue]HW Version[/]"), new Markup(psu.Device.HardwareVersion))
-                .AddRow(new Markup("[blue]SW Version[/]"), new Markup(psu.Device.SoftwareVersion))
-                .AddRow(new Markup("[blue]SW State[/]"), new Markup(psu.Device.SoftwareState));
+                .AddRow(new Markup("[blue]Device[/]"), new Markup(info.Type))
+                .AddRow(new Markup("[blue]Serial Num[/]"), new Markup(info.SerialNumber))
+                .AddRow(new Markup("[blue]HW Version[/]"), new Markup(info.HardwareVersion))
+                .AddRow(new Markup("[blue]SW Version[/]"), new Markup(info.SoftwareVersion))
+                .AddRow(new Markup("[blue]SW State[/]"), new Markup(info.SoftwareState));
         }
 
         /// <summary>
@@ -145,13 +146,14 @@ namespace PowerSupplyApp
         /// limits which may either result in regulation mode changes, or tripping fault
         /// protection logic.
         /// </summary>
+        /// <param name="supply">The power supply instance.</param>
         /// <param name="activeState">The current state information of the device.</param>
-        /// <returns>The grid.</returns>
-        private static Grid GetBarChartGrid(PowerSupplyActiveState activeState)
+        /// <returns>The <see cref="Grid"/> for the bar chart.</returns>
+        private static Grid GetBarChartGrid(PowerSupply supply, PowerSupplyActiveState activeState)
         {
-            int vo_limit = (activeState.VoltageOutputMax > psu.Presets[psu.Output.Preset].OVP) ?
-                psu.Presets[psu.Output.Preset].OVP : activeState.VoltageOutputMax;
-            int io_limit = psu.Presets[psu.Output.Preset].OCP;
+            int vo_limit = (activeState.VoltageOutputMax > supply.Presets[supply.Output.Preset].OVP) ?
+                supply.Presets[supply.Output.Preset].OVP : activeState.VoltageOutputMax;
+            int io_limit = supply.Presets[supply.Output.Preset].OCP;
 
             var width = Console.WindowWidth - 3;
             double vLoad = (double)activeState.Voltage / vo_limit;
@@ -167,24 +169,25 @@ namespace PowerSupplyApp
         /// <summary>
         /// Gets the grid object for displaying the preset selection.
         /// </summary>
-        /// <returns>The grid.</returns>
-        private static Grid GetPresetGrid()
+        /// <param name="preset">The currently selected preset index.</param>
+        /// <returns>The <see cref="Grid"/> for the preset selection.</returns>
+        private static Grid GetPresetGrid(int preset)
         {
             Markup[] presetText =
-            {
-                new Markup(" 0 ", scheme.Preset),
-                new Markup(" 1 ", scheme.Preset),
-                new Markup(" 2 ", scheme.Preset),
-                new Markup(" 3 ", scheme.Preset),
-                new Markup(" 4 ", scheme.Preset),
-                new Markup(" 5 ", scheme.Preset),
-                new Markup(" 6 ", scheme.Preset),
-                new Markup(" 7 ", scheme.Preset),
-                new Markup(" 8 ", scheme.Preset),
-                new Markup(" 9 ", scheme.Preset)
-            };
+            [
+                new(" 0 ", scheme.Preset),
+                new(" 1 ", scheme.Preset),
+                new(" 2 ", scheme.Preset),
+                new(" 3 ", scheme.Preset),
+                new(" 4 ", scheme.Preset),
+                new(" 5 ", scheme.Preset),
+                new(" 6 ", scheme.Preset),
+                new(" 7 ", scheme.Preset),
+                new(" 8 ", scheme.Preset),
+                new(" 9 ", scheme.Preset)
+            ];
 
-            presetText[psu.Output.Preset] = new Markup($" {psu.Output.Preset} ", scheme.PresetSelected);
+            presetText[preset] = new Markup($" {preset} ", scheme.PresetSelected);
 
             return new Grid()
                 .AddColumns(10)
@@ -203,7 +206,7 @@ namespace PowerSupplyApp
         private static Markup GetOutputModeMarkup(PowerSupplyOutputMode mode)
         {
             Markup markup;
-            string text = Enum.GetName(typeof(PowerSupplyOutputMode), mode);
+            string? text = Enum.GetName(typeof(PowerSupplyOutputMode), mode);
 
             switch (mode)
             {
@@ -240,8 +243,6 @@ namespace PowerSupplyApp
         {
             Markup faultStatus;
 
-            string text = Enum.GetName(typeof(PowerSupplyFaultStatus), status);
-
             switch (status)
             {
                 case PowerSupplyFaultStatus.OK:
@@ -256,6 +257,7 @@ namespace PowerSupplyApp
                 case PowerSupplyFaultStatus.REP:
                 case PowerSupplyFaultStatus.Invalid:
                 default:
+                    string? text = Enum.GetName(typeof(PowerSupplyFaultStatus), status);
                     faultStatus = new Markup($" {text} ", scheme.FaultMessage);
                     break;
             }
@@ -423,11 +425,12 @@ namespace PowerSupplyApp
         /// <summary>
         /// Gets the device information panel.
         /// </summary>
+        /// <param name="supply">The supply instance.</param>
         /// <returns>The panel providing device information.</returns>
-        private static Panel GetDeviceInfoPanel()
+        private static Panel GetDeviceInfoPanel(PowerSupply supply)
         {
             return new Panel(
-                    Align.Center(GetDeviceInfoGrid().Expand(),
+                    Align.Center(GetDeviceInfoGrid(supply.Device).Expand(),
                         VerticalAlignment.Middle))
                 .Header("[blue] Device Info[/] [grey](Press Any Key To Return) [/]")
                 .BorderColor(Color.Grey)
@@ -466,9 +469,9 @@ namespace PowerSupplyApp
             return new Grid()
                 .AddColumns(1)
                 .AddRow(GetDataTable(supply, setpoint, system, active))
-                .AddRow(Align.Center(GetPresetGrid()))
+                .AddRow(Align.Center(GetPresetGrid(supply.Output.Preset)))
                 .AddRow(new Rule().RuleStyle(scheme.TableAccent))
-                .AddRow(GetBarChartGrid(active))
+                .AddRow(GetBarChartGrid(supply, active))
                 .AddEmptyRow()
                 .AddRow(new Markup(controlsCaption, scheme.Caption).Centered());
         }

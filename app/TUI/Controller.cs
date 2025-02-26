@@ -17,7 +17,7 @@ namespace PowerSupplyApp
 
         // Handles the layout of the user interface.
         // Used to easily switch between different screens/views.
-        private static Layout layout;
+        private static Layout layout = new("Root");
 
         // The selected row which directly relates to the parameter selected (from top to bottom).
         private static int selectedRow = 0;
@@ -26,7 +26,7 @@ namespace PowerSupplyApp
         // this is from right to left and is meant to reflect the digit in a parameter that is selected.
         private static int selectedCol = 0;
 
-        private static void OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        private static void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
         {
             runInteractive = false;
             e.Cancel = true;
@@ -34,6 +34,11 @@ namespace PowerSupplyApp
 
         public static void RunInteractiveMode()
         {
+            if (psu == null)
+            {
+                return;
+            }
+
             runInteractive = true;
             EnterAlternateScreenBuffer();
             Console.CancelKeyPress += OnCancelKeyPress;
@@ -42,7 +47,6 @@ namespace PowerSupplyApp
             psu.GetPreset(psu.Output.Preset);
             psu.GetSystemParams();
             sys = new PowerSupplySystemParams(psu.SystemParams);
-            layout = new Layout("Root");
 
             psu.ActiveStateEvent += ReceiveActiveState;
             psu.StartWorkerThread(TimeSpan.FromMilliseconds(1));
@@ -64,6 +68,11 @@ namespace PowerSupplyApp
 
         public static void RunWaveGenMode()
         {
+            if (psu == null)
+            {
+                return;
+            }
+
             while (runInteractive && psu.Connected)
             {
                 WaveGen.Run();
@@ -91,6 +100,11 @@ namespace PowerSupplyApp
 
         public static void RunNormalMode()
         {
+            if (psu == null)
+            {
+                return;
+            }
+
             while (runInteractive && psu.Connected)
             {
                 ProcessKeys(psu);
@@ -100,6 +114,11 @@ namespace PowerSupplyApp
 
         public static void RunBlinker()
         {
+            if (psu == null)
+            {
+                return;
+            }
+
             string blinkMsg;
             int blinkCount = 10;
             runInteractive = true;
@@ -151,15 +170,15 @@ namespace PowerSupplyApp
 
             if (selectedRow <= numSetpointControls - 1)
             {
-                psu.SetOutput(sp);
+                psu?.SetOutput(sp);
             }
             else
             {
-                psu.SetSystemParams(sys);
+                psu?.SetSystemParams(sys);
             }
         }
 
-        private static void ProcessKeys(PowerSupply psu)
+        private static void ProcessKeys(PowerSupply supply)
         {
             KeyboardEvent keyEvent = GetKeyboardEvent();
 
@@ -214,8 +233,8 @@ namespace PowerSupplyApp
                 case KeyboardEvent.SetPreset7:
                 case KeyboardEvent.SetPreset8:
                 case KeyboardEvent.SetPreset9:
-                    psu.UsePreset((byte)(keyEvent - KeyboardEvent.SetPreset0));
-                    sp = new PowerSupplySetpoint(psu.Output.Setpoint);
+                    supply.UsePreset((byte)(keyEvent - KeyboardEvent.SetPreset0));
+                    sp = new PowerSupplySetpoint(supply.Output.Setpoint);
                     break;
                 case KeyboardEvent.SavePreset0: // Saving to Preset 0 does not appear to work.
                 case KeyboardEvent.SavePreset1:
@@ -227,52 +246,52 @@ namespace PowerSupplyApp
                 case KeyboardEvent.SavePreset7:
                 case KeyboardEvent.SavePreset8:
                 case KeyboardEvent.SavePreset9:
-                    psu.SetPreset((byte)(keyEvent - KeyboardEvent.SavePreset0), sp);
+                    supply.SetPreset((byte)(keyEvent - KeyboardEvent.SavePreset0), sp);
                     break;
 
                 case KeyboardEvent.IncrementVoltage:
                     VoltageOutput++;
-                    psu.SetOutput(sp);
+                    supply.SetOutput(sp);
                     break;
                 case KeyboardEvent.DecrementVoltage:
                     VoltageOutput--;
-                    psu.SetOutput(sp);
+                    supply.SetOutput(sp);
                     break;
                 case KeyboardEvent.IncrementVoltage10x:
                     VoltageOutput += largeIncrement;
-                    psu.SetOutput(sp);
+                    supply.SetOutput(sp);
                     break;
                 case KeyboardEvent.DecrementVoltage10x:
                     VoltageOutput -= largeIncrement;
-                    psu.SetOutput(sp);
+                    supply.SetOutput(sp);
                     break;
                 case KeyboardEvent.IncrementCurrent:
                     CurrentOutput++;
-                    psu.SetOutput(sp);
+                    supply.SetOutput(sp);
                     break;
                 case KeyboardEvent.DecrementCurrent:
                     CurrentOutput--;
-                    psu.SetOutput(sp);
+                    supply.SetOutput(sp);
                     break;
                 case KeyboardEvent.IncrementCurrent10x:
                     CurrentOutput += largeIncrement;
-                    psu.SetOutput(sp);
+                    supply.SetOutput(sp);
                     break;
                 case KeyboardEvent.DecrementCurrent10x:
                     CurrentOutput -= largeIncrement;
-                    psu.SetOutput(sp);
+                    supply.SetOutput(sp);
                     break;
                 case KeyboardEvent.OutputOn:
-                    psu.SetOutputOn();
+                    supply.SetOutputOn();
                     break;
                 case KeyboardEvent.OutputOff:
-                    psu.SetOutputOff();
+                    supply.SetOutputOff();
                     break;
                 case KeyboardEvent.OutputToggle:
-                    if (psu.Output.On)
-                        psu.SetOutputOff();
+                    if (supply.Output.On)
+                        supply.SetOutputOff();
                     else
-                        psu.SetOutputOn();
+                        supply.SetOutputOn();
                     break;
                 case KeyboardEvent.ShowControls:
                     showControls = true;
@@ -295,13 +314,16 @@ namespace PowerSupplyApp
             {
                 layout["Root"].Update(GetControlsPanel());
             }
-            else if (showDeviceInfo)
+            else if (psu != null)
             {
-                layout["Root"].Update(GetDeviceInfoPanel());
-            }
-            else
-            {
-                layout["Root"].Update(GetDataGrid(psu, sp, sys, activeState));
+                if (showDeviceInfo)
+                {
+                    layout["Root"].Update(GetDeviceInfoPanel(psu));
+                }
+                else
+                {
+                    layout["Root"].Update(GetDataGrid(psu, sp, sys, activeState));
+                }
             }
 
             Console.SetCursorPosition(0, 0);
