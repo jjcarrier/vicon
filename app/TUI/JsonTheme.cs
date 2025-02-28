@@ -39,7 +39,7 @@ namespace PowerSupplyApp.TUI
         /// <summary>
         /// Loads the theme setting from disk.
         /// </summary>
-        /// <returns>The theme to apply to teh TUI.</returns>
+        /// <returns>The theme to apply to the TUI.</returns>
         public static ColorTheme LoadJsonTheme()
         {
             string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
