@@ -2,10 +2,15 @@ using LibDP100;
 
 namespace PowerSupplyApp
 {
-    // Assists in connecting to a specific PowerSupply by offering
-    // enumeration mechanisms.
+    /// <summary>
+    /// Assists in connecting to a specific PowerSupply by offering
+    /// enumeration mechanisms.
+    /// </summary>
     public static class Enumerator
     {
+        /// <summary>
+        /// Simple helper class to assist in comparison and selection of a device.
+        /// </summary>
         private class EnumeratedSupply(PowerSupply psu, bool selected) : IComparable
         {
             public PowerSupply Instance { get; set; } = psu;
@@ -19,10 +24,12 @@ namespace PowerSupplyApp
             }
         }
 
-        // The enumerated power supply instances.
-        // The boolean is used to determine which instances have been requested by the application
-        // to determine which instances to close during cleanup so that separate applications
-        // may take control of the device.
+        /// <summary>
+        /// The enumerated power supply instances.
+        /// The boolean is used to determine which instances have been requested by the application
+        /// to determine which instances to close during cleanup so that separate applications
+        /// may take control of the device.
+        /// </summary>
         private static readonly List<EnumeratedSupply> supplies = new();
 
         /// <summary>

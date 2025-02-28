@@ -239,6 +239,11 @@ namespace PowerSupplyApp
             return lockStatus;
         }
 
+        /// <summary>
+        /// Gets the markup text for displaying the fault status.
+        /// </summary>
+        /// <param name="status">The fault status.</param>
+        /// <returns>The <see cref="Markup"/> for the specified fault status.</returns>
         private static Markup GetFaultStatusMarkup(PowerSupplyFaultStatus status)
         {
             Markup faultStatus;
@@ -275,7 +280,7 @@ namespace PowerSupplyApp
         /// <param name="setpoint">The current setpoint data.</param>
         /// <param name="system">The current system data.</param>
         /// <param name="active">The current active data.</param>
-        /// <returns>The data table containing the key power supply data.</returns>
+        /// <returns>The data <see cref="Table"/> containing the key power supply data.</returns>
         private static Table GetDataTable(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
         {
             const string voidDataString = "----";
