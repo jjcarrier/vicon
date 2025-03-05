@@ -26,7 +26,7 @@
 
 `vicon` : (vī'con) Short for V-I-Console and a play on the pronunciation of viking.
 
-A CLI/TUI for controlling the AlienTek DP100 (ATK-DP100) over USB.
+A cross-platform CLI/TUI for controlling the AlienTek DP100 (ATK-DP100) over USB.
 
 ## Checklist / Features
 
@@ -61,14 +61,23 @@ Below is a basic overview of `vicon` functionality:
 
 ## Software Requirements
 
-- Requires .NET Framework (v4.8.1)
-  - `winget install Microsoft.DotNet.Framework.DeveloperPack_4`
+### Windows
+
+- .NET 8 SDK
+  - `winget install Microsoft.DotNet.SDK.8`
     - NOTE: A system reboot is recommended after install.
-  - A future version will hopefully switch to .NET Core to make this tool
-    cross-platform.
-- Visual Studio 2022 / MSBuild / NuGet
+- (Optional) Visual Studio 2022 / MSBuild / NuGet
   - Visual Studio `.NET desktop environment` workload.
   - Dedicated nuget install: `winget install Microsoft.NuGet`.
+
+### Linux
+
+- .NET 8 SDK
+  - `sudo apt install dotnet-sdk-8.0`
+
+> [!NOTE]
+> While no formal instructions will be given at this time, successful compilation
+> and execution has been proven possible for the RaspberryPI.
 
 ## Initial Setup
 
@@ -77,7 +86,6 @@ Checkout and configure the repository via:
 ```pwsh
 git clone --recurse-submodules https://github.com/jjcarrier/vicon.git
 cd vicon
-nuget restore
 ```
 
 > [!NOTE]
