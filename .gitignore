@@ -2,7 +2,10 @@
 bin/
 obj/
 packages/
-install/
+build/
+build-standalone/
+artifacts/
+artifacts-standalone/
 
 *.user
 *.pdf

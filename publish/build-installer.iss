@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "vicon"
-#define MyAppVersion "1.0"
+;#define MyAppVersion "0.0.0" ; Use CLI argument, i.i. ISCC /DMyAppVersion="0.0.0"
 #define MyAppPublisher "Jon Carrier"
 #define MyAppURL "https://github.com/jjcarrier/vicon"
 #define MyAppExeName "vicon-x64.exe"
@@ -19,12 +19,12 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 CreateAppDir=yes
-LicenseFile=.\LICENSE
+LicenseFile=..\LICENSE
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=install
-OutputBaseFilename=vicon-setup
+OutputDir=artifacts
+OutputBaseFilename=setup-vicon-v{#MyAppVersion}-win-x64
 SolidCompression=yes
 WizardStyle=modern
 DefaultDirName={autopf}\jjcarrier\vicon
@@ -35,17 +35,13 @@ ArchitecturesInstallIn64BitMode=x64compatible
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: ".\app\bin\Release\ATK-DP100DLL.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\LibDP100.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\Newtonsoft.Json.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\Spectre.Console.Cli.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\Spectre.Console.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\System.Buffers.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\System.Memory.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\System.Numerics.Vectors.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\System.Runtime.CompilerServices.Unsafe.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\vicon.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\vicon.exe.config"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\HidSharp.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\PowerSupply.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\Spectre.Console.Cli.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\Spectre.Console.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\vicon.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\vicon.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\vicon.runtimeconfig.json"; DestDir: "{app}\bin"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Code]
@@ -85,6 +81,64 @@ end;
 // look for the path with leading and trailing semicolon
 // Pos() returns 0 if not found
 Result := Pos(';' + Param + ';', ';' + OrigPath + ';') = 0;
+end;
+
+///////////////////
+// Check for .NET 8
+///////////////////
+function IsDotNetInstalled(DotNetName: string): Boolean;
+var
+  Cmd, Args: string;
+  FileName: string;
+  Output: AnsiString;
+  Command: string;
+  ResultCode: Integer;
+begin
+  FileName := ExpandConstant('{tmp}\dotnet.txt');
+  Cmd := ExpandConstant('{cmd}');
+  Command := 'dotnet --list-runtimes';
+  Args := '/C ' + Command + ' > "' + FileName + '" 2>&1';
+  if Exec(Cmd, Args, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and
+     (ResultCode = 0) then
+  begin
+    if LoadStringFromFile(FileName, Output) then
+    begin
+      if Pos(DotNetName, Output) > 0 then
+      begin
+        Log('"' + DotNetName + '" found in output of "' + Command + '"');
+        Result := True;
+      end
+      else
+      begin
+        Log('"' + DotNetName + '" not found in output of "' + Command + '"');
+        Result := False;
+      end;
+    end
+    else
+    begin
+      Log('Failed to read output of "' + Command + '"');
+    end;
+  end
+  else
+  begin
+    Log('Failed to execute "' + Command + '"');
+    Result := False;
+  end;
+  DeleteFile(FileName);
+end;
+
+function InitializeSetup(): Boolean;
+begin
+  if not IsDotNetInstalled('Microsoft.NETCore.App 8.0.') then
+  begin
+    MsgBox('Please install the .NET 8 Runtime to run this application.', mbError, MB_OK);
+    Result := False;
+  end
+  else
+  begin
+    Result := True;
+  end;
+
 end;
 
 [Registry]
