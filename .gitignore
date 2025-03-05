@@ -3,6 +3,7 @@ bin/
 obj/
 packages/
 install/
+app/publish/
 
 *.user
 *.pdf

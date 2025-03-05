@@ -35,17 +35,13 @@ ArchitecturesInstallIn64BitMode=x64compatible
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: ".\app\bin\Release\ATK-DP100DLL.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\LibDP100.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\Newtonsoft.Json.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\Spectre.Console.Cli.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\Spectre.Console.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\System.Buffers.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\System.Memory.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\System.Numerics.Vectors.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\System.Runtime.CompilerServices.Unsafe.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\vicon.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: ".\app\bin\Release\vicon.exe.config"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: ".\app\publish\windows_x64\HidSharp.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: ".\app\publish\windows_x64\PowerSupply.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: ".\app\publish\windows_x64\Spectre.Console.Cli.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: ".\app\publish\windows_x64\Spectre.Console.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: ".\app\publish\windows_x64\vicon.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: ".\app\publish\windows_x64\vicon.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: ".\app\publish\windows_x64\vicon.runtimeconfig.json"; DestDir: "{app}\bin"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Code]
