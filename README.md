@@ -32,6 +32,7 @@ A cross-platform CLI/TUI for controlling the AlienTek DP100 (ATK-DP100) over USB
 
 Below is a basic overview of `vicon` functionality:
 
+- [x] Built on .NET 9 for cross-platform support.
 - [x] CLI supported
   - Serial processing of commands, allowing for complex control sequences.
   - Normal-style and JSON-style output to provide option for human readability
@@ -42,7 +43,6 @@ Below is a basic overview of `vicon` functionality:
 - [x] Waveform Generator (AWG)
   - A basic JSON file format is used to describe setpoint sequences for
     generating arbitrary waveforms (low speed).
-- [x] Suppressed ATK-DP100DLL debug output
 - [x] Wireshark USB dissector
 - [x] PowerShell tab-completions
 - [x] JSON output
@@ -57,13 +57,12 @@ Below is a basic overview of `vicon` functionality:
 - [x] Supports a TUI lock function to prevent accidental button presses
 - [x] Supports basic TUI theme option for user to select from one of the pre-defined
   color themes.
-- [ ] Recorder/trace (support for logging all activity during interactive mode)
 
 ## Software Requirements
 
 ### Windows
 
-- .NET 8 SDK
+- .NET 9 SDK
   - `winget install Microsoft.DotNet.SDK.8`
     - NOTE: A system reboot is recommended after install.
 - (Optional) Visual Studio 2022 / MSBuild / NuGet
@@ -72,12 +71,27 @@ Below is a basic overview of `vicon` functionality:
 
 ### Linux
 
-- .NET 8 SDK
+- .NET 9 SDK
   - `sudo apt install dotnet-sdk-8.0`
+- For user-level access install the provided udev-rule.
+
+```sh
+sudo cp ./udev/99-atk-dp100.rules /etc/udev/rules.d/99-atk-dp100.rules
+```
+
+The either reboot the device or reload the rules rules (the device may need to
+be reconnected):
+
+```sh
+sudo udevadm control --reload
+sudo systemctl daemon-reload
+```
 
 > [!NOTE]
-> While no formal instructions will be given at this time, successful compilation
-> and execution has been proven possible for the RaspberryPI.
+> This should work both for a Linux PC and Raspberry Pi (running bookworm).
+> Also note at this time, the application in `--interactive` mode will likely
+> result in high CPU load on the RPi. Options for reducing the load will be
+> addressed in a future update.
 
 ## Initial Setup
 
