@@ -32,6 +32,7 @@ A cross-platform CLI/TUI for controlling the AlienTek DP100 (ATK-DP100) over USB
 
 Below is a basic overview of `vicon` functionality:
 
+- [x] Built on .NET 8 for cross-platform support.
 - [x] CLI supported
   - Serial processing of commands, allowing for complex control sequences.
   - Normal-style and JSON-style output to provide option for human readability
@@ -42,7 +43,6 @@ Below is a basic overview of `vicon` functionality:
 - [x] Waveform Generator (AWG)
   - A basic JSON file format is used to describe setpoint sequences for
     generating arbitrary waveforms (low speed).
-- [x] Suppressed ATK-DP100DLL debug output
 - [x] Wireshark USB dissector
 - [x] PowerShell tab-completions
 - [x] JSON output
