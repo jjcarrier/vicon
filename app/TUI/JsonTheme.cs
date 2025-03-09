@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -17,6 +18,21 @@ namespace PowerSupplyApp.TUI
         private const string themeFilename = "vicon.theme.json";
 
         /// <summary>
+        /// The subdirectory where user settings will be saved.
+        /// </summary>
+        private const string userSubDir = "jjcarrier/vicon";
+
+        /// <summary>
+        /// The subdirectory used when storing to user-space for Windows.
+        /// </summary>
+        private static string winLocalSettingsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), userSubDir);
+
+        /// <summary>
+        /// The subdirectory used when storing to user-space for Unix-like systems.
+        /// </summary>
+        private static string nixLocalSettingsDir = Path.Combine("~/.config", userSubDir);
+
+        /// <summary>
         /// Stores the specified theme name to disk.
         /// Currently there is no error checking for whether the name is valid.
         /// </summary>
@@ -25,13 +41,33 @@ namespace PowerSupplyApp.TUI
         /// </returns>
         public static bool StoreJsonTheme(string themeName)
         {
-            JsonTheme theme = new JsonTheme() { Theme = themeName };
+            JsonTheme theme = new() { Theme = themeName };
             string text = JsonSerializer.Serialize(theme);
-            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string themeFilePath = Path.Combine(exeDirectory, themeFilename);
-            using (StreamWriter outputFile = new StreamWriter(themeFilePath))
+            try
             {
-                outputFile.WriteLine(text);
+                // Try to save in the exe directory
+                string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string themeFilePath = Path.Combine(exeDirectory, themeFilename);
+                using (StreamWriter outputFile = new(themeFilePath))
+                {
+                    outputFile.WriteLine(text);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // If access is denied, save in the user-specific folder
+                string themeFilePath = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) ?
+                    Path.Combine(winLocalSettingsDir, themeFilename) :
+                    Path.Combine(nixLocalSettingsDir, themeFilename);
+                string? themeFileDir = Path.GetDirectoryName(themeFilePath);
+                if (themeFileDir != null)
+                {
+                    Directory.CreateDirectory(themeFileDir);
+                }
+                using (StreamWriter outputFile = new(themeFilePath))
+                {
+                    outputFile.WriteLine(text);
+                }
             }
             return true;
         }
@@ -42,9 +78,18 @@ namespace PowerSupplyApp.TUI
         /// <returns>The theme to apply to the TUI.</returns>
         public static ColorTheme LoadJsonTheme()
         {
-            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string themeFilePath = Path.Combine(exeDirectory, themeFilename);
             ColorTheme theme = ColorThemes.Classic;
+            string themeFilePath = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) ?
+                Path.Combine(winLocalSettingsDir, themeFilename) :
+                Path.Combine(nixLocalSettingsDir, themeFilename);
+
+            if (!File.Exists(themeFilePath))
+            {
+                // If the file is not found in the user-specific folder,
+                // try to load from the exe directory
+                string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                themeFilePath = Path.Combine(exeDirectory, themeFilename);
+            }
 
             if (!File.Exists(themeFilePath))
             {
