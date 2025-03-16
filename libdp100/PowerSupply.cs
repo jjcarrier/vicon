@@ -1,5 +1,6 @@
 using HidSharp;
 using System.Diagnostics;
+using System.Threading;
 
 namespace LibDP100
 {
@@ -153,6 +154,16 @@ namespace LibDP100
         /// The time between each read performed by the worker thread.
         /// </summary>
         private TimeSpan workerThreadSleepTime;
+
+        /// <summary>
+        /// Token to cancel the delay to allow additional work to be done.
+        /// </summary>
+        private CancellationToken workerThreadSleepCancellation = new CancellationToken();
+
+        /// <summary>
+        /// Cancellation token source for the worker thread.
+        /// </summary>
+        CancellationTokenSource workerThreadSleepCts = new CancellationTokenSource();
 
         /// <summary>
         /// Delegate for processing input report buffer data.
@@ -1007,10 +1018,11 @@ namespace LibDP100
         {
             Stopwatch sw = new Stopwatch();
             int milliseconds;
+            workerThreadSleepCancellation = workerThreadSleepCts.Token;
 
             while (workerThreadRun)
             {
-                sw.Start();
+                sw.Restart();
                 if (GetActiveStatus() == PowerSupplyResult.OK)
                 {
                     if (ActiveState.FaultStatus != PowerSupplyFaultStatus.OK)
@@ -1021,12 +1033,35 @@ namespace LibDP100
                     ActiveStateEvent?.Invoke(ActiveState);
                 }
                 sw.Stop();
-                milliseconds = workerThreadSleepTime.Milliseconds - (int)sw.ElapsedMilliseconds;
+
+                milliseconds = (int)(workerThreadSleepTime.TotalMilliseconds - (int)sw.ElapsedMilliseconds);
                 if (milliseconds > 0)
                 {
-                    Thread.Sleep(milliseconds);
+                    try
+                    {
+                        Task.Delay(milliseconds, workerThreadSleepCancellation).Wait(workerThreadSleepCancellation);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+                    finally
+                    {
+                        // Reset the cancellation token source.
+                        workerThreadSleepCts.Dispose();
+                        workerThreadSleepCts = new CancellationTokenSource();
+                        workerThreadSleepCancellation = workerThreadSleepCts.Token;
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// To be called to unblock the worker thread and process the next loop.
+        /// This is mainly intended to be called by the user related events.
+        /// </summary>
+        public void SignalRunWorker()
+        {
+            workerThreadSleepCts.Cancel();
         }
 
         /// <summary>
