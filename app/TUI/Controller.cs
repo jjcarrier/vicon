@@ -32,7 +32,7 @@ namespace PowerSupplyApp
             e.Cancel = true;
         }
 
-        public static void RunInteractiveMode()
+        public static void RunInteractiveMode(TimeSpan sleepTime)
         {
             if (psu == null)
             {
@@ -49,7 +49,7 @@ namespace PowerSupplyApp
             sys = new PowerSupplySystemParams(psu.SystemParams);
 
             psu.ActiveStateEvent += ReceiveActiveState;
-            psu.StartWorkerThread(TimeSpan.FromMilliseconds(1));
+            psu.StartWorkerThread(sleepTime);
 
             if (wavegenMode)
             {
@@ -107,7 +107,10 @@ namespace PowerSupplyApp
 
             while (runInteractive && psu.Connected)
             {
-                ProcessKeys(psu);
+                if (ProcessKeys(psu))
+                {
+                    psu.SignalRunWorker();
+                }
                 Thread.Sleep(10);
             }
         }
@@ -178,7 +181,7 @@ namespace PowerSupplyApp
             }
         }
 
-        private static void ProcessKeys(PowerSupply supply)
+        private static bool ProcessKeys(PowerSupply supply)
         {
             KeyboardEvent keyEvent = GetKeyboardEvent();
 
@@ -306,6 +309,8 @@ namespace PowerSupplyApp
                 default:
                     break;
             }
+
+            return keyEvent != KeyboardEvent.None;
         }
 
         private static void ReceiveActiveState(PowerSupplyActiveState activeState)

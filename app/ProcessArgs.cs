@@ -13,6 +13,10 @@ namespace PowerSupplyApp
         private static bool enumerate = false;
         private static string psuSerialNumber = string.Empty;
 
+        private static bool themeSet = false;
+        private static bool pollRateSet = false;
+        private static JsonSettings settings = new();
+
         private static void ShowHelp()
         {
             // Example for generating a sinusoid in powershell.
@@ -36,8 +40,8 @@ namespace PowerSupplyApp
                 "For visual identification, the lock indicator will blink 10x (~1x per second).");
             grid.AddRow("  [white]--serial[/], [white]--sn[/]", "[silver]<SERIAL>[/]",
                 "Connects to the power supply that matches the specified [white]SERIAL[/] number.");
-            grid.AddRow("  [white]--interactive[/]", "",
-                "Switches into interactive mode.");
+            grid.AddRow("  [white]--interactive[/]", "[[MS_POLL]]",
+                "Switches into an interactive text-based user interface. Set [white]MS_POLL[/] to reduce the update/poll rate (default = 1, range 0-100), value persists between executions. This currently affects the perceived responsiveness of the UI but lowers the CPU utilization.");
             grid.AddRow("  [white]--theme[/]", "<THEME>",
                 "Sets the interactive-mode's theme. Persists between executions. The [white]THEME[/] may be one of the following: 'classic', 'black-and-white', 'grey', 'dark-red', 'dark-green', 'dark-magenta', 'cyan', 'gold', 'blue', 'blue-violet'.");
             grid.AddRow("  [white]--json[/]", "",
@@ -93,6 +97,12 @@ namespace PowerSupplyApp
 
         private static ProcessArgsResult PreProcessArgs(string[] args)
         {
+            if (!settings.Load())
+            {
+                Console.WriteLine($"ERROR: Invalid settings, please correct." + Environment.NewLine + settings.GetSettingsFilePath());
+                return ProcessArgsResult.Error;
+            }
+
             // First pass, to check for --help or --json args
             if (args.Length > 0)
             {
@@ -122,11 +132,8 @@ namespace PowerSupplyApp
                                 return ProcessArgsResult.MissingParameter;
                             }
 
-                            if (!JsonTheme.StoreJsonTheme(args[i + 1]))
-                            {
-                                Console.WriteLine("Failed to set theme!");
-                                return ProcessArgsResult.Error;
-                            }
+                            themeSet = true;
+                            settings.Theme = args[i + 1];
                             break;
                         case "--enumerate":
                             enumerate = true;
@@ -149,6 +156,28 @@ namespace PowerSupplyApp
                             break;
                         case "--interactive":
                             interactiveMode = true;
+                            if ((i + 1 < args.Length) && !args[i + 1].StartsWith('-'))
+                            {
+                                bool result = uint.TryParse(args[i + 1], out uint ms);
+                                if (result)
+                                {
+                                    if (ms > 100)
+                                    {
+                                        result = false;
+                                    }
+                                    else
+                                    {
+                                        pollRateSet = true;
+                                        settings.PollRate = ms;
+                                    }
+                                }
+
+                                if (!result)
+                                {
+                                    Console.WriteLine($"ERROR: Invalid <MS_POLL> parameter for '{args[i]}'.");
+                                    return ProcessArgsResult.InvalidParameter;
+                                }
+                            }
                             break;
                         case "--json":
                             serializeAsJson = true;
@@ -227,6 +256,15 @@ namespace PowerSupplyApp
                 return ProcessArgsResult.Error;
             }
 
+            if (pollRateSet || themeSet)
+            {
+                if (!settings.Store())
+                {
+                    Console.WriteLine("Failed to store settings!");
+                    return ProcessArgsResult.Error;
+                }
+            }
+
             return ProcessArgsResult.Ok;
         }
 
@@ -272,8 +310,13 @@ namespace PowerSupplyApp
                             break;
 
                         case "--interactive":
-                            theme = JsonTheme.LoadJsonTheme();
-                            RunInteractiveMode();
+                            if (pollRateSet)
+                            {
+                                i++;
+                            }
+
+                            theme = settings.GetTheme();
+                            RunInteractiveMode(TimeSpan.FromMilliseconds(settings.PollRate));
                             break;
 
                         case "--awg":
