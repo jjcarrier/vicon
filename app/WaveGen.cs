@@ -88,7 +88,7 @@ namespace PowerSupplyApp
                 case WaveGenStatus.InvalidFilePath:
                     return "Invalid file path!";
                 case WaveGenStatus.NotLoaded:
-                    return "No Error";
+                    return "No WaveGen Pattern Loaded";
                 case WaveGenStatus.SetpointFailure:
                     return "Failed to Write Setpoint";
                 default:
