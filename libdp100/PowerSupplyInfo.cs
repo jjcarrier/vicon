@@ -43,6 +43,11 @@ namespace LibDP100
         public string MfgDate { get; set; } = string.Empty;
 
         /// <summary>
+        /// A user assigned alias for the device for identification purposes.
+        /// </summary>
+        public string Alias { get; set; } = string.Empty;
+
+        /// <summary>
         /// Parses/deserializes the HID response data, updating the related
         /// object members.
         /// </summary>
@@ -100,6 +105,10 @@ namespace LibDP100
             Console.WriteLine("  SW     : " + SoftwareVersion);
             Console.WriteLine("  BOOT   : " + BootloaderVersion);
             Console.WriteLine("  Status : " + SoftwareState);
+            if (!string.IsNullOrWhiteSpace(Alias))
+            {
+                Console.WriteLine("  Alias  : " + Alias);
+            }
             Console.WriteLine();
         }
     }

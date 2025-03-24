@@ -31,6 +31,12 @@ namespace PowerSupplyApp.TUI
         }
 
         /// <summary>
+        /// An optional list of device aliases to assist in device selection.
+        /// </summary>
+        [JsonPropertyName("devices")]
+        public List<AliasedDevice> AliasedDevices { get; set; } = [];
+
+        /// <summary>
         /// The file containing the theme description setting.
         /// </summary>
         private const string settingsFilename = "vicon.settings.json";
@@ -154,7 +160,7 @@ namespace PowerSupplyApp.TUI
                 {
                     theme = ColorThemes.GetTheme(loadedSettings.Theme);
                     PollRate = loadedSettings.PollRate;
-                    Aliases = loadedSettings.Aliases;
+                    AliasedDevices = loadedSettings.AliasedDevices;
                 }
             }
             catch (Exception)

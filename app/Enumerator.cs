@@ -38,8 +38,9 @@ namespace PowerSupplyApp
         /// number in order to provide a more predictable ordering to the application
         /// and user.
         /// </summary>
+        /// <param name="devices">List of aliased devices to improve identification.</param>
         /// <returns>The number of power supplies enumerated.</returns>
-        public static int Enumerate()
+        public static int Enumerate(List<AliasedDevice> devices)
         {
             while (true)
             {
@@ -51,6 +52,12 @@ namespace PowerSupplyApp
 
                 if (psu.GetDeviceInfo() == PowerSupplyResult.OK)
                 {
+                    var alias = devices.FirstOrDefault(a => a.Serial == psu.Device.SerialNumber);
+                    if (alias != null)
+                    {
+                        psu.Device.Alias = alias.Alias;
+                    }
+
                     supplies.Add(new EnumeratedSupply(psu, false));
                 }
             }
@@ -135,16 +142,23 @@ namespace PowerSupplyApp
         }
 
         /// <summary>
-        /// Gets a list of the enumerated power supplies' serial numbers.
+        /// Gets a list of the enumerated power supplies' serial numbers and
+        /// their optionally user-assigned aliases.
         /// </summary>
         /// <returns>The list of serial numbers</returns>
-        public static List<string> GetSerialNumbers()
+        public static List<AliasedDevice> GetAliasedDevices()
         {
-            List<string> list = new();
+            List<AliasedDevice> list = new();
 
             foreach (var psu in supplies)
             {
-                list.Add(psu.Instance.Device.SerialNumber);
+                AliasedDevice dev = new()
+                {
+                    Alias = psu.Instance.Device.Alias,
+                    Serial = psu.Instance.Device.SerialNumber
+                };
+
+                list.Add(dev);
             }
 
             return list;
