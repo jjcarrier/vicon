@@ -1,5 +1,5 @@
 using LibDP100;
-using PowerControllerApp;
+using PowerSupplyApp;
 using PowerSupplyApp.TUI;
 using Spectre.Console;
 using System.Text.Json;
