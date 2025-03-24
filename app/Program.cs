@@ -26,7 +26,7 @@ namespace PowerSupplyApp
                 return (int)result;
             }
 
-            int psuCount = Enumerator.Enumerate();
+            int psuCount = Enumerator.Enumerate(settings.AliasedDevices);
 
             if (enumerate)
             {
@@ -45,7 +45,7 @@ namespace PowerSupplyApp
                 {
                     EnterAlternateScreenBuffer();
                     Console.SetCursorPosition(0, 0);
-                    psuSerialNumber = GetDeviceSelection(Enumerator.GetSerialNumbers());
+                    psuSerialNumber = GetDeviceSelection(Enumerator.GetAliasedDevices());
                 }
                 else
                 {
@@ -60,7 +60,7 @@ namespace PowerSupplyApp
             }
             else if (psuCount == 1)
             {
-                psuSerialNumber = Enumerator.GetSerialNumbers()[0];
+                psuSerialNumber = Enumerator.GetAliasedDevices()[0].Serial;
                 psu = Enumerator.GetDeviceByIndex(0);
             }
 

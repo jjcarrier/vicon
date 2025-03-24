@@ -105,13 +105,20 @@ namespace PowerSupplyApp
         /// <returns>The Grid containing the device information.</returns>
         private static Grid GetDeviceInfoGrid(PowerSupplyInfo info)
         {
-            return new Grid()
+            var grid = new Grid()
                 .AddColumns(2)
                 .AddRow(new Markup("[blue]Device[/]"), new Markup(info.Type))
                 .AddRow(new Markup("[blue]Serial Num[/]"), new Markup(info.SerialNumber))
                 .AddRow(new Markup("[blue]HW Version[/]"), new Markup(info.HardwareVersion))
                 .AddRow(new Markup("[blue]SW Version[/]"), new Markup(info.SoftwareVersion))
                 .AddRow(new Markup("[blue]SW State[/]"), new Markup(info.SoftwareState));
+
+            if (!string.IsNullOrWhiteSpace(info.Alias))
+            {
+                grid.AddRow(new Markup("[blue]Alias[/]"), new Markup(info.Alias));
+            }
+
+            return grid;
         }
 
         /// <summary>
@@ -447,17 +454,24 @@ namespace PowerSupplyApp
         /// </summary>
         /// <param name="serialNumbers">List of serial numbers to chose from.</param>
         /// <returns>The serial number of the selected device.</returns>
-        private static string GetDeviceSelection(List<string> serialNumbers)
+        private static string GetDeviceSelection(List<AliasedDevice> devices)
         {
+            // Convert the device details to strings.
+            List<string> aliasedDevices = new();
+            foreach (var dev in devices)
+            {
+                aliasedDevices.Add(dev.ToString());
+            }
+
             string serialNumber = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Connect to which device (serial number)?")
                     .PageSize(10)
                     .EnableSearch()
                     .MoreChoicesText("[grey](Move up and down to reveal more devices)[/]")
-                    .AddChoices(serialNumbers));
+                    .AddChoices(aliasedDevices));
 
-            return serialNumber;
+            return serialNumber.Split(':')[0].Trim();
         }
 
         /// <summary>
