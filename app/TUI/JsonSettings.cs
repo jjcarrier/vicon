@@ -44,7 +44,7 @@ namespace PowerSupplyApp.TUI
         /// <summary>
         /// The subdirectory where user settings will be saved.
         /// </summary>
-        private const string userSubDir = "jjcarrier/vicon";
+        private static string userSubDir = Path.Combine("jjcarrier", "vicon");
 
         /// <summary>
         /// The subdirectory used when storing to user-space for Windows.
@@ -80,24 +80,14 @@ namespace PowerSupplyApp.TUI
         }
 
         /// <summary>
-        /// The file path where settings are stored.
+        /// The file path where user settings are stored.
         /// </summary>
-        /// <returns></returns>
-        public string GetSettingsFilePath()
+        /// <returns>The settings file path path.</returns>
+        public string GetUserSettingsFilePath()
         {
-            string settingsFilePath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
                 Path.Combine(winLocalSettingsDir, settingsFilename) :
                 Path.Combine(nixLocalSettingsDir, settingsFilename);
-
-            if (!File.Exists(settingsFilePath))
-            {
-                // If the file is not found in the user-specific folder,
-                // try to load from the exe directory
-                string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                settingsFilePath = Path.Combine(exeDirectory, settingsFilename);
-            }
-
-            return settingsFilePath;
         }
 
         /// <summary>
@@ -109,28 +99,15 @@ namespace PowerSupplyApp.TUI
         public bool Store()
         {
             string text = JsonSerializer.Serialize(this, serializationOptions);
-            try
+            string settingsFilePath = GetUserSettingsFilePath();
+            string? settingsFileDir = Path.GetDirectoryName(settingsFilePath);
+            if (settingsFileDir != null)
             {
-                // Try to save in the exe directory
-                string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                string settingsFilePath = Path.Combine(exeDirectory, settingsFilename);
-                using StreamWriter outputFile = new(settingsFilePath);
-                outputFile.WriteLine(text);
+                Directory.CreateDirectory(settingsFileDir);
             }
-            catch (UnauthorizedAccessException)
-            {
-                // If access is denied, save in the user-specific folder
-                string settingsFilePath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
-                    Path.Combine(winLocalSettingsDir, settingsFilename) :
-                    Path.Combine(nixLocalSettingsDir, settingsFilename);
-                string? settingsFileDir = Path.GetDirectoryName(settingsFilePath);
-                if (settingsFileDir != null)
-                {
-                    Directory.CreateDirectory(settingsFileDir);
-                }
-                using StreamWriter outputFile = new(settingsFilePath);
-                outputFile.WriteLine(text);
-            }
+
+            using StreamWriter outputFile = new(settingsFilePath);
+            outputFile.WriteLine(text);
             return true;
         }
 
@@ -142,7 +119,7 @@ namespace PowerSupplyApp.TUI
         /// </returns>
         public bool Load()
         {
-            string settingsFilePath = GetSettingsFilePath();
+            string settingsFilePath = GetUserSettingsFilePath();
 
             if (!File.Exists(settingsFilePath))
             {
@@ -153,7 +130,6 @@ namespace PowerSupplyApp.TUI
             try
             {
                 string json = r.ReadToEnd();
-
 
                 JsonSettings? loadedSettings = JsonSerializer.Deserialize<JsonSettings>(json, serializationOptions);
                 if (loadedSettings != null)
