@@ -32,6 +32,8 @@ namespace PowerSupplyApp
                 "Displays this help information.");
             grid.AddRow("  [white]--version[/], [white]-v[/]", "",
                 "Displays the version of the application.");
+            grid.AddRow("  [white]--config[/]", "",
+                "Prints the path to the user settings file used by this tool.");
             grid.AddRow("  [white]--debug[/]", "",
                 "Enables debug output of underlying driver. (Only intended for CLI mode)");
             grid.AddRow("  [white]--enumerate[/]", "",
@@ -99,7 +101,7 @@ namespace PowerSupplyApp
         {
             if (!settings.Load())
             {
-                Console.WriteLine($"ERROR: Invalid settings, please correct." + Environment.NewLine + settings.GetSettingsFilePath());
+                Console.WriteLine($"ERROR: Invalid settings, please correct." + Environment.NewLine + settings.GetUserSettingsFilePath());
                 return ProcessArgsResult.Error;
             }
 
@@ -121,6 +123,9 @@ namespace PowerSupplyApp
                         case "--version":
                         case "-v":
                             Console.WriteLine("v1.0.0");
+                            return ProcessArgsResult.OkExitNow;
+                        case "--config":
+                            Console.WriteLine(settings.GetUserSettingsFilePath());
                             return ProcessArgsResult.OkExitNow;
                         case "--debug":
                             debug = true;
