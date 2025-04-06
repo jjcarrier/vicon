@@ -63,7 +63,7 @@ Below is a basic overview of `vicon` functionality:
 ### Windows
 
 - .NET 9 SDK
-  - `winget install Microsoft.DotNet.SDK.8`
+  - `winget install Microsoft.DotNet.SDK.9`
     - NOTE: A system reboot is recommended after install.
 - (Optional) Visual Studio 2022 / MSBuild / NuGet
   - Visual Studio `.NET desktop environment` workload.
@@ -72,14 +72,14 @@ Below is a basic overview of `vicon` functionality:
 ### Linux
 
 - .NET 9 SDK
-  - `sudo apt install dotnet-sdk-8.0`
+  - `sudo apt install dotnet-sdk-9.0`
 - For user-level access install the provided udev-rule.
 
 ```sh
 sudo cp ./udev/99-atk-dp100.rules /etc/udev/rules.d/99-atk-dp100.rules
 ```
 
-The either reboot the device or reload the rules rules (the device may need to
+Then either reboot the device or reload the rules rules (the device may need to
 be reconnected):
 
 ```sh
@@ -89,9 +89,9 @@ sudo systemctl daemon-reload
 
 > [!NOTE]
 > This should work both for a Linux PC and Raspberry Pi (running bookworm).
-> Also note at this time, the application in `--interactive` mode will likely
-> result in high CPU load on the RPi. Options for reducing the load will be
-> addressed in a future update.
+> If the application is consuming too many resources, consider setting the
+> polling interval in `--interactive` to a higher setting. This should
+> reduce the burden on the CPU but at the cost of responsiveness.
 
 ## Initial Setup
 
