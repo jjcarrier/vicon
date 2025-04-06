@@ -463,13 +463,14 @@ namespace PowerSupplyApp
                 aliasedDevices.Add(dev.ToString());
             }
 
-            string serialNumber = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
+            SelectionPrompt<string> prompt = new SelectionPrompt<string>()
                     .Title("Connect to which device (serial number)?")
                     .PageSize(10)
                     .EnableSearch()
                     .MoreChoicesText("[grey](Move up and down to reveal more devices)[/]")
-                    .AddChoices(aliasedDevices));
+                    .AddChoices(aliasedDevices);
+            prompt.SearchHighlightStyle = new Style(Color.White, Color.Blue);
+            string serialNumber = AnsiConsole.Prompt(prompt);
 
             return serialNumber.Split(':')[0].Trim();
         }
