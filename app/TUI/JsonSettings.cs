@@ -54,7 +54,7 @@ namespace PowerSupplyApp.TUI
         /// <summary>
         /// The subdirectory used when storing to user-space for Unix-like systems.
         /// </summary>
-        private static string nixLocalSettingsDir = Path.Combine("~/.config", userSubDir);
+        private static string nixLocalSettingsDir = Path.Combine(Environment.GetEnvironmentVariable("HOME") ?? Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".config", userSubDir);
 
         /// <summary>
         /// The loaded theme.
