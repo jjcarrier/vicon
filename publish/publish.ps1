@@ -50,16 +50,18 @@ if (-not (Test-Path -Path $artifactsPath)) {
     New-Item -ItemType Directory -Path $artifactsPath | Out-Null
 }
 
+Get-ChildItem -Path $artifactsPath -Recurse | Remove-Item -Force
+
 $Runtimes | ForEach-Object {
     Write-Output "Publishing: $_"
     Publish-Artifact -Runtime $_
     if ($_ -eq 'win-x64') {
         $archiveType = "zip"
+        Compress-Archive -Path "$buildPath/$_/*" -DestinationPath "$artifactsPath/vicon-$Version-$_.$archiveType"
     } else {
         $archiveType = "tgz"
+        tar -czf "$artifactsPath/vicon-$Version-$_.$archiveType" -C "$buildPath/$_" .
     }
-
-     Compress-Archive -Path "$buildPath/$_/*" -DestinationPath "$artifactsPath/vicon-$Version-$_.$archiveType"
 }
 
 $Runtimes | ForEach-Object {
@@ -67,11 +69,11 @@ $Runtimes | ForEach-Object {
     Publish-Artifact -Runtime $_ -SelfContained
     if ($_ -eq 'win-x64') {
         $archiveType = "zip"
+        Compress-Archive -Path "$standAloneBuildPath/$_/*" -DestinationPath "$artifactsPath/vicon-$Version-$_-standalone.$archiveType"
     } else {
         $archiveType = "tgz"
+        tar -czf "$artifactsPath/vicon-$Version-$_-standalone.$archiveType" -C "$standAloneBuildPath/$_" .
     }
-
-     Compress-Archive -Path "$standAloneBuildPath/$_/*" -DestinationPath "$artifactsPath/vicon-$Version-$_-standalone.$archiveType"
 }
 
 Pop-Location
