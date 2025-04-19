@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace LibDP100
 {
     /// <summary>
@@ -8,27 +10,36 @@ namespace LibDP100
         /// <summary>
         /// Output voltage. Unit: mV
         /// </summary>
+        [JsonPropertyName("voltage")]
         public ushort Voltage { get; set; } = 0;
 
         /// <summary>
         /// Output current. Unit: mA
         /// </summary>
+        [JsonPropertyName("current")]
         public ushort Current { get; set; } = 0;
 
         /// <summary>
         /// Over voltage protection. Unit: mV.
         /// </summary>
+        [JsonPropertyName("ovp")]
         public ushort OVP { get; set; } = 0;
 
         /// <summary>
         /// Over current protection. Unit: mA.
         /// </summary>
+        [JsonPropertyName("ocp")]
         public ushort OCP { get; set; } = 0;
 
         /// <summary>
         /// The index associated with the preset.
         /// </summary>
         private byte Index { get; set; } = 0;
+
+        /// <summary>
+        /// Default constructor. Not to be used except for deserialization.
+        /// </summary>
+        public PowerSupplySetpoint() { }
 
         /// <summary>
         /// Default constructor.
@@ -74,6 +85,16 @@ namespace LibDP100
         public byte GetIndex()
         {
             return Index;
+        }
+
+        /// <summary>
+        /// Sets the index of the preset.
+        /// This is primarily intended for deserialization logic.
+        /// </summary>
+        /// <param name="index">The index to set.</param>
+        public void SetIndex(byte index)
+        {
+            Index = index;
         }
 
         /// <summary>

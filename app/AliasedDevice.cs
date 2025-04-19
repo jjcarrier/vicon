@@ -10,6 +10,9 @@ namespace PowerSupplyApp
         [JsonPropertyName("serial")]
         public string Serial { get; set; } = string.Empty;
 
+        [JsonPropertyName("config")]
+        public ConfiguredState? Config { get; set; }
+
         public override string ToString()
         {
             if (Alias == string.Empty)

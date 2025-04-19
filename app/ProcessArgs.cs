@@ -34,6 +34,8 @@ namespace PowerSupplyApp
                 "Displays the version of the application.");
             grid.AddRow("  [white]--config[/]", "",
                 "Prints the path to the user settings file used by this tool.");
+            grid.AddRow("  [white]--check[/]", "",
+                "Verifies that the devices configured state matches the state stored in the the application's settings. If running non-interactively, the application will exit with an error code; otherwise the application will prompt the user for further action.");
             grid.AddRow("  [white]--debug[/]", "",
                 "Enables debug output of underlying driver. (Only intended for CLI mode)");
             grid.AddRow("  [white]--enumerate[/]", "",
@@ -129,6 +131,9 @@ namespace PowerSupplyApp
                             return ProcessArgsResult.OkExitNow;
                         case "--debug":
                             debug = true;
+                            break;
+                        case "--check":
+                            checkConfiguration = true;
                             break;
                         case "--theme":
                             if ((i + 1 >= args.Length) || args[i + 1].StartsWith('-'))
@@ -263,7 +268,7 @@ namespace PowerSupplyApp
 
             if (pollRateSet || themeSet)
             {
-                if (!settings.Store())
+                if (!settings.Save())
                 {
                     Console.WriteLine("Failed to store settings!");
                     return ProcessArgsResult.Error;
@@ -296,6 +301,7 @@ namespace PowerSupplyApp
                         case "--json":
                         case "--json-list":
                         case "--debug":
+                        case "--check":
                         case "--enumerate":
                             // Do nothing, already handled in first pass.
                             break;

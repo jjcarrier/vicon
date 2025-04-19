@@ -1,10 +1,12 @@
 using LibDP100;
+using System.Security.Cryptography;
 
 namespace PowerSupplyApp
 {
     internal partial class Program
     {
         private static bool debug = false;
+        private static bool checkConfiguration = false;
         private static bool serializeAsJson = false;
         private static bool serializeAsJsonArray = false;
         private static int serializedOutput = 0;
@@ -36,7 +38,7 @@ namespace PowerSupplyApp
             if (psuCount == 0)
             {
                 Console.WriteLine("ERROR: No DP100 detected!");
-                return 1;
+                return (int)ProcessArgsResult.DeviceNotPresent;
             }
 
             if ((psuSerialNumber == string.Empty) && (psuCount > 1))
@@ -50,7 +52,7 @@ namespace PowerSupplyApp
                 else
                 {
                     Console.WriteLine("ERROR: Multiple DP100s detected. Please provide the --serial option!");
-                    return 1;
+                    return (int)ProcessArgsResult.SerialNumberRequired;
                 }
             }
 
@@ -73,11 +75,33 @@ namespace PowerSupplyApp
                 psu.GetDeviceInfo();
                 psu.GetSystemParams();
                 psu.Reload();
+
+                if (checkConfiguration)
+                {
+                    AliasedDevice? devSettings = settings.FindDeviceBySerialNumber(psu.Device.SerialNumber);
+                    if (devSettings == null)
+                    {
+                        return (int)ProcessArgsResult.NoAliasedDeviceFound;
+                    }
+
+                    (string computedConfigHash, string computedDeviceHash, string recordedHash) = GetHashes(psu, devSettings);
+                    if ((recordedHash != computedConfigHash) || (recordedHash != computedDeviceHash))
+                    {
+                        ExitAlternateScreenBuffer();
+                        result = CheckConfiguration(psu, devSettings, computedConfigHash, computedDeviceHash, recordedHash);
+                        if (result != ProcessArgsResult.Ok)
+                        {
+                            // Invert the result for error codes.
+                            return (int)result;
+                        }
+                        EnterAlternateScreenBuffer();
+                    }
+                }
             }
             else
             {
                 Console.WriteLine("ERROR: Could not initialize DP100!");
-                return 1;
+                return (int)ProcessArgsResult.InitializationFailed;
             }
 
             // Only permit debug mode in non-interactive mode.
@@ -98,6 +122,197 @@ namespace PowerSupplyApp
             psu.Disconnect();
 
             return (int)result;
+        }
+
+        private static (string computedConfigHash, string computedDeviceHash, string recordedHash) GetHashes(PowerSupply psu, AliasedDevice devSettings)
+        {
+            string computedConfigHash = devSettings.Config == null ? string.Empty : devSettings.Config.ComputeConfiguredHash();
+            string computedDeviceHash = GetConfigurationHash(psu.SystemParams, psu.Presets);
+            string recordedHash = devSettings.Config == null ? string.Empty : devSettings.Config.Hash;
+            return (computedConfigHash, computedDeviceHash, recordedHash);
+        }
+
+        private static ProcessArgsResult CheckConfiguration(PowerSupply psu, AliasedDevice devSettings, string computedConfigHash, string computedDeviceHash, string recordedHash)
+        {
+            if ((recordedHash == computedConfigHash) && (recordedHash == computedDeviceHash))
+            {
+                return ProcessArgsResult.Ok;
+            }
+
+            ShowWarning("Configured state requires review!");
+            if (devSettings.Config != null)
+            {
+                Console.WriteLine($"- Device Hash   : {computedDeviceHash}");
+                Console.WriteLine($"- Recorded Hash : {(string.IsNullOrWhiteSpace(recordedHash) ? "None" : recordedHash)}");
+                Console.WriteLine($"- Config Hash   : {(string.IsNullOrWhiteSpace(computedConfigHash) ? "None" : computedConfigHash)}");
+            }
+            Console.WriteLine();
+
+            if (recordedHash != computedConfigHash)
+            {
+                if (string.IsNullOrWhiteSpace(recordedHash))
+                {
+                    ShowWarning("Possible corruption detected in stored settings!");
+                }
+            }
+
+            if (computedConfigHash != computedDeviceHash)
+            {
+                PrintConfigurationDiff(psu, devSettings.Config);
+                Console.WriteLine();
+            }
+
+            if (!interactiveMode)
+            {
+                if (devSettings.Config == null)
+                {
+                    ShowError("No configuration has been saved to check against.");
+                    Console.WriteLine("Use --save to add this configuration to disk.");
+                    return ProcessArgsResult.NoConfigurationPreset;
+                }
+                else
+                {
+                    ShowError("The device state does not match saved configuration.");
+                    Console.WriteLine("Use --save to save the device state to disk or --load to load the device state from disk.");
+                    return ProcessArgsResult.ConfigurationMismatch;
+                }
+            }
+
+            List<string> choices = ["Exit now", "Continue", "Save device state (to disk)"];
+            if (devSettings.Config != null)
+            {
+                choices.Add("Load device state (from disk)");
+            }
+
+            int choice = GetChoice("Select an action:", choices);
+            switch (choice)
+            {
+                default:
+                case 1: // Exit application, make no change.
+                    Console.WriteLine("Exiting.");
+                    return ProcessArgsResult.OkExitNow;
+                case 2: // Continue application, make no change.
+                    Console.WriteLine("Continuing.");
+                    return ProcessArgsResult.Ok;
+                case 3: // Save device state to disk
+                    if (!SaveConfiguration(psu, devSettings))
+                    {
+                        Console.WriteLine("Failed to store settings!");
+                        return ProcessArgsResult.StoreError;
+                    }
+                    Console.WriteLine("Saved configuration.");
+                    break;
+                case 4: // Load device state from disk.
+                    if (devSettings.Config == null)
+                    {
+                        return ProcessArgsResult.OkExitNow;
+                    }
+                    LoadConfiguration(psu, devSettings.Config);
+                    if (devSettings.Config.Hash != computedConfigHash)
+                    {
+                        // The settings appear to also need a corrected hash, save now.
+                        devSettings.Config.Hash = computedConfigHash;
+                        if (!SaveConfiguration(psu, devSettings))
+                        {
+                            Console.WriteLine("Failed to store settings!");
+                            return ProcessArgsResult.StoreError;
+                        }
+                    }
+                    Console.WriteLine("Loaded configuration.");
+                    break;
+            }
+
+            return ProcessArgsResult.Ok;
+        }
+
+        static bool SaveConfiguration(PowerSupply psu, AliasedDevice devSettings)
+        {
+            if (devSettings.Config == null)
+            {
+                devSettings.Config = new ConfiguredState();
+            }
+
+            devSettings.Config.SystemParams.OPP = psu.SystemParams.OPP;
+            devSettings.Config.SystemParams.OTP = psu.SystemParams.OTP;
+            devSettings.Config.SystemParams.RPP = psu.SystemParams.RPP;
+            devSettings.Config.SystemParams.AutoOn = psu.SystemParams.AutoOn;
+            devSettings.Config.SystemParams.Backlight = psu.SystemParams.Backlight;
+            devSettings.Config.SystemParams.Volume = psu.SystemParams.Volume;
+
+            devSettings.Config.Presets = new List<PowerSupplySetpoint>(psu.Presets.Length);
+            devSettings.Config.Presets.Clear();
+
+            for (int i = 0; i < psu.Presets.Length; i++)
+            {
+                devSettings.Config.Presets.Add(psu.Presets[i]);
+            }
+
+            devSettings.Config.Hash = devSettings.Config.ComputeConfiguredHash();
+            if (!settings.Save())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        static void LoadConfiguration(PowerSupply psu, ConfiguredState? config)
+        {
+            if (config == null)
+            {
+                return;
+            }
+
+            psu.SetSystemParams(config.SystemParams);
+            foreach (var preset in config.Presets)
+            {
+                psu.SetPreset(preset.GetIndex(), preset);
+            }
+        }
+
+        // Prints all settings which do not match between device and config
+        static int PrintConfigurationDiff(PowerSupply psu, ConfiguredState? config)
+        {
+            if (config == null)
+            {
+                Console.WriteLine("Current Device configuration:");
+                Console.WriteLine();
+                ShowConfiguration(psu.SystemParams, psu.Presets);
+                return 1;
+            }
+
+            Console.WriteLine("Checking configuration differences:");
+
+            int diffCount = ShowDifferences(psu, config);
+            if (diffCount == 0)
+            {
+                Console.WriteLine("- No differences found.");
+            }
+
+            return diffCount;
+        }
+
+        static string GetConfigurationHash(PowerSupplySystemParams systemParams, PowerSupplySetpoint[] presets)
+        {
+            using var sha256 = SHA256.Create();
+            var sb = new System.Text.StringBuilder();
+
+            // Include settings critical for safe operation.
+            sb.Append(systemParams.OPP);
+            sb.Append(systemParams.OTP);
+            sb.Append(systemParams.RPP);
+            sb.Append(systemParams.AutoOn);
+            foreach (var preset in presets)
+            {
+                sb.Append(preset.Voltage);
+                sb.Append(preset.Current);
+                sb.Append(preset.OVP);
+                sb.Append(preset.OCP);
+            }
+
+            // Compute the hash
+            var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(sb.ToString()));
+            return Convert.ToHexString(hashBytes);
         }
 
         private static int PrintEnumeration()
