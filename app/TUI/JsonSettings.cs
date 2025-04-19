@@ -42,6 +42,11 @@ namespace PowerSupplyApp.TUI
         private const string settingsFilename = "vicon.settings.json";
 
         /// <summary>
+        /// The file defining the JSON schema for user settings.
+        /// </summary>
+        private const string settingsSchemaFilename = "vicon.settings.schema.json";
+
+        /// <summary>
         /// The subdirectory where user settings will be saved.
         /// </summary>
         private static string userSubDir = Path.Combine("jjcarrier", "vicon");
@@ -66,8 +71,10 @@ namespace PowerSupplyApp.TUI
         /// </summary>
         private static JsonSerializerOptions serializationOptions = new()
         {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             PropertyNameCaseInsensitive = true,
-            WriteIndented = true
+            WriteIndented = true,
+            MaxDepth = 8
         };
 
         /// <summary>
@@ -82,7 +89,7 @@ namespace PowerSupplyApp.TUI
         /// <summary>
         /// The file path where user settings are stored.
         /// </summary>
-        /// <returns>The settings file path path.</returns>
+        /// <returns>The settings file path.</returns>
         public string GetUserSettingsFilePath()
         {
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
@@ -91,13 +98,30 @@ namespace PowerSupplyApp.TUI
         }
 
         /// <summary>
+        /// The file path where the settings' JSON schema file is stored.
+        /// </summary>
+        /// <returns>The settings' schema file path.</returns>
+        public string GetSettingsSchemaFilePath()
+        {
+            return Path.Combine(AppContext.BaseDirectory, settingsSchemaFilename);
+        }
+
+        /// <summary>
         /// Stores settings to disk.
         /// </summary>
         /// <returns>
         /// True if the store to disk succeeded; otherwise false.
         /// </returns>
-        public bool Store()
+        public bool Save()
         {
+            foreach (var dev in AliasedDevices)
+            {
+                if (dev.Config != null && string.IsNullOrWhiteSpace(dev.Config.Hash))
+                {
+                    // Remove the config from the object.
+                    dev.Config = null;
+                }
+            }
             string text = JsonSerializer.Serialize(this, serializationOptions);
             string settingsFilePath = GetUserSettingsFilePath();
             string? settingsFileDir = Path.GetDirectoryName(settingsFilePath);
@@ -136,6 +160,21 @@ namespace PowerSupplyApp.TUI
                 {
                     theme = ColorThemes.GetTheme(loadedSettings.Theme);
                     PollRate = loadedSettings.PollRate;
+
+                    foreach (var dev in loadedSettings.AliasedDevices)
+                    {
+                        if (dev.Config == null)
+                        {
+                            continue;
+                        }
+
+                        byte index = 0;
+                        foreach (var preset in dev.Config.Presets)
+                        {
+                            // Restore the proper index.
+                            preset.SetIndex(index++);
+                        }
+                    }
                     AliasedDevices = loadedSettings.AliasedDevices;
                 }
             }
@@ -146,6 +185,16 @@ namespace PowerSupplyApp.TUI
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Finds and returns the matching aliased device based on a serial number.
+        /// </summary>
+        /// <param name="serialNumber">The serial number to search for.</param>
+        /// <returns>The matching aliased device, or null if no match is found.</returns>
+        public AliasedDevice? FindDeviceBySerialNumber(string serialNumber)
+        {
+            return AliasedDevices.FirstOrDefault(device => device.Serial == serialNumber);
         }
     }
 }

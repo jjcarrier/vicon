@@ -1,0 +1,109 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "poll-rate-ms": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "theme": {
+            "type": "string",
+            "enum": ["classic", "black-and-white", "grey", "dark-red", "dark-green", "dark-magenta", "cyan", "gold", "blue", "blue-violet"]
+        },
+        "devices": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "alias": {
+                        "type": "string"
+                    },
+                    "serial": {
+                        "type": "string",
+                        "pattern": "^[0-9A-Fa-f]{8}$"
+                    },
+                    "config": {
+                        "type": "object",
+                        "properties": {
+                            "hash": {
+                                "type": "string",
+                                "pattern": "^[0-9A-Fa-f]*$"
+                            },
+                            "system-params": {
+                                "type": "object",
+                                "properties": {
+                                    "opp": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 1050
+                                    },
+                                    "otp": {
+                                        "type": "integer",
+                                        "minimum": 50,
+                                        "maximum": 80
+                                    },
+                                    "rpp": {
+                                        "type": "boolean"
+                                    },
+                                    "auto-on": {
+                                        "type": "boolean"
+                                    },
+                                    "backlight": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 4
+                                    },
+                                    "volume": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 4
+                                    }
+                                },
+                                "required": ["opp","otp","rpp","auto-on","backlight","volume"],
+                                "additionalProperties": false
+                            },
+                            "presets": {
+                                "type":"array",
+                                "minItems": 10,
+                                "maxItems": 10,
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "voltage": {
+                                            "type": "integer",
+                                            "minimum": 0,
+                                            "maximum": 30500
+                                        },
+                                        "current": {
+                                            "type": "integer",
+                                            "minimum": 0,
+                                            "maximum": 5050
+                                        },
+                                        "ovp": {
+                                            "type": "integer",
+                                            "minimum": 0,
+                                            "maximum": 30500
+                                        },
+                                        "ocp": {
+                                            "type": "integer",
+                                            "minimum": 0,
+                                            "maximum": 5050
+                                        }
+                                    },
+                                    "required": ["voltage","current","ovp","ocp"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        },
+                        "required": ["hash","system-params","presets"],
+                        "additionalProperties": false
+                    }
+                },
+                "required": ["alias", "serial"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}
