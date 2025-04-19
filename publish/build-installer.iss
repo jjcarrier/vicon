@@ -42,6 +42,7 @@ Source: "build\win-x64\Spectre.Console.dll"; DestDir: "{app}\bin"; Flags: ignore
 Source: "build\win-x64\vicon.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\vicon.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\vicon.runtimeconfig.json"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\vicon.settings.schema.json"; DestDir: "{app}\bin"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Code]

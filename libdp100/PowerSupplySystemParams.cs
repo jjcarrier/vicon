@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace LibDP100
 {
     /// <summary>
@@ -8,31 +10,37 @@ namespace LibDP100
         /// <summary>
         /// Over power protection. Unit: 0.1W.
         /// </summary>
+        [JsonPropertyName("opp")]
         public ushort OPP { get; set; } = 0;
 
         /// <summary>
-        /// Over temperature protection. Unit Celsius. Value range 50-80.
+        /// Over temperature protection. Unit Celsius. Value range 40-80.
         /// </summary>
+        [JsonPropertyName("otp")]
         public ushort OTP { get; set; } = 0;
 
         /// <summary>
         /// Reverse polarity protection enable/disable.
         /// </summary>
+        [JsonPropertyName("rpp")]
         public bool RPP { get; set; } = false;
 
         /// <summary>
         /// Enable/Disable automatic output-on.
         /// </summary>
+        [JsonPropertyName("auto-on")]
         public bool AutoOn { get; set; } = false;
 
         /// <summary>
         /// Backlight level value 0-4.
         /// </summary>
+        [JsonPropertyName("backlight")]
         public byte Backlight { get; set; } = 0;
 
         /// <summary>
         /// Volume level ranges from 0-4.
         /// </summary>
+        [JsonPropertyName("volume")]
         public byte Volume { get; set; } = 0;
 
         /// <summary>
