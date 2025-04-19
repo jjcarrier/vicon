@@ -77,15 +77,20 @@ namespace PowerSupplyApp
 
         private static bool faulted = false;
         private static bool controlsLocked = false;
+        private static bool altBufferState = false;
 
         /// <summary>
         /// Write the ANSI sequence to enter the alternate screen buffer.
         /// </summary>
         private static void EnterAlternateScreenBuffer()
         {
+            if (!interactiveMode || altBufferState)
+                return;
+
             // Enter alt-screen buffer and hide cursor.
             Console.Write($"{(char)27}[?1049h");
             Console.Write($"{(char)27}[?25l");
+            altBufferState = true;
         }
 
         /// <summary>
@@ -93,9 +98,14 @@ namespace PowerSupplyApp
         /// </summary>
         private static void ExitAlternateScreenBuffer()
         {
+            if (!interactiveMode || !altBufferState)
+                return;
+
             // Exit alt-screen buffer and show cursor.
             Console.Write($"{(char)27}[?1049l");
             Console.Write($"{(char)27}[?25h");
+            altBufferState = false;
+
         }
 
         /// <summary>
@@ -114,6 +124,117 @@ namespace PowerSupplyApp
         private static void ShowError(string message)
         {
             AnsiConsole.Write(new Markup($"[white on darkred] ERROR [/] {message}{Environment.NewLine}"));
+        }
+
+        /// <summary>
+        /// Shows the differences between the device and stored configuration.
+        /// </summary>
+        /// <param name="supply">The device.</param>
+        /// <param name="config">The stored configuration.</param>
+        /// <returns>The number of differences detected.</returns>
+        private static int ShowDifferences(PowerSupply supply, ConfiguredState config)
+        {
+            int AddDiff(Table table, string scope, string name, object deviceValue, object configValue)
+            {
+                if (!Equals(deviceValue, configValue))
+                {
+                    table.AddRow(
+                        scope?.ToString() ?? "",
+                        name?.ToString() ?? "",
+                        deviceValue?.ToString() ?? "",
+                        configValue?.ToString() ?? ""
+                    );
+                    return 1;
+                }
+
+                return 0;
+            }
+
+            var diffTable = new Table();
+            diffTable.AddColumn(new TableColumn(new Markup("[white]Scope[/]")).Centered());
+            diffTable.AddColumn(new TableColumn(new Markup("[white]Parameter[/]")).Centered());
+            diffTable.AddColumn(new TableColumn(new Markup("[white]Device[/]")).Centered());
+            diffTable.AddColumn(new TableColumn(new Markup("[white]Config[/]")).Centered());
+            int diffCount = 0;
+            diffCount += AddDiff(diffTable, "System", "OPP (W)", $"{supply.SystemParams.OPP / 10.0:0.0}", $"{config.SystemParams.OPP / 10.0:0.0}");
+            diffCount += AddDiff(diffTable, "System", "OTP (C)", $"{supply.SystemParams.OTP}", $"{config.SystemParams.OTP}");
+            diffCount += AddDiff(diffTable, "System", "RPP", $"{supply.SystemParams.RPP}", $"{config.SystemParams.RPP}");
+            diffCount += AddDiff(diffTable, "System", "AutoOn", $"{supply.SystemParams.AutoOn}", $"{config.SystemParams.AutoOn}");
+            diffCount += AddDiff(diffTable, "System", "Backlight", $"{supply.SystemParams.Backlight}", $"{config.SystemParams.Backlight}");
+            diffCount += AddDiff(diffTable, "System", "Volume", $"{supply.SystemParams.Volume}", $"{config.SystemParams.Volume}");
+
+            for (int i = 0; i < supply.Presets.Length; i++)
+            {
+                var devPreset = supply.Presets[i];
+                string cfgVoltage = "--";
+                string cfgOvp = "--";
+                string cfgCurrent = "--";
+                string cfgOcp = "--";
+
+                if (i < config.Presets.Count)
+                {
+                    cfgVoltage = $"{config.Presets[i].Voltage / 1000.0,6:0.000}";
+                    cfgOvp = $"{config.Presets[i].OVP / 1000.0,6:0.000}";
+                    cfgCurrent = $"{config.Presets[i].Current / 1000.0,6:0.000}";
+                    cfgOcp = $"{config.Presets[i].OCP / 1000.0,6:0.000}";
+                }
+                diffCount += AddDiff(diffTable, $"Preset {i}", "Voltage (V)", $"{devPreset.Voltage / 1000.0,6:0.000}", cfgVoltage);
+                diffCount += AddDiff(diffTable, $"Preset {i}", "OVP (V)", $"{devPreset.OVP / 1000.0,6:0.000}", cfgOvp);
+                diffCount += AddDiff(diffTable, $"Preset {i}", "Current (A)", $"{devPreset.Current / 1000.0,6:0.000}", cfgCurrent);
+                diffCount += AddDiff(diffTable, $"Preset {i}", "OCP (A)", $"{devPreset.OCP / 1000.0,6:0.000}", cfgOcp);
+            }
+
+            if (diffCount != 0)
+            {
+                AnsiConsole.Write(diffTable);
+            }
+
+            return diffCount;
+        }
+
+        /// <summary>
+        /// Shows the configuration for system parameters and presets.
+        /// </summary>
+        /// <param name="sysParams">The system parameters.</param>
+        /// <param name="presets">The presets.</param>
+        private static void ShowConfiguration(PowerSupplySystemParams sysParams, PowerSupplySetpoint[] presets)
+        {
+            var sysParamTable = new Table();
+            var presetsTable = new Table();
+
+            sysParamTable.AddColumn(new TableColumn(new Markup("[white]OPP (W)[/]")).Centered());
+            sysParamTable.AddColumn(new TableColumn(new Markup("[white]OTP (C)[/]")).Centered());
+            sysParamTable.AddColumn(new TableColumn(new Markup("[white]RPP[/]")).Centered());
+            sysParamTable.AddColumn(new TableColumn(new Markup("[white]Auto-ON[/]")).Centered());
+            sysParamTable.AddColumn(new TableColumn(new Markup("[white]Backlight[/]")).Centered());
+            sysParamTable.AddColumn(new TableColumn(new Markup("[white]Volume[/]")).Centered());
+
+            sysParamTable.AddRow(
+                $"{sysParams.OPP / 10.0:0.0}",
+                $"{sysParams.OTP}",
+                sysParams.RPP.ToString(),
+                sysParams.AutoOn.ToString(),
+                sysParams.Backlight.ToString(),
+                sysParams.Volume.ToString());
+
+            presetsTable.AddColumn(new TableColumn(new Markup("[white]Preset[/]")).Centered());
+            presetsTable.AddColumn(new TableColumn(new Markup("[white]Voltage (V)[/]")).Centered());
+            presetsTable.AddColumn(new TableColumn(new Markup("[white]OVP (V)[/]")).Centered());
+            presetsTable.AddColumn(new TableColumn(new Markup("[white]Current (A)[/]")).Centered());
+            presetsTable.AddColumn(new TableColumn(new Markup("[white]OCP (A)[/]")).Centered());
+
+            foreach (var preset in presets)
+            {
+                presetsTable.AddRow(
+                    preset.GetIndex().ToString(),
+                    $"{preset.Voltage / 1000.0,6:0.000}",
+                    $"{preset.OVP / 1000.0,6:0.000}",
+                    $"{preset.Current / 1000.0,6:0.000}",
+                    $"{preset.OCP / 1000.0,6:0.000}");
+            }
+
+            AnsiConsole.Write(sysParamTable);
+            AnsiConsole.Write(presetsTable);
         }
 
         /// <summary>
@@ -491,6 +612,32 @@ namespace PowerSupplyApp
             string serialNumber = AnsiConsole.Prompt(prompt);
 
             return serialNumber.Split(':')[0].Trim();
+        }
+
+        /// <summary>
+        /// Ask the user to select an option from one of the specified choices.
+        /// </summary>
+        /// <param name="title">The title/prompt to show</param>
+        /// <param name="choices">The list of choices.</param>
+        /// <returns>The choice selected (1-based).</returns>
+        private static int GetChoice(string title, List<string> choices)
+        {
+            List<string> formattedChoices = new();
+            foreach (var choice in choices)
+            {
+                formattedChoices.Add($"{formattedChoices.Count + 1}: {choice}");
+            }
+
+            SelectionPrompt<string> prompt = new SelectionPrompt<string>()
+                    .Title(title)
+                    .PageSize(10)
+                    .EnableSearch()
+                    .MoreChoicesText("[grey](Move up and down to reveal more devices)[/]")
+                    .AddChoices(formattedChoices);
+            prompt.SearchHighlightStyle = new Style(Color.White, Color.Blue);
+            string userChoice = AnsiConsole.Prompt(prompt);
+
+            return int.Parse(userChoice.Split(':')[0].Trim());
         }
 
         /// <summary>

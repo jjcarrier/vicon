@@ -34,6 +34,12 @@ namespace PowerSupplyApp
                 "Displays the version of the application.");
             grid.AddRow("  [white]--config[/]", "",
                 "Prints the path to the user settings file used by this tool.");
+            grid.AddRow("  [white]--save[/]", "",
+                "Saves the devices configured state to the application's settings. This action takes place after all other mutable actions complete successfully.");
+            grid.AddRow("  [white]--load[/]", "",
+                "Loads the application's device settings into the device. This action takes place before all other mutable actions. If no settings exist for the device the application exits with an exit code.");
+            grid.AddRow("  [white]--check[/]", "",
+                "Verifies that the devices configured state matches the state stored in the the application's settings. If running non-interactively, the application will exit with an error code; otherwise the application will prompt the user for further action.");
             grid.AddRow("  [white]--debug[/]", "",
                 "Enables debug output of underlying driver. (Only intended for CLI mode)");
             grid.AddRow("  [white]--enumerate[/]", "",
@@ -129,6 +135,15 @@ namespace PowerSupplyApp
                             return ProcessArgsResult.OkExitNow;
                         case "--debug":
                             debug = true;
+                            break;
+                        case "--load":
+                            loadConfiguration = true;
+                            break;
+                        case "--save":
+                            saveConfiguration = true;
+                            break;
+                        case "--check":
+                            checkConfiguration = true;
                             break;
                         case "--theme":
                             if ((i + 1 >= args.Length) || args[i + 1].StartsWith('-'))
@@ -261,12 +276,18 @@ namespace PowerSupplyApp
                 return ProcessArgsResult.Error;
             }
 
+            if (loadConfiguration && checkConfiguration)
+            {
+                ShowError("--check and --load are mutually exclusive options.");
+                return ProcessArgsResult.InvalidParameter;
+            }
+
             if (pollRateSet || themeSet)
             {
-                if (!settings.Store())
+                if (!settings.Save())
                 {
                     ShowError("Failed to store settings!");
-                    return ProcessArgsResult.Error;
+                    return ProcessArgsResult.StoreError;
                 }
             }
 
@@ -296,6 +317,9 @@ namespace PowerSupplyApp
                         case "--json":
                         case "--json-list":
                         case "--debug":
+                        case "--load":
+                        case "--save":
+                        case "--check":
                         case "--enumerate":
                             // Do nothing, already handled in first pass.
                             break;

@@ -10,6 +10,13 @@
         NotImplemented,
         MissingParameter,
         InvalidParameter,
-        UnsupportedOption
+        UnsupportedOption,
+        SerialNumberRequired,
+        DeviceNotPresent,
+        ConfigurationMismatch,
+        InitializationFailed,
+        NoAliasedDeviceFound,
+        NoConfigurationPresent,
+        StoreError
     }
 }
