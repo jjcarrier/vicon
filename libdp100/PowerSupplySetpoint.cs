@@ -28,7 +28,7 @@ namespace LibDP100
         /// <summary>
         /// The index associated with the preset.
         /// </summary>
-        private int Index { get; set; } = 0;
+        private byte Index { get; set; } = 0;
 
         /// <summary>
         /// Default constructor.
@@ -37,7 +37,7 @@ namespace LibDP100
         /// The preset index related to this instance.
         /// The preset is only applicable for referencing stored presets, it has not meaning for the current output setpoint.
         /// </param>
-        public PowerSupplySetpoint(int index)
+        public PowerSupplySetpoint(byte index)
         {
             Index = index;
         }
@@ -65,6 +65,15 @@ namespace LibDP100
             Current = current;
             OVP = ovp;
             OCP = ocp;
+        }
+
+        /// <summary>
+        /// Gets the index of the preset.
+        /// </summary>
+        /// <returns>The index.</returns>
+        public byte GetIndex()
+        {
+            return Index;
         }
 
         /// <summary>
