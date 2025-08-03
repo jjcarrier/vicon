@@ -9,13 +9,25 @@
             "args": [
                 "build",
                 "--configuration",
-                "Debug"
+                "${input:buildConfiguration}"
             ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "problemMatcher": "$msCompile"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "buildConfiguration",
+            "type": "pickString",
+            "description": "Select the build configuration",
+            "options": [
+                "Debug",
+                "Release"
+            ],
+            "default": "Debug"
         }
     ]
 }
