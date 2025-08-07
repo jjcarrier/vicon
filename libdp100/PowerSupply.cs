@@ -104,6 +104,11 @@ namespace LibDP100
         private bool[] presetsValid = new bool[NumPresets];
 
         /// <summary>
+        /// Indicates that the "Presets" object has been applied to the volatile preset's state.
+        /// </summary>
+        private bool[] presetsLoaded = new bool[NumPresets];
+
+        /// <summary>
         /// Indicates that the "SystemParams" object has been populated with valid data.
         /// </summary>
         private bool systemParamsValid = false;
@@ -525,8 +530,14 @@ namespace LibDP100
                 Output.Setpoint.Voltage = millivolts;
                 Output.Setpoint.Current = milliamps;
 
+                if (Presets[Output.Preset] == null)
+                {
+                    Presets[Output.Preset] = new PowerSupplySetpoint(Output.Preset);
+                }
+
                 // Output state affects the volatile state of a preset (group).
                 Presets[Output.Preset].Copy(Output.Setpoint);
+                presetsValid[Output.Preset] = true;
             }
 
             return result;
@@ -896,6 +907,14 @@ namespace LibDP100
 
             if (result == PowerSupplyResult.OK)
             {
+                if (!presetsLoaded[preset])
+                {
+                    result = SetOutput(Presets[preset]);
+                }
+            }
+
+            if (result == PowerSupplyResult.OK)
+            {
                 Output.Setpoint.Copy(Presets[preset]);
             }
 
@@ -1038,18 +1057,6 @@ namespace LibDP100
                 byte i = (byte)((startPreset + count) % NumPresets);
 
                 result = GetPreset(i);
-                if (result != PowerSupplyResult.OK)
-                {
-                    return result;
-                }
-
-                result = UsePreset(i);
-                if (result != PowerSupplyResult.OK)
-                {
-                    return result;
-                }
-
-                result = SetOutput(Presets[i]);
                 if (result != PowerSupplyResult.OK)
                 {
                     return result;
