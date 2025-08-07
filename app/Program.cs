@@ -71,12 +71,8 @@ namespace PowerSupplyApp
             if (psu != null)
             {
                 psu.GetDeviceInfo();
-                psu.GetOutput();
                 psu.GetSystemParams();
-                for (byte i = 0; i < psu.Presets.Length; i++)
-                {
-                    psu.GetPreset(i);
-                }
+                psu.Reload();
             }
             else
             {
