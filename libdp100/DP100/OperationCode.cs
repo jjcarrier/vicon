@@ -15,11 +15,6 @@
         SystemSet = 0x45,
         ScanOut = 0x50,
         SerialOut = 0x55,
-        Disconnect = 0x80,
-        BasicSetGetGroupInfo = 0x00,
-        BasicSetSetCurrentBasic = 0x20,
-        BasicSetSaveGroup = 0x60,
-        BasicSetGetCurrentBasic = 0x80,
-        BasicSetUseGroup = 0xA0
+        Disconnect = 0x80
     };
 }
