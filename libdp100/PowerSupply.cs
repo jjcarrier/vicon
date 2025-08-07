@@ -524,6 +524,9 @@ namespace LibDP100
                 Output.On = outputOn;
                 Output.Setpoint.Voltage = millivolts;
                 Output.Setpoint.Current = milliamps;
+
+                // Output state affects the volatile state of a preset (group).
+                Presets[Output.Preset].Copy(Output.Setpoint);
             }
 
             return result;
@@ -986,7 +989,7 @@ namespace LibDP100
         }
 
         /// <summary>
-        /// Read a preconfigured preset.
+        /// Read a preconfigured preset's non-volatile state.
         /// </summary>
         /// <param name="preset">The preset to get (0-9).</param>
         /// <returns>
@@ -1004,6 +1007,56 @@ namespace LibDP100
             PrintOutputReportHex(outputReport);
             return ProcessTransaction(outputReport,
                 new HandleResponseDelegate(HandleGroupInfoResponse));
+        }
+
+        /// <summary>
+        /// Reloads configured state.
+        /// This includes getting the current output state.Resets the volatile preset states to their corresponding non-volatile states.
+        /// </summary>
+        /// <returns>
+        /// On success, returns <see cref="PowerSupplyResult.OK"/>.
+        /// On failure, a relevant error result will be returned.
+        /// </returns>
+        public PowerSupplyResult Reload()
+        {
+            if (!Connected)
+            {
+                return PowerSupplyResult.DeviceNotConnected;
+            }
+
+            PowerSupplyResult result = GetOutput();
+            if (result != PowerSupplyResult.OK)
+            {
+                return result;
+            }
+
+            byte activePreset = Output.Preset;
+            byte startPreset = (byte)((activePreset + 1) % NumPresets);
+
+            for (int count = 0; count < NumPresets; count++)
+            {
+                byte i = (byte)((startPreset + count) % NumPresets);
+
+                result = GetPreset(i);
+                if (result != PowerSupplyResult.OK)
+                {
+                    return result;
+                }
+
+                result = UsePreset(i);
+                if (result != PowerSupplyResult.OK)
+                {
+                    return result;
+                }
+
+                result = SetOutput(Presets[i]);
+                if (result != PowerSupplyResult.OK)
+                {
+                    return result;
+                }
+            }
+
+            return result;
         }
 
         #endregion // Read Operations
