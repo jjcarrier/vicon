@@ -86,8 +86,8 @@ namespace PowerSupplyApp
                 "Sets the Over-Current Protection level. Please note, the current setpoint parameters will be used to update the currently configured preset. Reaching or exceeding this limit will switch the output OFF. (units: mA)");
             grid.AddRow("  [white]--opp[/]", "[silver]<DECI_W>[/]",
                 "Sets the Over-Power Protection level. Reaching or exceeding this limit will switch the output OFF. (units: 0.1 W, range: 0-1050)");
-            grid.AddRow("  [white]--otp[/]", "[silver]<DECI_C>[/]",
-                "Sets the Over-Temperature Protection level. Reaching or exceeding this limit will switch the output OFF. (units: 0.1 C, range: 500-800)");
+            grid.AddRow("  [white]--otp[/]", "[silver]<CELSIUS>[/]",
+                "Sets the Over-Temperature Protection level. Reaching or exceeding this limit will switch the output OFF. (units: 1 C, range: 50-80)");
             grid.AddRow("  [white]--rpp[/]", "[silver]<STATE>[/]",
                 "Sets the Reverse Polarity Protection. (range: 0-1)");
             grid.AddRow("  [white]--auto-on[/]", "[silver]<STATE>[/]",

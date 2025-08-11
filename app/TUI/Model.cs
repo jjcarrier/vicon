@@ -9,7 +9,7 @@ namespace PowerSupplyApp
         private const ushort powerOutputMax = 1050; // 1050 * 0.1 = 105W
         private const ushort powerOutputMin = 0;
         private const ushort tempOutputMax = 80; // 50 = 50C
-        private const ushort tempOutputMin = 0;
+        private const ushort tempOutputMin = 50;
 
         private static int VoltageOutput
         {
