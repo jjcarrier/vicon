@@ -35,7 +35,7 @@ namespace PowerSupplyApp
 
             if (psuCount == 0)
             {
-                Console.WriteLine("ERROR: No DP100 detected!");
+                ShowError("No DP100 detected!");
                 return 1;
             }
 
@@ -49,7 +49,7 @@ namespace PowerSupplyApp
                 }
                 else
                 {
-                    Console.WriteLine("ERROR: Multiple DP100s detected. Please provide the --serial option!");
+                    ShowError("Multiple DP100s detected. Please provide the --serial option!");
                     return 1;
                 }
             }
@@ -76,7 +76,7 @@ namespace PowerSupplyApp
             }
             else
             {
-                Console.WriteLine("ERROR: Could not initialize DP100!");
+                ShowError("Could not initialize DP100!");
                 return 1;
             }
 

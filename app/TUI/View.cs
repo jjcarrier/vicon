@@ -99,6 +99,24 @@ namespace PowerSupplyApp
         }
 
         /// <summary>
+        /// Shows a warning message.
+        /// </summary>
+        /// <param name="message">The message to show.</param>
+        private static void ShowWarning(string message)
+        {
+            AnsiConsole.Write(new Markup($"[yellow]WARNING[/] {message}{Environment.NewLine}"));
+        }
+
+        /// <summary>
+        /// Shows an error message.
+        /// </summary>
+        /// <param name="message">The message to show.</param>
+        private static void ShowError(string message)
+        {
+            AnsiConsole.Write(new Markup($"[white on darkred] ERROR [/] {message}{Environment.NewLine}"));
+        }
+
+        /// <summary>
         /// Gets the Grid for the device information.
         /// </summary>
         /// <param name="info">Power supply device information.</param>
