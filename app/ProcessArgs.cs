@@ -526,7 +526,7 @@ namespace PowerSupplyApp
 
         private static int ProcessWrite(PowerSupply inst, Operation op, string[] args, int index)
         {
-            bool result;
+            bool result = false;
             ushort parsedValue = 0;
             string formatMessage = string.Empty;
             int argsToProcess = 0;
@@ -548,6 +548,8 @@ namespace PowerSupplyApp
 
                 case Operation.UsePreset:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -557,6 +559,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteVoltage:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -571,6 +575,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteCurrent:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -585,6 +591,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteOVP:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -601,6 +609,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteOCP:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -617,6 +627,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteOPP:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -631,6 +643,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteOTP:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -645,6 +659,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteRPP:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -659,6 +675,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteAutoOn:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -673,6 +691,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteVolume:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -687,6 +707,8 @@ namespace PowerSupplyApp
 
                 case Operation.WriteBacklight:
                     argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
@@ -702,13 +724,16 @@ namespace PowerSupplyApp
 
             if (!result)
             {
-                // TODO: more detailed error codes should be reported here for debugging purposes.
-                // Ex: "Not connected", "Out of Range", "Invalid command", "Invalid state"
-                SerializeObject(new CommandResponse
+                if (serializeAsJson)
                 {
-                    Command = op,
-                    Response = new { Error = "Operation Failed" }
-                });
+                    // TODO: more detailed error codes should be reported here for debugging purposes.
+                    // Ex: "Not connected", "Out of Range", "Invalid command", "Invalid state"
+                    SerializeObject(new CommandResponse
+                    {
+                        Command = op,
+                        Response = new { Error = "Operation Failed" }
+                    });
+                }
                 return 0;
             }
 
@@ -929,7 +954,7 @@ namespace PowerSupplyApp
 
             for (int i = index; i < args.Length; i++)
             {
-                if (args[i].StartsWith("--") || args[i].StartsWith('-'))
+                if (args[i].StartsWith('-'))
                 {
                     if (betweenFlags)
                     {
