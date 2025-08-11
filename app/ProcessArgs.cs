@@ -101,7 +101,7 @@ namespace PowerSupplyApp
         {
             if (!settings.Load())
             {
-                Console.WriteLine($"ERROR: Invalid settings, please correct." + Environment.NewLine + settings.GetUserSettingsFilePath());
+                ShowError("Invalid settings, please correct." + Environment.NewLine + settings.GetUserSettingsFilePath());
                 return ProcessArgsResult.Error;
             }
 
@@ -133,7 +133,7 @@ namespace PowerSupplyApp
                         case "--theme":
                             if ((i + 1 >= args.Length) || args[i + 1].StartsWith('-'))
                             {
-                                Console.WriteLine($"ERROR: Missing <THEME_NAME> parameter for '{args[i]}'.");
+                                ShowError($"Missing <THEME_NAME> parameter for '{args[i]}'.");
                                 return ProcessArgsResult.MissingParameter;
                             }
 
@@ -179,7 +179,7 @@ namespace PowerSupplyApp
 
                                 if (!result)
                                 {
-                                    Console.WriteLine($"ERROR: Invalid <MS_POLL> parameter for '{args[i]}'.");
+                                    ShowError($"Invalid <MS_POLL> parameter for '{args[i]}'.");
                                     return ProcessArgsResult.InvalidParameter;
                                 }
                             }
@@ -198,13 +198,13 @@ namespace PowerSupplyApp
                         case "--wavegen":
                             if ((i + 1 >= args.Length) || args[i + 1].StartsWith('-'))
                             {
-                                Console.WriteLine($"ERROR: Missing <FILE_PATH> parameter for '{args[i]}'.");
+                                ShowError($"Missing <FILE_PATH> parameter for '{args[i]}'.");
                                 return ProcessArgsResult.MissingParameter;
                             }
 
                             if (!WaveGen.Load(args[i + 1]))
                             {
-                                Console.WriteLine(WaveGen.GetLastErrorMessage());
+                                ShowError(WaveGen.GetLastErrorMessage());
                                 return ProcessArgsResult.Error;
                             }
                             break;
@@ -245,8 +245,8 @@ namespace PowerSupplyApp
                         default:
                             if (arg.StartsWith('-'))
                             {
-                                Console.WriteLine($"Unsupported argument '{arg}'." + Environment.NewLine +
-                                                  "Use -?, -h, or --help for help information.");
+                                ShowError($"Unsupported argument '{arg}'." + Environment.NewLine +
+                                          "Use -?, -h, or --help for help information.");
                                 return ProcessArgsResult.UnsupportedOption;
                             }
                             break;
@@ -265,7 +265,7 @@ namespace PowerSupplyApp
             {
                 if (!settings.Store())
                 {
-                    Console.WriteLine("Failed to store settings!");
+                    ShowError("Failed to store settings!");
                     return ProcessArgsResult.Error;
                 }
             }
@@ -290,7 +290,7 @@ namespace PowerSupplyApp
                     switch (arg)
                     {
                         default:
-                            Console.WriteLine($"Internal error: argument '{arg}' has not been implemented.");
+                            ShowError($"Internal - argument '{arg}' has not been implemented.");
                             return ProcessArgsResult.NotImplemented;
 
                         case "--json":
@@ -328,7 +328,7 @@ namespace PowerSupplyApp
                         case "--wavegen":
                             if (!WaveGen.Init(inst, sp) || !WaveGen.Restart())
                             {
-                                Console.WriteLine(WaveGen.GetLastErrorMessage());
+                                ShowError(WaveGen.GetLastErrorMessage());
                                 return ProcessArgsResult.Error;
                             }
 
@@ -376,7 +376,7 @@ namespace PowerSupplyApp
                             }
                             else
                             {
-                                Console.WriteLine($"ERROR: Missing <DELAY_MS> parameter for '{args[i]}'.");
+                                ShowError($"Missing <DELAY_MS> parameter for '{args[i]}'.");
                                 return ProcessArgsResult.MissingParameter;
                             }
                             break;
@@ -1155,7 +1155,7 @@ namespace PowerSupplyApp
             else
             {
                 // TODO improve, output each unprocessed arg.
-                Console.WriteLine($"Could not process '{args[index]}'");
+                ShowError($"Could not process '{args[index]}'");
                 return false;
             }
         }
@@ -1168,7 +1168,7 @@ namespace PowerSupplyApp
             }
             else
             {
-                Console.WriteLine($"Could not process '{arg}'");
+                ShowError($"Could not process '{arg}'");
                 return false;
             }
         }
@@ -1182,7 +1182,7 @@ namespace PowerSupplyApp
             }
             else
             {
-                Console.WriteLine($"Could not process '{args[index]}' ({args[index + 1]})");
+                ShowError($"Could not process '{args[index]}' ({args[index + 1]})");
                 return false;
             }
         }
