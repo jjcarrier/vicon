@@ -46,8 +46,8 @@ namespace PowerSupplyApp
                 "Enumerates all connected power supplies and returns device information for each. If set, all other processing is ignored.");
             grid.AddRow("  [white]--blink[/]", "",
                 "For visual identification, the lock indicator will blink 10x (~1x per second).");
-            grid.AddRow("  [white]--serial[/], [white]--sn[/]", "[silver]<SERIAL>[/]",
-                "Connects to the power supply that matches the specified [white]SERIAL[/] number.");
+            grid.AddRow("  [white]--serial[/], [white]--sn[/]", "[silver]<SERIAL> [[ALIAS]][/]",
+                "Connects to the power supply that matches the specified [white]SERIAL[/] number. Specify [white]ALIAS[/] to assign an alias which may be presented during device selection or enumeration (persistently stored in settings).");
             grid.AddRow("  [white]--interactive[/]", "[[MS_POLL]]",
                 "Switches into an interactive text-based user interface. Set [white]MS_POLL[/] to reduce the update/poll rate (default = 1, range 0-100), value persists between executions. This currently affects the perceived responsiveness of the UI but lowers the CPU utilization.");
             grid.AddRow("  [white]--theme[/]", "<THEME>",
@@ -117,6 +117,7 @@ namespace PowerSupplyApp
                 int argIndex = 0;
                 for (int i = 0; i < args.Length; i++)
                 {
+                    int numArgParams = 0;
                     string arg = args[i].ToLower();
 
                     switch (arg)
@@ -160,23 +161,41 @@ namespace PowerSupplyApp
                             break;
                         case "--serial":
                         case "--sn":
-                            if (argIndex + 1 < args.Length)
+                            numArgParams = CountArgsBetweenFlags(args, i);
+                            if (numArgParams >= 1)
                             {
                                 psuSerialNumber = args[argIndex + 1];
-                                if (psuSerialNumber.StartsWith('-'))
+                                if (numArgParams >= 2)
                                 {
-                                    psuSerialNumber = string.Empty;
-                                    return ProcessArgsResult.MissingParameter;
+                                    var existingAlias = settings.AliasedDevices.FirstOrDefault(a => a.Serial == psuSerialNumber);
+                                    if (existingAlias != null)
+                                    {
+                                        existingAlias.Alias = args[argIndex + 2];
+                                    }
+                                    else
+                                    {
+                                        settings.AliasedDevices.Add(new AliasedDevice
+                                        {
+                                            Serial = psuSerialNumber,
+                                            Alias = args[argIndex + 2]
+                                        });
+                                    }
+
+                                    // For now, save immediately.
+                                    // It may be desired to wait until arguments are processed before saving.
+                                    settings.Save();
                                 }
                             }
                             else
                             {
+                                psuSerialNumber = string.Empty;
                                 return ProcessArgsResult.MissingParameter;
                             }
                             break;
                         case "--interactive":
                             interactiveMode = true;
-                            if ((i + 1 < args.Length) && !args[i + 1].StartsWith('-'))
+                            numArgParams = CountArgsBetweenFlags(args, i);
+                            if (numArgParams == 1)
                             {
                                 bool result = uint.TryParse(args[i + 1], out uint ms);
                                 if (result)
@@ -197,6 +216,7 @@ namespace PowerSupplyApp
                                     ShowError($"Invalid <MS_POLL> parameter for '{args[i]}'.");
                                     return ProcessArgsResult.InvalidParameter;
                                 }
+                                i += numArgParams;
                             }
                             break;
                         case "--json":
@@ -331,7 +351,7 @@ namespace PowerSupplyApp
                         case "--serial":
                         case "--sn":
                             // Only increment the index, already handled in first pass.
-                            i++;
+                            i += CountArgsBetweenFlags(args, i);
                             break;
 
                         case "--blink":
