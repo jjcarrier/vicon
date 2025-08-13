@@ -364,5 +364,5 @@ This project is licensed under the MIT license. For more details please refer to
 [LICENSE](./LICENSE). This software depends on the following third party
 components:
 
-- Spectre.Console (https://github.com/spectreconsole/spectre.console/LICENSE.md)
+- Spectre.Console (https://github.com/spectreconsole/spectre.console/blob/main/LICENSE.md)
 - HidSharp (https://github.com/IntergatedCircuits/HidSharp/blob/master/License.txt)
