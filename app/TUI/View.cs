@@ -84,12 +84,13 @@ namespace PowerSupplyApp
         /// </summary>
         private static void EnterAlternateScreenBuffer()
         {
+            // Hide cursor.
+            Console.Write($"{(char)27}[?25l");
             if (!interactiveMode || altBufferState)
                 return;
 
-            // Enter alt-screen buffer and hide cursor.
+            // Enter alt-screen buffer.
             Console.Write($"{(char)27}[?1049h");
-            Console.Write($"{(char)27}[?25l");
             altBufferState = true;
         }
 
@@ -105,7 +106,6 @@ namespace PowerSupplyApp
             Console.Write($"{(char)27}[?1049l");
             Console.Write($"{(char)27}[?25h");
             altBufferState = false;
-
         }
 
         /// <summary>
