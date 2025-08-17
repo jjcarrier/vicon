@@ -3,6 +3,7 @@ namespace PowerSupplyApp
     public enum Operation
     {
         None,
+        Delay,
         ReadOutput,
         ReadActState,
         ReadSystem,
