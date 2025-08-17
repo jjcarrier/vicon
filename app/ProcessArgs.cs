@@ -406,14 +406,13 @@ namespace PowerSupplyApp
                             if ((i + 1 < args.Length) &&
                                 (!args[i + 1].StartsWith('-')))
                             {
-                                int milliseconds;
-                                result = int.TryParse(args[i + 1], out milliseconds);
+                                result = int.TryParse(args[i + 1], out int milliseconds);
                                 if (result)
                                 {
                                     Thread.Sleep(milliseconds);
                                 }
 
-                                if (!CheckResult(result, args, ref i))
+                                if (!CheckResult(Operation.Delay, result, args, ref i))
                                 {
                                     return ProcessArgsResult.InvalidParameter;
                                 }
@@ -526,14 +525,14 @@ namespace PowerSupplyApp
 
                     if (readOp)
                     {
-                        if (!CheckResult(ProcessRead(inst, op, args, i), args, ref i))
+                        if (!CheckResult(op, ProcessRead(inst, op, args, i), args, ref i))
                         {
                             return ProcessArgsResult.ReadError;
                         }
                     }
                     else if (writeOp)
                     {
-                        if (!CheckResult(ProcessWrite(inst, op, args, i), args, ref i))
+                        if (!CheckResult(op, ProcessWrite(inst, op, args, i), args, ref i))
                         {
                             return ProcessArgsResult.WriteError;
                         }
@@ -744,16 +743,9 @@ namespace PowerSupplyApp
 
             if (!result)
             {
-                if (serializeAsJson)
-                {
-                    // TODO: more detailed error codes should be reported here for debugging purposes.
-                    // Ex: "Not connected", "Out of Range", "Invalid command", "Invalid state"
-                    SerializeObject(new CommandResponse
-                    {
-                        Command = op,
-                        Response = new { Error = "Operation Failed" }
-                    });
-                }
+                // For now, no additional details are captured here.
+                // A more helpful "result" datatype should be used to pass the
+                // error information up to the logic that reports errors.
                 return 0;
             }
 
@@ -1214,7 +1206,7 @@ namespace PowerSupplyApp
             return result ? argsToProcess : 0;
         }
 
-        private static bool CheckResult(int numArgsProcessed, string[] args, ref int index)
+        private static bool CheckResult(Operation op, int numArgsProcessed, string[] args, ref int index)
         {
             if (numArgsProcessed > 0)
             {
@@ -1223,13 +1215,24 @@ namespace PowerSupplyApp
             }
             else
             {
-                // TODO improve, output each unprocessed arg.
-                ShowError($"Could not process '{args[index]}'");
+                string msg = $"Could not process argument ({args[index]})";
+                if (serializeAsJson)
+                {
+                    SerializeObject(new CommandResponse
+                    {
+                        Command = op,
+                        Response = new { Error = msg }
+                    });
+                }
+                else
+                {
+                    ShowError(msg);
+                }
                 return false;
             }
         }
 
-        private static bool CheckResult(bool result, string arg)
+        private static bool CheckResult(Operation op, bool result, string arg)
         {
             if (result)
             {
@@ -1237,12 +1240,24 @@ namespace PowerSupplyApp
             }
             else
             {
-                ShowError($"Could not process '{arg}'");
+                string msg = $"Could not process argument ({arg})";
+                if (serializeAsJson)
+                {
+                    SerializeObject(new CommandResponse
+                    {
+                        Command = op,
+                        Response = new { Error = msg }
+                    });
+                }
+                else
+                {
+                    ShowError(msg);
+                }
                 return false;
             }
         }
 
-        private static bool CheckResult(bool result, string[] args, ref int index)
+        private static bool CheckResult(Operation op, bool result, string[] args, ref int index)
         {
             if (result)
             {
@@ -1251,7 +1266,19 @@ namespace PowerSupplyApp
             }
             else
             {
-                ShowError($"Could not process '{args[index]}' ({args[index + 1]})");
+                string msg = $"Could not process argument ({args[index]}) value ({args[index + 1]})";
+                if (serializeAsJson)
+                {
+                    SerializeObject(new CommandResponse
+                    {
+                        Command = op,
+                        Response = new { Error = msg }
+                    });
+                }
+                else
+                {
+                    ShowError(msg);
+                }
                 return false;
             }
         }
