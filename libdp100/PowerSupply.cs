@@ -533,11 +533,16 @@ namespace LibDP100
                 if (Presets[Output.Preset] == null)
                 {
                     Presets[Output.Preset] = new PowerSupplySetpoint(Output.Preset);
+                    result = GetPreset(Output.Preset);
                 }
+            }
 
+            if (result == PowerSupplyResult.OK)
+            {
                 // Output state affects the volatile state of a preset (group).
-                Presets[Output.Preset].Copy(Output.Setpoint);
-                presetsValid[Output.Preset] = true;
+                // This does not include OVP/OCP.
+                Presets[Output.Preset].Voltage = Output.Setpoint.Voltage;
+                Presets[Output.Preset].Current = Output.Setpoint.Current;
             }
 
             return result;
