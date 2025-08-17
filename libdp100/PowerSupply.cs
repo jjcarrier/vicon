@@ -765,6 +765,11 @@ namespace LibDP100
                 return PowerSupplyResult.DeviceNotConnected;
             }
 
+            if (preset >= NumPresets)
+            {
+                return PowerSupplyResult.OutOfRange;
+            }
+
             PowerSupplyResult result = PowerSupplyResult.OK;
 
             if (!presetsValid[preset])
@@ -794,6 +799,11 @@ namespace LibDP100
             if (!Connected)
             {
                 return PowerSupplyResult.DeviceNotConnected;
+            }
+
+            if (preset >= NumPresets)
+            {
+                return PowerSupplyResult.OutOfRange;
             }
 
             PowerSupplyResult result = PowerSupplyResult.OK;
@@ -844,6 +854,11 @@ namespace LibDP100
                 return PowerSupplyResult.DeviceNotConnected;
             }
 
+            if (preset >= NumPresets)
+            {
+                return PowerSupplyResult.OutOfRange;
+            }
+
             PowerSupplyResult result = PowerSupplyResult.OK;
 
             if (!presetsValid[preset])
@@ -880,6 +895,11 @@ namespace LibDP100
             if (!Connected)
             {
                 return PowerSupplyResult.DeviceNotConnected;
+            }
+
+            if (preset >= NumPresets)
+            {
+                return PowerSupplyResult.OutOfRange;
             }
 
             PowerSupplyResult result = PowerSupplyResult.OK;
@@ -1025,6 +1045,11 @@ namespace LibDP100
             if (!Connected)
             {
                 return PowerSupplyResult.DeviceNotConnected;
+            }
+
+            if (preset >= NumPresets)
+            {
+                return PowerSupplyResult.OutOfRange;
             }
 
             byte[] outputReport = GetBasicSetCommand(BasicSetSubOpCode.GetGroupInfo, preset);
