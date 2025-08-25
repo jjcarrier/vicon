@@ -1270,7 +1270,20 @@ namespace LibDP100
         {
             if (DebugMode)
             {
-                Console.WriteLine("Output Report:\n");
+                // Print OperationCode and BasicSetSubOpCode if applicable
+                if (data.Length > 2)
+                {
+                    var opCode = (OperationCode)data[2];
+                    if (opCode == OperationCode.BasicSet && data.Length > 6)
+                    {
+                        var basicSetSubOpCode = (BasicSetSubOpCode)(data[5] & 0xF0);
+                        Console.WriteLine($"Output Report ({opCode}, {basicSetSubOpCode}):");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Output Report ({opCode}):");
+                    }
+                }
                 PrintReportHex(data);
             }
         }
@@ -1283,7 +1296,11 @@ namespace LibDP100
         {
             if (DebugMode)
             {
-                Console.WriteLine("Input Report:\n");
+                if (data.Length > 2)
+                {
+                    var opCode = (OperationCode)data[2];
+                    Console.WriteLine($"Input Report ({opCode}):");
+                }
                 PrintReportHex(data);
             }
         }
@@ -1308,12 +1325,7 @@ namespace LibDP100
                 }
             }
 
-            // Print a final new line if the last line was not completed
-            if ((minLen + dataLen) % 16 != 0)
-            {
-                Console.WriteLine("");
-            }
-
+            Console.WriteLine("");
             Console.WriteLine("");
         }
 
