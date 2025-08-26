@@ -238,7 +238,20 @@ namespace PowerSupplyApp
                 case KeyboardEvent.SetPreset7:
                 case KeyboardEvent.SetPreset8:
                 case KeyboardEvent.SetPreset9:
-                    supply.UsePreset((byte)(keyEvent - KeyboardEvent.SetPreset0));
+                    supply.UsePreset((byte)(keyEvent - KeyboardEvent.SetPreset0), fromNonVolatile: true);
+                    sp = new PowerSupplySetpoint(supply.Output.Setpoint);
+                    break;
+                case KeyboardEvent.RecallPreset0:
+                case KeyboardEvent.RecallPreset1:
+                case KeyboardEvent.RecallPreset2:
+                case KeyboardEvent.RecallPreset3:
+                case KeyboardEvent.RecallPreset4:
+                case KeyboardEvent.RecallPreset5:
+                case KeyboardEvent.RecallPreset6:
+                case KeyboardEvent.RecallPreset7:
+                case KeyboardEvent.RecallPreset8:
+                case KeyboardEvent.RecallPreset9:
+                    supply.UsePreset((byte)(keyEvent - KeyboardEvent.RecallPreset0), fromNonVolatile: false);
                     sp = new PowerSupplySetpoint(supply.Output.Setpoint);
                     break;
                 case KeyboardEvent.SavePreset0: // Saving to Preset 0 does not appear to work.

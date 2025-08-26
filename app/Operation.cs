@@ -12,6 +12,7 @@ namespace PowerSupplyApp
         WriteOutputOn,
         WriteOutputOff,
         UsePreset,
+        RecallPreset,
         WriteVoltage,
         WriteCurrent,
         WriteSetpoint,

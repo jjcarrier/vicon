@@ -104,11 +104,6 @@ namespace LibDP100
         private bool[] presetsValid = new bool[NumPresets];
 
         /// <summary>
-        /// Indicates that the "Presets" object has been applied to the volatile preset's state.
-        /// </summary>
-        private bool[] presetsLoaded = new bool[NumPresets];
-
-        /// <summary>
         /// Indicates that the "SystemParams" object has been populated with valid data.
         /// </summary>
         private bool systemParamsValid = false;
@@ -886,11 +881,11 @@ namespace LibDP100
         /// Used to switch to a preconfigured preset.
         /// </summary>
         /// <param name="preset">The preset index (range 0-9).</param>
-        /// <returns>
+        /// <param name="fromNonVolatile">When set, the non-volatile state of teh preset is used.</param>
         /// On success, returns <see cref="PowerSupplyResult.OK"/>.
         /// On failure, a relevant error result will be returned.
         /// </returns>
-        public PowerSupplyResult UsePreset(byte preset)
+        public PowerSupplyResult UsePreset(byte preset, bool fromNonVolatile)
         {
             if (!Connected)
             {
@@ -924,23 +919,34 @@ namespace LibDP100
                 Output.Preset = preset;
 
                 // Make sure the local copy of the preset is valid before proceeding to copy.
-                if (!presetsValid[preset])
+                if (!presetsValid[preset] || fromNonVolatile)
                 {
                     result = GetPreset(preset);
                 }
             }
 
-            if (result == PowerSupplyResult.OK)
+            if (fromNonVolatile)
             {
-                if (!presetsLoaded[preset])
+                if (result == PowerSupplyResult.OK)
                 {
                     result = SetOutput(Presets[preset]);
                 }
+                if (result == PowerSupplyResult.OK)
+                {
+                    Output.Setpoint.Copy(Presets[preset]);
+                }
             }
-
-            if (result == PowerSupplyResult.OK)
+            else
             {
-                Output.Setpoint.Copy(Presets[preset]);
+                if (result == PowerSupplyResult.OK)
+                {
+                    result = GetOutput();
+                }
+
+                if (result == PowerSupplyResult.OK)
+                {
+                    result = SetOutput(Output.Setpoint);
+                }
             }
 
             return result;

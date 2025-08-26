@@ -702,7 +702,7 @@ namespace PowerSupplyApp
                     case ConsoleKey.D8:
                     case ConsoleKey.D9:
                         byte preset = (byte)(key.KeyChar - '0');
-                        return (KeyboardEvent.SavePreset0 + preset);
+                        return KeyboardEvent.SavePreset0 + preset;
 
                     default:
                         return KeyboardEvent.None;
@@ -723,7 +723,7 @@ namespace PowerSupplyApp
                     case ConsoleKey.D8:
                     case ConsoleKey.D9:
                         byte preset = (byte)(key.Key - '0');
-                        return (KeyboardEvent.SavePreset0 + preset);
+                        return KeyboardEvent.SavePreset0 + preset;
 
                     default:
                         return KeyboardEvent.None;
@@ -733,6 +733,19 @@ namespace PowerSupplyApp
             {
                 switch (key.Key)
                 {
+                    case ConsoleKey.D0:
+                    case ConsoleKey.D1:
+                    case ConsoleKey.D2:
+                    case ConsoleKey.D3:
+                    case ConsoleKey.D4:
+                    case ConsoleKey.D5:
+                    case ConsoleKey.D6:
+                    case ConsoleKey.D7:
+                    case ConsoleKey.D8:
+                    case ConsoleKey.D9:
+                        byte preset = (byte)(key.KeyChar - '0');
+                        return KeyboardEvent.RecallPreset0 + preset;
+
                     case ConsoleKey.UpArrow:
                         return KeyboardEvent.IncrementDigit;
                     case ConsoleKey.DownArrow:
@@ -812,69 +825,100 @@ namespace PowerSupplyApp
             }
             else
             {
-                switch (key.KeyChar)
+                switch (key.Key)
                 {
-                    case '\0':
-                    case '\f':
+                    case ConsoleKey.UpArrow:
+                    case ConsoleKey.DownArrow:
+                    case ConsoleKey.RightArrow:
+                    case ConsoleKey.LeftArrow:
+                    case ConsoleKey.Enter:
+                    case ConsoleKey.L:
                         // This is related to:
                         // Navigation keys, and other keystrokes involving
                         // Control/Shift/Alt. For instance: "Ctrl + Shift + L"
                         return GetKeyboardEventExtended(key);
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
+                    case ConsoleKey.D0:
+                    case ConsoleKey.D1:
+                    case ConsoleKey.D2:
+                    case ConsoleKey.D3:
+                    case ConsoleKey.D4:
+                    case ConsoleKey.D5:
+                    case ConsoleKey.D6:
+                    case ConsoleKey.D7:
+                    case ConsoleKey.D8:
+                    case ConsoleKey.D9:
+                        byte preset = (byte)(key.Key - ConsoleKey.D0);
                         if (key.Modifiers.HasFlag(ConsoleModifiers.Alt))
                         {
-                            return GetKeyboardEventExtended(key);
+                            return KeyboardEvent.SavePreset0 + preset;
+                        }
+                        else if (key.Modifiers.HasFlag(ConsoleModifiers.Shift))
+                        {
+                            return KeyboardEvent.SetPreset0 + preset;
                         }
                         else
                         {
-                            byte preset = (byte)(key.KeyChar - '0');
-                            return (KeyboardEvent.SetPreset0 + preset);
+                            return KeyboardEvent.RecallPreset0 + preset;
                         }
-                    case 'w':
-                        return KeyboardEvent.IncrementVoltage;
-                    case 'W':
-                        return KeyboardEvent.IncrementVoltage10x;
-                    case 's':
-                        return KeyboardEvent.DecrementVoltage;
-                    case 'S':
-                        return KeyboardEvent.DecrementVoltage10x;
-                    case 'd':
-                        return KeyboardEvent.IncrementCurrent;
-                    case 'D':
-                        return KeyboardEvent.IncrementCurrent10x;
-                    case 'a':
-                        return KeyboardEvent.DecrementCurrent;
-                    case 'A':
-                        return KeyboardEvent.DecrementCurrent10x;
-                    case '=':
-                    case '+':
-                        return KeyboardEvent.OutputOn;
-                    case '-':
-                    case '_':
-                        return KeyboardEvent.OutputOff;
-                    case '`':
-                    case '~':
-                        return KeyboardEvent.OutputToggle;
-                    case 'q':
-                    case 'Q':
+                    case ConsoleKey.W:
+                        if (key.KeyChar == 'w')
+                        {
+                            return KeyboardEvent.IncrementVoltage;
+                        }
+                        else
+                        {
+                            return KeyboardEvent.IncrementVoltage10x;
+                        }
+                    case ConsoleKey.S:
+                        if (key.KeyChar == 's')
+                        {
+                            return KeyboardEvent.DecrementVoltage;
+                        }
+                        else
+                        {
+                            return KeyboardEvent.DecrementVoltage10x;
+                        }
+                    case ConsoleKey.D:
+                        if (key.KeyChar == 'd')
+                        {
+                            return KeyboardEvent.IncrementCurrent;
+                        }
+                        else
+                        {
+                            return KeyboardEvent.IncrementCurrent10x;
+                        }
+                    case ConsoleKey.A:
+                        if (key.KeyChar == 'a')
+                        {
+                            return KeyboardEvent.DecrementCurrent;
+                        }
+                        else
+                        {
+                            return KeyboardEvent.DecrementCurrent10x;
+                        }
+                    case ConsoleKey.Q:
                         return KeyboardEvent.Quit;
-                    case '?':
-                    case '/':
-                        return KeyboardEvent.ShowControls;
-                    case 'i':
-                    case 'I':
+                    case ConsoleKey.I:
                         return KeyboardEvent.ShowDeviceInfo;
                     default:
-                        return KeyboardEvent.None;
+                        // Process keys that partially fall under OEM designations.
+                        switch (key.KeyChar)
+                        {
+                            case '+':
+                            case '=':
+                                return KeyboardEvent.OutputOn;
+                            case '-':
+                            case '_':
+                                return KeyboardEvent.OutputOff;
+                            case '?':
+                            case '/':
+                                return KeyboardEvent.ShowControls;
+                            case '`':
+                            case '~':
+                                return KeyboardEvent.OutputToggle;
+                            default:
+                                return KeyboardEvent.None;
+                        }
                 }
             }
         }
