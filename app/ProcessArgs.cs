@@ -59,7 +59,9 @@ namespace PowerSupplyApp
             grid.AddRow("  [white]--delay[/], [white]-d[/]", "[silver]<MS>[/]",
                 "Specifies the time to delay before processing the next argument. Where [white]MS[/] is the delay time in milliseconds.");
             grid.AddRow("  [white]--preset[/], [white]-p[/]", "[silver]<INDEX>[/]",
-                "Loads preset parameters where [white]INDEX[/] is the preset to load. (units: index, range: 0-9).");
+                "Loads preset (non-volatile-state) parameters where [white]INDEX[/] is the preset to load. (units: index, range: 0-9).");
+            grid.AddRow("  [white]--recall[/], [white]-r[/]", "[silver]<INDEX>[/]",
+                "Loads preset (volatile-state) parameters where [white]INDEX[/] is the preset to load. (units: index, range: 0-9).");
             grid.AddRow("  [white]--wavegen[/], [white]--awg[/]", "[silver]<FNAME>[/]",
                 "Generates a waveform based on the JSON file specified by [white]FNAME[/]. This file consists of a: 'loop-count', 'milliseconds', and 'points' keys. The 'points' is an array of 'mv' and 'ma' key-values, and an optional 'ms' key-value to delay the execution of the next point.");
             grid.AddRow("  [white]--read-dev[/], [white]--rd[/]", "",
@@ -250,6 +252,8 @@ namespace PowerSupplyApp
                             break;
                         case "--preset":
                         case "-p":
+                        case "--recall":
+                        case "-r":
                         case "--read-out":
                         case "--ro":
                         case "--read-act":
@@ -470,6 +474,12 @@ namespace PowerSupplyApp
                             op = Operation.UsePreset;
                             break;
 
+                        case "--recall":
+                        case "-r":
+                            writeOp = true;
+                            op = Operation.RecallPreset;
+                            break;
+
                         case "--mv":
                         case "--millivolts":
                             writeOp = true;
@@ -572,7 +582,18 @@ namespace PowerSupplyApp
                     result = ushort.TryParse(args[index + 1], out parsedValue);
                     if (result)
                     {
-                        result = inst.UsePreset((byte)parsedValue) == PowerSupplyResult.OK;
+                        result = inst.UsePreset((byte)parsedValue, fromNonVolatile: true) == PowerSupplyResult.OK;
+                    }
+                    break;
+
+                case Operation.RecallPreset:
+                    argsToProcess = 2;
+                    if (index + 1 >= args.Length) break;
+
+                    result = ushort.TryParse(args[index + 1], out parsedValue);
+                    if (result)
+                    {
+                        result = inst.UsePreset((byte)parsedValue, fromNonVolatile: false) == PowerSupplyResult.OK;
                     }
                     break;
 
@@ -787,6 +808,7 @@ namespace PowerSupplyApp
                     break;
 
                 case Operation.UsePreset:
+                case Operation.RecallPreset:
                     if (serializeAsJson)
                     {
                         result = SerializeObject(new CommandResponse
