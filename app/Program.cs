@@ -76,6 +76,7 @@ namespace PowerSupplyApp
 
             if (psu != null)
             {
+                psu.DebugMode = debug;
                 psu.GetDeviceInfo();
                 psu.GetSystemParams();
                 psu.Reload();
@@ -114,11 +115,13 @@ namespace PowerSupplyApp
                     if ((recordedHash != computedConfigHash) || (recordedHash != computedDeviceHash))
                     {
                         ExitAlternateScreenBuffer();
+                        psu.DebugMode = debug;
                         result = CheckConfiguration(psu, devSettings, computedConfigHash, computedDeviceHash, recordedHash);
                         if (result != ProcessArgsResult.Ok)
                         {
                             return (int)result;
                         }
+                        psu.DebugMode = false;
                         EnterAlternateScreenBuffer();
                     }
                 }
@@ -128,9 +131,6 @@ namespace PowerSupplyApp
                 ShowError("Could not initialize DP100!");
                 return (int)ProcessArgsResult.InitializationFailed;
             }
-
-            // Only permit debug mode in non-interactive mode.
-            psu.DebugMode = !interactiveMode && debug;
 
             sp = new PowerSupplySetpoint(psu.Output.Setpoint);
 

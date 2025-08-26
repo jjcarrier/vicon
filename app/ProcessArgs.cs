@@ -365,7 +365,7 @@ namespace PowerSupplyApp
                             }
 
                             theme = settings.GetTheme();
-                            RunInteractiveMode(TimeSpan.FromMilliseconds(settings.PollRate));
+                            RunInteractiveMode(TimeSpan.FromMilliseconds(settings.PollRate), debug);
                             break;
 
                         case "--awg":

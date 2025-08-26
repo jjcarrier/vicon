@@ -32,7 +32,7 @@ namespace PowerSupplyApp
             e.Cancel = true;
         }
 
-        public static void RunInteractiveMode(TimeSpan sleepTime)
+        public static void RunInteractiveMode(TimeSpan sleepTime, bool debug)
         {
             if (psu == null)
             {
@@ -40,7 +40,6 @@ namespace PowerSupplyApp
             }
 
             runInteractive = true;
-            EnterAlternateScreenBuffer();
             Console.CancelKeyPress += OnCancelKeyPress;
             Console.Title = psu.Device.Type;
 
@@ -48,7 +47,9 @@ namespace PowerSupplyApp
             psu.GetSystemParams();
             sys = new PowerSupplySystemParams(psu.SystemParams);
 
+            psu.DebugMode = false;
             psu.ActiveStateEvent += ReceiveActiveState;
+            EnterAlternateScreenBuffer();
             psu.StartWorkerThread(sleepTime);
 
             if (wavegenMode)
@@ -64,6 +65,7 @@ namespace PowerSupplyApp
 
             psu.StopWorkerThread();
             ExitAlternateScreenBuffer();
+            psu.DebugMode = debug;
         }
 
         public static void RunWaveGenMode()
