@@ -261,6 +261,28 @@ namespace PowerSupplyApp
         }
 
         /// <summary>
+        /// Gets the Table for the notices.
+        /// </summary>
+        /// <param name="title">The title of the notice table.</param>
+        /// <param name="notices">The list of notices.</param>
+        /// <returns>The Table containing the notices.</returns>
+        public static Table GetNoticesTable(string title, List<Notice> notices)
+        {
+            var table = new Table();
+            table.Title($" {title} ", new Style(foreground: Color.Black, background: Color.Yellow));
+            table.AddColumn("ID");
+            table.AddColumn("Severity");
+            table.AddColumn("Type");
+            table.AddColumn("Applied In");
+            table.AddColumn("Message");
+            foreach (var n in notices)
+            {
+                table.AddRow(n.Id, n.Severity, n.Type, n.Version, n.Message);
+            }
+            return table;
+       }
+
+        /// <summary>
         /// Gets the Grid for the user controls.
         /// </summary>
         /// <returns>The Grid containing the user controls.</returns>

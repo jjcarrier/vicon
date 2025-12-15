@@ -1,0 +1,9 @@
+[
+    {
+        "id": "WN0001",
+        "severity": "WARNING",
+        "type": "Functional",
+        "version": "v1.1.0",
+        "message": "Keys 0-9 now load the volatile preset state. Use SHIFT + 0-9 to restore a non-volatile preset."
+    }
+]
