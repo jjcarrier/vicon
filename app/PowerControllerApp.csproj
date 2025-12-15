@@ -14,6 +14,8 @@
     <PackageProjectUrl>https://github.com/jjcarrier/vicon</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/jjcarrier/vicon</RepositoryUrl>
+    <FileVersion>1.1.0.0</FileVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,6 +51,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="vicon.notices.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="vicon.settings.schema.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -1,4 +1,5 @@
 using LibDP100;
+using System.Reflection;
 using System.Security.Cryptography;
 
 namespace PowerSupplyApp
@@ -18,6 +19,24 @@ namespace PowerSupplyApp
         // Holds the user requested setpoint (which may or may not match the actual state of the device).
         private static PowerSupplySetpoint sp = new(0);
         private static PowerSupplySystemParams sys = new();
+
+        private static string GetCurrentAppVersion()
+        {
+            return Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
+        }
+
+        private static int CompareVersions(string a, string b)
+        {
+            // Strip leading 'v' or 'V' characters
+            string normalizedA = a.TrimStart('v', 'V');
+            string normalizedB = b.TrimStart('v', 'V');
+
+            if (Version.TryParse(normalizedA, out var va) && Version.TryParse(normalizedB, out var vb))
+            {
+                return va.CompareTo(vb);
+            }
+            return string.Compare(normalizedA, normalizedB, StringComparison.OrdinalIgnoreCase);
+        }
 
         private static int Main(string[] args)
         {

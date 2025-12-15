@@ -8,6 +8,16 @@ namespace PowerSupplyApp.TUI
     public class JsonSettings
     {
         /// <summary>
+        /// The cached version of the loaded application. Used to determine the
+        /// last version of the application that was loaded and potentially offer
+        /// migration options. This is also used to check for out-dated notices
+        /// which can be ignored if the user has not last run an older version of
+        /// the software.
+        /// </summary>
+        [JsonPropertyName("version")]
+        public string Version { get; set; } = "";
+
+        /// <summary>
         /// Defines the polling rate used during interactive mode. Range 0-100 ms.
         /// </summary>
         [JsonPropertyName("poll-rate-ms")]
@@ -35,6 +45,12 @@ namespace PowerSupplyApp.TUI
         /// </summary>
         [JsonPropertyName("devices")]
         public List<AliasedDevice> AliasedDevices { get; set; } = [];
+
+        /// <summary>
+        /// A list of notice IDs the user has acknowledged.
+        /// </summary>
+        [JsonPropertyName("acknowledged-notices")]
+        public List<string> AcknowledgedNotices { get; set; } = [];
 
         /// <summary>
         /// The file containing the theme description setting.
@@ -158,6 +174,7 @@ namespace PowerSupplyApp.TUI
                 JsonSettings? loadedSettings = JsonSerializer.Deserialize<JsonSettings>(json, serializationOptions);
                 if (loadedSettings != null)
                 {
+                    Version = loadedSettings.Version;
                     theme = ColorThemes.GetTheme(loadedSettings.Theme);
                     PollRate = loadedSettings.PollRate;
 
@@ -176,6 +193,7 @@ namespace PowerSupplyApp.TUI
                         }
                     }
                     AliasedDevices = loadedSettings.AliasedDevices;
+                    AcknowledgedNotices = loadedSettings.AcknowledgedNotices;
                 }
             }
             catch (Exception)

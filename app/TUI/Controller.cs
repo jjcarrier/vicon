@@ -1,6 +1,7 @@
 using LibDP100;
 using PowerSupplyApp.TUI;
 using Spectre.Console;
+using System.Text.Json;
 
 namespace PowerSupplyApp
 {
@@ -30,6 +31,146 @@ namespace PowerSupplyApp
         {
             runInteractive = false;
             e.Cancel = true;
+        }
+
+        public readonly struct NoticeProcessResult
+        {
+            public bool ShouldSave { get; }
+            public int? ExitCode { get; }
+
+            public NoticeProcessResult(bool shouldSave, int? exitCode)
+            {
+                ShouldSave = shouldSave;
+                ExitCode = exitCode;
+            }
+
+            public static NoticeProcessResult None => new(false, null);
+        }
+
+        /// <summary>
+        /// Show any unacknowledged notices to the user and prompt for acknowledgement.
+        /// </summary>
+        /// <returns>Result indicating whether settings should be saved and whether to exit.</returns>
+        public static NoticeProcessResult ShowNotices()
+        {
+            if (settings == null)
+            {
+                return NoticeProcessResult.None;
+            }
+
+            var lastVersion = string.IsNullOrWhiteSpace(settings.Version) ? "0.0.0" : settings.Version;
+            var currentVersion = GetCurrentAppVersion();
+            settings.Version = currentVersion;
+
+            // Load notices from file
+            List<Notice>? notices = null;
+            string noticesJson = "vicon.notices.json";
+            try
+            {
+                var noticesPath = Path.Combine(AppContext.BaseDirectory, noticesJson);
+                if (File.Exists(noticesPath))
+                {
+                    var json = File.ReadAllText(noticesPath);
+                    var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    notices = JsonSerializer.Deserialize<List<Notice>>(json, opts);
+                }
+            }
+            catch
+            {
+                AnsiConsole.MarkupLine($"[red]ERROR: Please reinstall, \"{noticesJson}\" corrupt.[/]");
+
+                return new NoticeProcessResult(false, 1);
+            }
+
+            if (notices == null || notices.Count == 0)
+            {
+                return NoticeProcessResult.None;
+            }
+
+            // If downgrading, remove acknowledgements for notices that belong to versions newer than the current app.
+            var isDowngrade = CompareVersions(currentVersion, lastVersion) < 0;
+            var removedAcks = new List<string>();
+            if (isDowngrade)
+            {
+                foreach (var ack in settings.AcknowledgedNotices.ToList())
+                {
+                    var notice = notices.FirstOrDefault(n => n.Id == ack);
+                    if (notice != null && CompareVersions(notice.Version, currentVersion) > 0)
+                    {
+                        settings.AcknowledgedNotices.Remove(ack);
+                        removedAcks.Add(ack);
+                    }
+                }
+
+                // Save settings immediately after removing acknowledgements
+                if (removedAcks.Count != 0)
+                {
+                    settings.Save();
+                }
+            }
+
+            // Show only new notices (currentVersion >= n.Version) that are unacknowledged.
+            // Exclude notices whose acknowledgements were just removed - they shouldn't be re-acknowledged.
+            var noticesToShow = notices
+                .Where(n =>
+                    !removedAcks.Contains(n.Id) &&
+                    ((CompareVersions(currentVersion, n.Version) >= 0 && !settings.AcknowledgedNotices.Contains(n.Id)) ||
+                    (lastVersion != "0.0.0" && CompareVersions(n.Version, lastVersion) > 0 && CompareVersions(currentVersion, n.Version) >= 0)))
+                .OrderBy(n => Version.TryParse((n.Version ?? string.Empty).TrimStart('v', 'V'), out var v) ? v : new Version(0, 0))
+                .ThenBy(n => n.Id)
+                .ToList();
+
+            if (removedAcks.Count != 0)
+            {
+                AnsiConsole.MarkupLine($"[yellow]WARNING: Some notice acknowledgements were removed because the application version was downgraded (was {lastVersion}, now {currentVersion}). Please be aware of important functional changes.[/]");
+                AnsiConsole.WriteLine();
+
+                var removedNotices = notices.Where(n => removedAcks.Contains(n.Id)).ToList();
+                if (removedNotices.Count != 0)
+                {
+                    Table removedNoticesTable = GetNoticesTable("Removed Acknowledgements", removedNotices);
+                    AnsiConsole.Write(removedNoticesTable);
+                    AnsiConsole.WriteLine("Re-run application to continue.");
+
+                    return new NoticeProcessResult(true, 1);
+                }
+
+                AnsiConsole.WriteLine();
+            }
+
+            if (noticesToShow.Count == 0)
+            {
+                settings.Version = currentVersion;
+                return new NoticeProcessResult(true, null);
+            }
+
+            Table noticeTab = GetNoticesTable("Important Notices", noticesToShow);
+            AnsiConsole.Write(noticeTab);
+            AnsiConsole.WriteLine();
+
+            // Accept or Reject the notices. Rejecting exits the application immediately.
+            var action = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                .Title("All notices must be acknowledged/accepted to continue:")
+                .AddChoices(["Accept", "Reject"]));
+
+            if (action == "Accept")
+            {
+                foreach (var n in noticesToShow)
+                {
+                    if (!settings.AcknowledgedNotices.Contains(n.Id))
+                    {
+                        settings.AcknowledgedNotices.Add(n.Id);
+                    }
+                }
+
+                AnsiConsole.WriteLine("Notices acknowledged. Re-run application to continue.");
+                return new NoticeProcessResult(true, 0);
+            }
+            else
+            {
+                AnsiConsole.WriteLine("Notices were rejected. Exiting application.");
+                return new NoticeProcessResult(false, 1);
+            }
         }
 
         public static void RunInteractiveMode(TimeSpan sleepTime, bool debug)

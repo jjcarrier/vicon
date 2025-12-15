@@ -131,7 +131,7 @@ namespace PowerSupplyApp
                             return ProcessArgsResult.OkExitNow;
                         case "--version":
                         case "-v":
-                            Console.WriteLine("v1.0.0");
+                            Console.WriteLine("v" + GetCurrentAppVersion());
                             return ProcessArgsResult.OkExitNow;
                         case "--config":
                             Console.WriteLine(settings.GetUserSettingsFilePath());
@@ -313,6 +313,23 @@ namespace PowerSupplyApp
                     ShowError("Failed to store settings!");
                     return ProcessArgsResult.StoreError;
                 }
+            }
+
+            // Show any unacknowledged notices on startup and prompt for user acknowledgement.
+            var noticeResult = ShowNotices();
+            if (noticeResult.ShouldSave)
+            {
+                if (!settings.Save())
+                {
+                    ShowError("Failed to store settings!");
+                    return ProcessArgsResult.StoreError;
+                }
+            }
+
+            if (noticeResult.ExitCode.HasValue)
+            {
+                Environment.Exit(noticeResult.ExitCode.Value);
+                return ProcessArgsResult.OkExitNow;
             }
 
             return ProcessArgsResult.Ok;
