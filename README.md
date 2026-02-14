@@ -3,14 +3,18 @@
 [![CI](https://github.com/jjcarrier/vicon/actions/workflows/ci.yml/badge.svg)](https://github.com/jjcarrier/vicon/actions/workflows/ci.yml)
 
 > [!WARNING]
-> This repository is in an early release state and is subject to breaking
-> changes, faulty behavior, and/or incomplete functionality. Please use extra
-> caution while in this state. There is no guarantee that the functionality
-> currently provided will remain compatible/available in future revisions. With
-> that said, feedback/suggestions/bug reports are very much welcome and should
-> be issued via a GitHub issue. It is highly recommended to review the issues
-> page prior to use to understand any known issues with the tool so you may
-> assess the risk of using this while in this early release state.
+> First time users, please exercise caution. Experiment while the device
+> under test is under direct supervision to prevent possible harm.
+>
+> There is no guarantee that the functionality currently provided will remain
+> compatible/available in future revisions. A best effort notification system
+> is in place to help make users aware of possible breaking changes. Use extra
+> caution during these events.
+>
+> Feedback/suggestions/bug reports are very much welcome and should be issued via
+> a GitHub issue. It is highly recommended to review the issues page prior to
+> use to understand any known issues with the tool so you may assess the risk of
+> using this while in this early release state.
 
 <!-- markdownlint-disable -->
 <p align="center">
