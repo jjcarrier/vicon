@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <StartupObject>PowerSupplyApp.Program</StartupObject>
     <AssemblyName>vicon</AssemblyName>
-    <Copyright>Copyright 2024-2025 Jon Carrier</Copyright>
+    <Copyright>Copyright 2024-2026 Jon Carrier</Copyright>
     <Title>VI Power Controller Console for ATK-DP100</Title>
     <Company>Jon Carrier</Company>
     <Authors>Jon Carrier</Authors>
