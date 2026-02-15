@@ -2,6 +2,22 @@
 
 [![CI](https://github.com/jjcarrier/vicon/actions/workflows/ci.yml/badge.svg)](https://github.com/jjcarrier/vicon/actions/workflows/ci.yml)
 
+## Description
+
+`vicon` : (vī'con) Short for V-I-Console and a play on the pronunciation of viking.
+
+A cross-platform CLI/TUI for controlling the AlienTek DP100 (ATK-DP100) over USB.
+
+<!-- markdownlint-disable -->
+<p align="center">
+  <img
+    width="300"
+    src="images/drawing.svg"
+    alt="vicon – A power controller console"
+  />
+</p>
+<!-- markdownlint-enable -->
+
 > [!WARNING]
 > First time users, please exercise caution. Experiment while the device
 > under test is under direct supervision to prevent possible harm.
@@ -15,22 +31,6 @@
 > a GitHub issue. It is highly recommended to review the issues page prior to
 > use to understand any known issues with the tool so you may assess the risk of
 > using this while in this early release state.
-
-<!-- markdownlint-disable -->
-<p align="center">
-  <img
-    width="300"
-    src="images/drawing.svg"
-    alt="vicon – A power controller console"
-  />
-</p>
-<!-- markdownlint-enable -->
-
-## Description
-
-`vicon` : (vī'con) Short for V-I-Console and a play on the pronunciation of viking.
-
-A cross-platform CLI/TUI for controlling the AlienTek DP100 (ATK-DP100) over USB.
 
 ## Checklist / Features
 
@@ -62,7 +62,24 @@ Below is a basic overview of `vicon` functionality:
 - [x] Supports basic TUI theme option for user to select from one of the pre-defined
   color themes.
 
+<!-- markdownlint-disable -->
+<p align="center">
+  <img
+    width="500"
+    src="images/dp100.png"
+    alt="Alientek-DP100"
+  />
+</p>
+<!-- markdownlint-enable -->
+
 ## Software Requirements
+
+### Common
+
+The TUI uses special characters which may not be available in all font types.
+It is strongly recommended to use a Monospaced Nerd Font.
+[FiraCode Nerd Font Mono](https://github.com/Trzcin/Fira-Code-Nerd) is recommended
+however other fonts should work using similar styling.
 
 ### Windows
 
@@ -353,6 +370,29 @@ Import-Module <full_path_to_file>/VIConCompletion.psm1
 ```
 
 Add the above to your `$PROFILE` to make the changes persist between sessions.
+
+A bash completion script is also available in:
+
+```bash
+./completion/VIConCompletion.sh
+```
+
+Source it in your shell profile (for example `~/.bashrc`):
+
+```bash
+source /path/to/VIConCompletion.sh
+```
+
+Published releases contain an `install.sh` which will install this system-wide
+however it may require additional configuration in the shell environment. For
+instance for `zsh` it may be necessary to add the following to `~/.zshrc`:
+
+```zsh
+autoload bashcompinit && bashcompinit
+for completion_file in /etc/bash_completion.d/*; do
+    source "$completion_file"
+done
+```
 
 ### WireShark Dissector
 
