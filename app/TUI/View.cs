@@ -280,7 +280,7 @@ namespace PowerSupplyApp
                 table.AddRow(n.Id, n.Severity, n.Type, n.Version, n.Message);
             }
             return table;
-       }
+        }
 
         /// <summary>
         /// Gets the Grid for the user controls.

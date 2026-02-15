@@ -211,6 +211,30 @@ namespace LibDP100
             0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040
         ];
 
+#if false
+        // Use either a run-time or compile-time constant for the CRC
+        // lookup table.
+        private static readonly ushort[] Crc16Table = CreateCrc16Table();
+        private static ushort[] CreateCrc16Table()
+        {
+            const ushort polynomial = 0xA001;
+            ushort[] table = new ushort[256];
+            for (ushort i = 0; i < table.Length; ++i)
+            {
+                ushort value = i;
+                for (int j = 0; j < 8; ++j)
+                {
+                    if ((value & 1) != 0)
+                    value = (ushort)((value >> 1) ^ polynomial);
+                    else
+                    value >>= 1;
+                }
+                table[i] = value;
+            }
+            return table;
+        }
+#endif
+
         #endregion // Private Members
 
         /// <summary>
@@ -920,7 +944,7 @@ namespace LibDP100
         /// Used to switch to a preconfigured preset.
         /// </summary>
         /// <param name="preset">The preset index (range 0-9).</param>
-        /// <param name="fromNonVolatile">When set, the non-volatile state of teh preset is used.</param>
+        /// <param name="fromNonVolatile">When set, the non-volatile state of the preset is used.</param>
         /// On success, returns <see cref="PowerSupplyResult.OK"/>.
         /// On failure, a relevant error result will be returned.
         /// </returns>
