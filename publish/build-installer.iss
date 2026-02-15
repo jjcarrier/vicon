@@ -30,6 +30,7 @@ WizardStyle=modern
 DefaultDirName={autopf}\jjcarrier\vicon
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
+SetupIconFile="..\images\logo.ico"
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -41,8 +42,11 @@ Source: "build\win-x64\Spectre.Console.Cli.dll"; DestDir: "{app}\bin"; Flags: ig
 Source: "build\win-x64\Spectre.Console.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\vicon.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\vicon.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\vicon.notices.json"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\vicon.runtimeconfig.json"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\vicon.settings.schema.json"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "..\completion\VIConCompletion.psm1"; DestDir: "{app}\completion"; Flags: ignoreversion
+Source: "..\completion\VIConCompletion.sh"; DestDir: "{app}\completion"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Code]

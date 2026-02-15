@@ -108,6 +108,32 @@ function Publish-Artifact
     }
 }
 
+function New-TarBundle
+{
+    param(
+        [string]$ArchivePath,
+        [string]$SourceBuildPath,
+        [string]$BundleRoot
+    )
+
+    if (Test-Path -Path $BundleRoot) {
+        Remove-Item -Path $BundleRoot -Recurse -Force
+    }
+
+    New-Item -ItemType Directory -Path $BundleRoot | Out-Null
+
+    $bundleViconPath = Join-Path -Path $BundleRoot -ChildPath "vicon"
+    New-Item -ItemType Directory -Path $bundleViconPath | Out-Null
+
+    Copy-Item -Path (Join-Path -Path $SourceBuildPath -ChildPath "*") -Destination $bundleViconPath -Recurse -Force
+    Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath "..\udev") -Destination $BundleRoot -Recurse -Force
+    Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath "..\completion") -Destination $BundleRoot -Recurse -Force
+
+    tar -czf $ArchivePath -C $BundleRoot vicon udev completion
+
+    Remove-Item -Path $BundleRoot -Recurse -Force
+}
+
 Push-Location
 Set-Location $PSScriptRoot
 
@@ -131,9 +157,8 @@ $Runtimes | ForEach-Object {
         Compress-Archive -Path "$buildPath/$_/*" -DestinationPath "$artifactsPath/vicon-$Version-$_.$archiveType"
     } else {
         $archiveType = "tgz"
-        tar -czf "$artifactsPath/vicon-$Version-$_.$archiveType" `
-            -C "$buildPath/$_" . `
-            -C "$PSScriptRoot/.." udev
+        $bundleRoot = Join-Path -Path $artifactsPath -ChildPath "bundle-$_"
+        New-TarBundle -ArchivePath "$artifactsPath/vicon-$Version-$_.$archiveType" -SourceBuildPath "$buildPath/$_" -BundleRoot $bundleRoot
     }
 }
 
@@ -145,9 +170,8 @@ $Runtimes | ForEach-Object {
         Compress-Archive -Path "$standAloneBuildPath/$_/*" -DestinationPath "$artifactsPath/vicon-$Version-$_-standalone.$archiveType"
     } else {
         $archiveType = "tgz"
-        tar -czf "$artifactsPath/vicon-$Version-$_-standalone.$archiveType" `
-            -C "$standAloneBuildPath/$_" . `
-            -C "$PSScriptRoot/.." udev
+        $bundleRoot = Join-Path -Path $artifactsPath -ChildPath "bundle-$_-standalone"
+        New-TarBundle -ArchivePath "$artifactsPath/vicon-$Version-$_-standalone.$archiveType" -SourceBuildPath "$standAloneBuildPath/$_" -BundleRoot $bundleRoot
     }
 }
 
