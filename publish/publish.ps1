@@ -128,8 +128,10 @@ function New-TarBundle
     Copy-Item -Path (Join-Path -Path $SourceBuildPath -ChildPath "*") -Destination $bundleViconPath -Recurse -Force
     Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath "..\udev") -Destination $BundleRoot -Recurse -Force
     Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath "..\completion") -Destination $BundleRoot -Recurse -Force
+    Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath "install.sh") -Destination $BundleRoot -Force
+    Copy-Item -Path (Join-Path -Path $PSScriptRoot -ChildPath "uninstall.sh") -Destination $BundleRoot -Force
 
-    tar -czf $ArchivePath -C $BundleRoot vicon udev completion
+    tar -czf $ArchivePath -C $BundleRoot vicon udev completion install.sh uninstall.sh
 
     Remove-Item -Path $BundleRoot -Recurse -Force
 }
