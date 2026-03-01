@@ -27,7 +27,7 @@ WizardStyle=modern
 DefaultDirName={autopf}\jjcarrier\vicon
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-SetupIconFile="..\images\logo.ico"
+SetupIconFile="..\app\logo.ico"
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

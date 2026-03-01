@@ -16,8 +16,11 @@
     <RepositoryUrl>https://github.com/jjcarrier/vicon</RepositoryUrl>
     <FileVersion>1.1.0.0</FileVersion>
     <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
   </PropertyGroup>
-
+  <ItemGroup>
+    <Content Include="logo.ico" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md">
       <Pack>True</Pack>
