@@ -1716,15 +1716,15 @@ namespace LibDP100
         }
 
         /// <summary>
-        ///
+        /// Creates the command payload for setting system parameters.
         /// </summary>
-        /// <param name="otp"></param>
-        /// <param name="opp"></param>
-        /// <param name="backlight"></param>
-        /// <param name="volume"></param>
-        /// <param name="rpp"></param>
-        /// <param name="autoOn"></param>
-        /// <returns></returns>
+        /// <param name="otp">The over-temperature protection limit in degrees Celsius.</param>
+        /// <param name="opp">The over-power protection limit in 0.1 Watts.</param>
+        /// <param name="backlight">The display backlight brightness (range: 0-4).</param>
+        /// <param name="volume">The piezoelectric buzzer volume (range: 0-4).</param>
+        /// <param name="rpp">The reverse polarity protection state.</param>
+        /// <param name="autoOn">The output auto-on state.</param>
+        /// <returns>The output report payload for the command.</returns>
         private static byte[] SetSystemParamsCommand(ushort otp, ushort opp, byte backlight, byte volume, bool rpp, bool autoOn)
         {
             const byte maxVolume = 4;
