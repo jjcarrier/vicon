@@ -12,24 +12,51 @@ on:
     workflow_dispatch: {}
 
 jobs:
-  build:
+  prepare:
     runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: nuget restore
+
+      - name: Build Debug
+        run: dotnet build --no-restore --configuration Debug
+
+  build:
+    needs: prepare
+    runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         runtime: [win-x64, linux-x64, linux-arm64, linux-arm, osx-x64, osx-arm64]
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
-    - name: Restore dependencies
-      run: nuget restore
+      - name: Restore NuGet packages from cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-    - name: Build Debug
-      run: dotnet build --no-restore --configuration Debug
+      - name: Restore dependencies
+        run: nuget restore
 
-    - name: Build Release
-      run: ./publish/publish.ps1 -Runtimes ${{ matrix.runtime }} -Version "0.0.0"
+      - name: Build Release
+        run: ./publish/publish.ps1 -Runtimes ${{ matrix.runtime }} -Version "0.0.0"
