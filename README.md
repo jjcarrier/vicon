@@ -36,7 +36,7 @@ A cross-platform CLI/TUI for controlling the AlienTek DP100 (ATK-DP100) over USB
 
 Below is a basic overview of `vicon` functionality:
 
-- [x] Built on .NET 9 for cross-platform support.
+- [x] Built on .NET 10 for cross-platform support.
 - [x] CLI supported
   - Serial processing of commands, allowing for complex control sequences.
   - Normal-style and JSON-style output to provide option for human readability
@@ -83,8 +83,8 @@ however other fonts should work using similar styling.
 
 ### Windows
 
-- .NET 9 SDK
-  - `winget install Microsoft.DotNet.SDK.9`
+- .NET 10 SDK
+  - `winget install Microsoft.DotNet.SDK.10`
     - NOTE: A system reboot is recommended after install.
 - (Optional) Visual Studio 2022 / MSBuild / NuGet
   - Visual Studio `.NET desktop environment` workload.
@@ -92,8 +92,8 @@ however other fonts should work using similar styling.
 
 ### Linux
 
-- .NET 9 SDK
-  - `sudo apt install dotnet-sdk-9.0`
+- .NET 10 SDK
+  - `sudo apt install dotnet-sdk-10.0`
 - For user-level access install the provided udev-rule.
 
 ```sh
