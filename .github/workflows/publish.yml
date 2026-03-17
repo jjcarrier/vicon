@@ -1,0 +1,102 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string (e.g. v0.0.0)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Fetch all branches and tags
+        run: git fetch --all --tags
+
+      - name: Get latest main
+        run: |
+          git checkout main
+          git pull origin main
+
+      - name: Create tag for version
+        id: tag_version
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          git tag $VERSION
+          git push origin $VERSION
+
+      - name: Strip v prefix for script
+        id: strip_v
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          STRIPPED=${VERSION#v}
+          echo "::set-output name=version::${STRIPPED}"
+
+      - name: Run publish script
+        run: |
+          pwsh ./publish/publish.ps1 -Version "${{ steps.strip_v.outputs.version }}" -NoStandalone
+
+      - name: Upload Inno Setup installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: publish/build/setup-vicon-${{ steps.strip_v.outputs.version }}-win-x64.exe
+
+      - name: Upload Windows x64 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: publish/build/vicon-${{ steps.strip_v.outputs.version }}-win-x64.zip
+
+      - name: Upload Linux x64 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: publish/build/vicon-${{ steps.strip_v.outputs.version }}-linux-x64.zip
+
+      - name: Upload Linux arm64 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-arm64
+          path: publish/build/vicon-${{ steps.strip_v.outputs.version }}-linux-arm64.zip
+
+      - name: Upload macOS x64 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: osx-x64
+          path: publish/build/vicon-${{ steps.strip_v.outputs.version }}-osx-x64.zip
+
+      - name: Upload macOS arm64 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: osx-arm64
+          path: publish/build/vicon-${{ steps.strip_v.outputs.version }}-osx-arm64.zip
+
+      - name: Create draft GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          draft: true
+          files: |
+            publish/build/setup-vicon-${{ steps.strip_v.outputs.version }}-win-x64.exe
+            publish/build/vicon-${{ steps.strip_v.outputs.version }}-win-x64.zip
+            publish/build/vicon-${{ steps.strip_v.outputs.version }}-linux-x64.zip
+            publish/build/vicon-${{ steps.strip_v.outputs.version }}-linux-arm64.zip
+            publish/build/vicon-${{ steps.strip_v.outputs.version }}-osx-x64.zip
+            publish/build/vicon-${{ steps.strip_v.outputs.version }}-osx-arm64.zip

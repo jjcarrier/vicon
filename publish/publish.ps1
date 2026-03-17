@@ -3,9 +3,14 @@
 Builds release artifacts. Requires dotnet and inno-setup on system path.
 #>
 param(
+    # The runtimes to build for.
     [ArgumentCompletions('win-x64', 'linux-x64', 'linux-arm64', 'linux-arm', 'osx-x64', 'osx-arm64')]
     [Parameter()]
     [string[]]$Runtimes = @('win-x64', 'linux-x64', 'linux-arm64', 'linux-arm', 'osx-x64', 'osx-arm64'),
+
+    # Set to skip creating standalone artifacts
+    [Parameter()]
+    [switch]$NoStandalone,
 
     # Version string (i.e. "0.0.0")
     # If specified it will update the assembly version for the program prior to compilation with the version
@@ -164,16 +169,18 @@ $Runtimes | ForEach-Object {
     }
 }
 
-$Runtimes | ForEach-Object {
-    Write-Output "Publishing (stand-alone): $Version for $_ ..."
-    Publish-Artifact -Runtime $_ -SelfContained
-    if ($_ -eq 'win-x64') {
-        $archiveType = "zip"
-        Compress-Archive -Path "$standAloneBuildPath/$_/*" -DestinationPath "$artifactsPath/vicon-$Version-$_-standalone.$archiveType"
-    } else {
-        $archiveType = "tgz"
-        $bundleRoot = Join-Path -Path $artifactsPath -ChildPath "bundle-$_-standalone"
-        New-TarBundle -ArchivePath "$artifactsPath/vicon-$Version-$_-standalone.$archiveType" -SourceBuildPath "$standAloneBuildPath/$_" -BundleRoot $bundleRoot
+if (-not($NoStandalone)) {
+    $Runtimes | ForEach-Object {
+        Write-Output "Publishing (stand-alone): $Version for $_ ..."
+        Publish-Artifact -Runtime $_ -SelfContained
+        if ($_ -eq 'win-x64') {
+            $archiveType = "zip"
+            Compress-Archive -Path "$standAloneBuildPath/$_/*" -DestinationPath "$artifactsPath/vicon-$Version-$_-standalone.$archiveType"
+        } else {
+            $archiveType = "tgz"
+            $bundleRoot = Join-Path -Path $artifactsPath -ChildPath "bundle-$_-standalone"
+            New-TarBundle -ArchivePath "$artifactsPath/vicon-$Version-$_-standalone.$archiveType" -SourceBuildPath "$standAloneBuildPath/$_" -BundleRoot $bundleRoot
+        }
     }
 }
 
