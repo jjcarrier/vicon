@@ -36,20 +36,20 @@ jobs:
       - name: Create tag for version
         id: tag_version
         run: |
-          VERSION=${{ github.event.inputs.version }}
-          git tag $VERSION
-          git push origin $VERSION
+          $version = "${{ github.event.inputs.version }}"
+          git tag $version
+          git push origin $version
 
       - name: Strip v prefix for script
         id: strip_v
         run: |
-          VERSION=${{ github.event.inputs.version }}
-          STRIPPED=${VERSION#v}
-          echo "::set-output name=version::${STRIPPED}"
+          $version = "${{ github.event.inputs.version }}"
+          $stripped = $version -replace '^v', ''
+          echo "version=$stripped" >> $env:GITHUB_OUTPUT
 
       - name: Run publish script
         run: |
-          pwsh ./publish/publish.ps1 -Version "${{ steps.strip_v.outputs.version }}" -NoStandalone
+          ./publish/publish.ps1 -Version "${{ steps.strip_v.outputs.version }}" -NoStandalone
 
       - name: Upload Inno Setup installer
         uses: actions/upload-artifact@v4
