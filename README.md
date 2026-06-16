@@ -61,6 +61,7 @@ Below is a basic overview of `vicon` functionality:
 - [x] Supports a TUI lock function to prevent accidental button presses
 - [x] Supports basic TUI theme option for user to select from one of the pre-defined
   color themes.
+- [x] Supports a SCPI-like socket server interface for additional automation options.
 
 <!-- markdownlint-disable -->
 <p align="center">
@@ -134,8 +135,9 @@ Build the project via:
 dotnet build
 ```
 
-Add the build directory to your PowerShell `$PROFILE` to make the command
-available from any directory.
+Add the build directory to your PowerShell `$PROFILE`, Bash's `bash.rc`, or other
+shell run configuration file of your choosing to make the command available from
+any directory.
 
 Run the follow command for help documentation:
 
@@ -247,6 +249,65 @@ vicon --interactive
 > for post-interactive commands to execute. This way, a safe series of operations
 > may be performed at conclusion of this mode regardless of whether the user
 > exits with `q` keystroke or `Ctrl + C`.
+
+### SCPI Server Mode
+
+The application can host a socket-based SCPI-like control endpoint with
+`--server` and an `IP:PORT` endpoint:
+
+```pwsh
+vicon --server 127.0.0.1:5025
+```
+
+If `--interactive` is also set, the TUI continues to run while the server
+accepts remote control commands:
+
+```pwsh
+vicon --interactive --server 127.0.0.1:5025
+```
+
+Notes:
+
+- `--server` can run headless or alongside `--interactive`.
+- Commands are newline-delimited and ASCII.
+- Multiple commands can be sent in a single line using `;` separators.
+- `QUIT` closes the current client connection.
+- `EXIT` closes the current client and stops the server.
+
+### SCPI Client Mode
+
+The application can also execute supported CLI operations against a remote
+SCPI-like server:
+
+```pwsh
+vicon --client 127.0.0.1:5025 --read-out
+vicon --client 127.0.0.1:5025 --mv 5000 --ma 1000 --on
+```
+
+Notes:
+
+- `--interactive` is currently not supported with `--client`.
+- `--load`, `--save`, `--check`, `--enumerate`, and `--serial` remain local-device features and are not supported with `--client`.
+
+Supported SCPI-like commands:
+
+- `*IDN?`
+- `SYST:DEV?`
+- `OUTP?`, `OUTP <0|1|OFF|ON>`
+- `PRES?`, `PRES:READ? <0-9>`
+- `SOUR:VOLT?`, `SOUR:VOLT <mV>`
+- `SOUR:CURR?`, `SOUR:CURR <mA>`
+- `SOUR:VOLT:PROT?`, `SOUR:VOLT:PROT <mV>`
+- `SOUR:CURR:PROT?`, `SOUR:CURR:PROT <mA>`
+- `SYST:PROT:POW?`, `SYST:PROT:POW <0.1W>`
+- `SYST:PROT:TEMP?`, `SYST:PROT:TEMP <C>`
+- `SYST:RPP?`, `SYST:RPP <0|1>`
+- `SYST:AUTO?`, `SYST:AUTO <0|1>`
+- `SYST:VOL?`, `SYST:VOL <0-4>`
+- `SYST:BACK?`, `SYST:BACK <0-4>`
+- `MEAS:VOLT?`, `MEAS:CURR?`, `MEAS:POW?`, `MEAS:ALL?`
+- `PRES:USE <0-9>`, `PRES:RECALL <0-9>`
+- `SYST:HELP?`, `SYST:ERR?`
 
 ### TUI Overview
 

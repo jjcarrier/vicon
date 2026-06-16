@@ -15,6 +15,7 @@ namespace PowerSupplyApp
         private static bool runInteractive;
         private static bool showControls = false;
         private static bool showDeviceInfo = false;
+        private static readonly object tuiRenderLock = new();
 
         // Handles the layout of the user interface.
         // Used to easily switch between different screens/views.
@@ -256,11 +257,17 @@ namespace PowerSupplyApp
                 return;
             }
 
-            while (runInteractive && psu.Connected)
+            while (runInteractive)
             {
-                if (ProcessKeys(psu))
+                PowerSupply? currentPsu = psu;
+                if (!scpiServerRefreshInProgress && (currentPsu == null || !currentPsu.Connected))
                 {
-                    psu.SignalRunWorker();
+                    break;
+                }
+
+                if (currentPsu != null && ProcessKeys(currentPsu))
+                {
+                    currentPsu.SignalRunWorker();
                 }
                 Thread.Sleep(10);
             }
@@ -479,24 +486,27 @@ namespace PowerSupplyApp
 
         private static void ReceiveActiveState(PowerSupplyActiveState activeState)
         {
-            if (showControls)
+            lock (tuiRenderLock)
             {
-                layout["Root"].Update(GetControlsPanel());
-            }
-            else if (psu != null)
-            {
-                if (showDeviceInfo)
+                if (showControls)
                 {
-                    layout["Root"].Update(GetDeviceInfoPanel(psu));
+                    layout["Root"].Update(GetControlsPanel());
                 }
-                else
+                else if (psu != null)
                 {
-                    layout["Root"].Update(GetDataGrid(psu, sp, sys, activeState));
+                    if (showDeviceInfo)
+                    {
+                        layout["Root"].Update(GetDeviceInfoPanel(psu));
+                    }
+                    else
+                    {
+                        layout["Root"].Update(GetDataGrid(psu, sp, sys, activeState));
+                    }
                 }
-            }
 
-            Console.SetCursorPosition(0, 0);
-            AnsiConsole.Write(layout);
+                Console.SetCursorPosition(0, 0);
+                AnsiConsole.Write(layout);
+            }
         }
 
         private static void Blinker(PowerSupplyActiveState activeState)

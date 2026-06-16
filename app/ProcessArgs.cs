@@ -6,9 +6,19 @@ using System.Text.Json;
 
 namespace PowerSupplyApp
 {
+    internal enum ScpiConnectionMode
+    {
+        None,
+        Server,
+        Client
+    }
+
     internal partial class Program
     {
         private static bool interactiveMode = false;
+        private static ScpiConnectionMode scpiConnectionMode = ScpiConnectionMode.None;
+        private static string scpiEndpointAddress = "127.0.0.1";
+        private static int scpiEndpointPort = 5025;
         private static bool wavegenMode = false;
         private static bool enumerate = false;
         private static string psuSerialNumber = string.Empty;
@@ -35,7 +45,7 @@ namespace PowerSupplyApp
             grid.AddRow("  [white]--config[/]", "",
                 "Prints the path to the user settings file used by this tool.");
             grid.AddRow("  [white]--save[/]", "",
-                "Saves the devices configured state to the application's settings. This action takes place after all other mutable actions complete successfully.");
+                "Saves the device's configured state to the application's settings. This action takes place after all other mutable actions complete successfully.");
             grid.AddRow("  [white]--load[/]", "",
                 "Loads the application's device settings into the device. This action takes place before all other mutable actions. If no settings exist for the device the application exits with an exit code.");
             grid.AddRow("  [white]--check[/]", "",
@@ -50,6 +60,10 @@ namespace PowerSupplyApp
                 "Connects to the power supply that matches the specified [white]SERIAL[/] number. Specify [white]ALIAS[/] to assign an alias which may be presented during device selection or enumeration (persistently stored in settings).");
             grid.AddRow("  [white]--interactive[/]", "[[MS_POLL]]",
                 "Switches into an interactive text-based user interface. Set [white]MS_POLL[/] to reduce the update/poll rate (default = 1, range 0-100), value persists between executions. This currently affects the perceived responsiveness of the UI but lowers the CPU utilization.");
+            grid.AddRow("  [white]--server[/]", "<IP:PORT>",
+                "Starts a socket server that exposes SCPI-like commands on [white]IP:PORT[/]. When [white]--interactive[/] is also set, the TUI continues to run while the server accepts remote control commands.");
+            grid.AddRow("  [white]--client[/]", "<IP:PORT>",
+                "Connects to a remote SCPI-like server at [white]IP:PORT[/] and executes supported CLI commands over the network. [white]--interactive[/] is currently not supported in this mode.");
             grid.AddRow("  [white]--theme[/]", "<THEME>",
                 "Sets the interactive-mode's theme. Persists between executions. The [white]THEME[/] may be one of the following: 'classic', 'black-and-white', 'grey', 'dark-red', 'dark-green', 'dark-magenta', 'cyan', 'gold', 'blue', 'blue-violet'.");
             grid.AddRow("  [white]--json[/]", "",
@@ -221,6 +235,35 @@ namespace PowerSupplyApp
                                 i += numArgParams;
                             }
                             break;
+                        case "--server":
+                        case "--client":
+                            if ((i + 1 >= args.Length) || args[i + 1].StartsWith('-'))
+                            {
+                                ShowError($"Missing <IP:PORT> parameter for '{args[i]}'.");
+                                return ProcessArgsResult.MissingParameter;
+                            }
+
+                            if (!TryParseServerEndpoint(args[i + 1], out var endpointAddress, out var endpointPort))
+                            {
+                                ShowError($"Invalid <IP:PORT> parameter for '{args[i]}'.");
+                                return ProcessArgsResult.InvalidParameter;
+                            }
+
+                            ScpiConnectionMode requestedMode = arg == "--server"
+                                ? ScpiConnectionMode.Server
+                                : ScpiConnectionMode.Client;
+
+                            if ((scpiConnectionMode != ScpiConnectionMode.None) && (scpiConnectionMode != requestedMode))
+                            {
+                                ShowError("--server and --client are mutually exclusive options.");
+                                return ProcessArgsResult.InvalidParameter;
+                            }
+
+                            scpiConnectionMode = requestedMode;
+                            scpiEndpointAddress = endpointAddress;
+                            scpiEndpointPort = endpointPort;
+                            i++;
+                            break;
                         case "--json":
                             serializeAsJson = true;
                             break;
@@ -306,6 +349,24 @@ namespace PowerSupplyApp
                 return ProcessArgsResult.InvalidParameter;
             }
 
+            if ((scpiConnectionMode == ScpiConnectionMode.Client) && interactiveMode)
+            {
+                ShowError("--interactive is currently not supported when running in --client mode.");
+                return ProcessArgsResult.InvalidParameter;
+            }
+
+            if ((scpiConnectionMode == ScpiConnectionMode.Client) && enumerate)
+            {
+                ShowError("--enumerate is not supported when running in --client mode.");
+                return ProcessArgsResult.InvalidParameter;
+            }
+
+            if ((scpiConnectionMode == ScpiConnectionMode.Client) && (loadConfiguration || saveConfiguration || checkConfiguration))
+            {
+                ShowError("--load, --save, and --check are not supported when running in --client mode.");
+                return ProcessArgsResult.InvalidParameter;
+            }
+
             if (pollRateSet || themeSet)
             {
                 if (!settings.Save())
@@ -386,7 +447,26 @@ namespace PowerSupplyApp
                             }
 
                             theme = settings.GetTheme();
-                            RunInteractiveMode(TimeSpan.FromMilliseconds(settings.PollRate), debug);
+                            if (scpiConnectionMode == ScpiConnectionMode.Server)
+                            {
+                                RunInteractiveServerMode(TimeSpan.FromMilliseconds(settings.PollRate), debug, scpiEndpointAddress, scpiEndpointPort);
+                            }
+                            else
+                            {
+                                RunInteractiveMode(TimeSpan.FromMilliseconds(settings.PollRate), debug);
+                            }
+                            break;
+
+                        case "--server":
+                            if (!interactiveMode)
+                            {
+                                RunHeadlessServerMode(TimeSpan.FromMilliseconds(settings.PollRate), debug, scpiEndpointAddress, scpiEndpointPort);
+                            }
+                            i++;
+                            break;
+
+                        case "--client":
+                            i++;
                             break;
 
                         case "--awg":

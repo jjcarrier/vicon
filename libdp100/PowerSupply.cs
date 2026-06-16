@@ -345,6 +345,9 @@ namespace LibDP100
         public void Disconnect()
         {
             Connected = false;
+            outputValid = false;
+            systemParamsValid = false;
+            Array.Fill(presetsValid, false);
             Dispose();
         }
 
@@ -376,11 +379,17 @@ namespace LibDP100
         /// </summary>
         public void StopWorkerThread()
         {
-            workerThreadRun = false;
-
-            while (workerThread.ThreadState == System.Threading.ThreadState.Running)
+            if (!workerThreadRun && !workerThread.IsAlive)
             {
-                Thread.Yield();
+                return;
+            }
+
+            workerThreadRun = false;
+            workerThreadSleepCts.Cancel();
+
+            if (workerThread.IsAlive && Thread.CurrentThread != workerThread)
+            {
+                workerThread.Join();
             }
         }
 
@@ -1231,6 +1240,7 @@ namespace LibDP100
             if (hidStream != null)
             {
                 hidStream.Dispose();
+                hidStream = null;
             }
         }
 

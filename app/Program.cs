@@ -49,6 +49,11 @@ namespace PowerSupplyApp
                 return (int)result;
             }
 
+            if (scpiConnectionMode == ScpiConnectionMode.Client)
+            {
+                return (int)ProcessScpiClientArgs(args);
+            }
+
             int psuCount = Enumerator.Enumerate(settings.AliasedDevices);
 
             if (enumerate)
