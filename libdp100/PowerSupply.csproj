@@ -4,6 +4,11 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>libdp100</AssemblyName>
+    <Company>Jon Carrier</Company>
+    <Authors>Jon Carrier</Authors>
+    <Copyright>Copyright 2024-2026 Jon Carrier</Copyright>
+    <Description>Alientek-DP100 Library</Description>
   </PropertyGroup>
 
   <ItemGroup>
