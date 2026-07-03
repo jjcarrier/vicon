@@ -10,6 +10,9 @@
             "type": "string",
             "enum": ["classic", "black-and-white", "grey", "dark-red", "dark-green", "dark-magenta", "cyan", "gold", "blue", "blue-violet"]
         },
+        "hide-tui-help-footer": {
+            "type": "boolean"
+        },
         "devices": {
             "type": "array",
             "items": {

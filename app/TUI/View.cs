@@ -79,6 +79,8 @@ namespace PowerSupplyApp
         private static bool controlsLocked = false;
         private static bool altBufferState = false;
 
+        private static bool ShowTuiHelpFooter => !settings.HideTuiHelpFooter;
+
         /// <summary>
         /// Write the ANSI sequence to enter the alternate screen buffer.
         /// </summary>
@@ -455,8 +457,8 @@ namespace PowerSupplyApp
             const int numDataRows = 8;
             const int numSeparatorRows = 4;
             const int numHeaderFooterRows = 1;
-            const int numExtraRows = 5; // Preset, 1x Empty, V-Row, I-Row, Help Row
-            const int totalRows = numDataRows + numSeparatorRows + numHeaderFooterRows + numExtraRows;
+            int numExtraRows = ShowTuiHelpFooter ? 5 : 4; // Preset, 1x Empty, V-Row, I-Row, optional Help Row
+            int totalRows = numDataRows + numSeparatorRows + numHeaderFooterRows + numExtraRows;
             int rowIndex = 0;
             int h = Console.BufferHeight;
 
@@ -673,14 +675,20 @@ namespace PowerSupplyApp
         private static Grid GetDataGrid(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
         {
             string controlsCaption = wavegenMode ? "Press Q to Quit." : "Press Q to Quit. Press ? to Show Controls.";
-            return new Grid()
+            Grid grid = new Grid()
                 .AddColumns(1)
                 .AddRow(GetDataTable(supply, setpoint, system, active))
                 .AddRow(Align.Center(GetPresetGrid(supply.Output.Preset)))
                 .AddRow(new Rule().RuleStyle(scheme.TableAccent))
                 .AddRow(GetBarChartGrid(supply, active))
-                .AddEmptyRow()
-                .AddRow(new Markup(controlsCaption, scheme.Caption).Centered());
+                .AddEmptyRow();
+
+            if (ShowTuiHelpFooter)
+            {
+                grid.AddRow(new Markup(controlsCaption, scheme.Caption).Centered());
+            }
+
+            return grid;
         }
 
         /// <summary>

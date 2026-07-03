@@ -41,6 +41,12 @@ namespace PowerSupplyApp.TUI
         }
 
         /// <summary>
+        /// Hides the footer help line in the interactive TUI.
+        /// </summary>
+        [JsonPropertyName("hide-tui-help-footer")]
+        public bool HideTuiHelpFooter { get; set; } = false;
+
+        /// <summary>
         /// An optional list of device aliases to assist in device selection.
         /// </summary>
         [JsonPropertyName("devices")]
@@ -177,6 +183,7 @@ namespace PowerSupplyApp.TUI
                     Version = loadedSettings.Version;
                     theme = ColorThemes.GetTheme(loadedSettings.Theme);
                     PollRate = loadedSettings.PollRate;
+                    HideTuiHelpFooter = loadedSettings.HideTuiHelpFooter;
 
                     foreach (var dev in loadedSettings.AliasedDevices)
                     {
