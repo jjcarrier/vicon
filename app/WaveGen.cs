@@ -3,18 +3,18 @@ using System.Text.Json;
 
 namespace PowerSupplyApp
 {
-    public static class WaveGen
+    internal static class WaveGen
     {
         public static bool Running { get; set; } = false;
         public static WaveGenStatus LastErrorCode { get; set; } = WaveGenStatus.Ok;
 
-        private static PowerSupply psu = new();
+        private static IPowerSupplyBackend? psu;
         private static PowerSupplySetpoint sp = new PowerSupplySetpoint(0);
         private static ArbitraryWaveformGen? awg;
         private static bool awgBusy = false;
         private static int awgIndex = 0;
 
-        public static bool Init(PowerSupply psu, PowerSupplySetpoint setpoint)
+        public static bool Init(IPowerSupplyBackend psu, PowerSupplySetpoint setpoint)
         {
             WaveGen.psu = psu;
             sp = setpoint;
@@ -120,7 +120,7 @@ namespace PowerSupplyApp
 
         public static bool Run()
         {
-            if (!awgBusy || awg == null)
+            if (!awgBusy || awg == null || psu == null)
             {
                 return awgBusy;
             }

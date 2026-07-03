@@ -259,7 +259,7 @@ namespace PowerSupplyApp
 
             while (runInteractive)
             {
-                PowerSupply? currentPsu = psu;
+                IPowerSupplyBackend? currentPsu = psu;
                 if (!scpiServerRefreshInProgress && (currentPsu == null || !currentPsu.Connected))
                 {
                     break;
@@ -339,7 +339,7 @@ namespace PowerSupplyApp
             }
         }
 
-        private static bool ProcessKeys(PowerSupply supply)
+        private static bool ProcessKeys(IPowerSupplyBackend supply)
         {
             KeyboardEvent keyEvent = GetKeyboardEvent();
 

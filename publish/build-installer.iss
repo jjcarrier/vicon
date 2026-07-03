@@ -35,6 +35,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
 Source: "build\win-x64\HidSharp.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\libdp100.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "build\win-x64\libdp100soc.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\Spectre.Console.Cli.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\Spectre.Console.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "build\win-x64\vicon.dll"; DestDir: "{app}\bin"; Flags: ignoreversion

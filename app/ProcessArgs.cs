@@ -349,21 +349,9 @@ namespace PowerSupplyApp
                 return ProcessArgsResult.InvalidParameter;
             }
 
-            if ((scpiConnectionMode == ScpiConnectionMode.Client) && interactiveMode)
-            {
-                ShowError("--interactive is currently not supported when running in --client mode.");
-                return ProcessArgsResult.InvalidParameter;
-            }
-
             if ((scpiConnectionMode == ScpiConnectionMode.Client) && enumerate)
             {
                 ShowError("--enumerate is not supported when running in --client mode.");
-                return ProcessArgsResult.InvalidParameter;
-            }
-
-            if ((scpiConnectionMode == ScpiConnectionMode.Client) && (loadConfiguration || saveConfiguration || checkConfiguration))
-            {
-                ShowError("--load, --save, and --check are not supported when running in --client mode.");
                 return ProcessArgsResult.InvalidParameter;
             }
 
@@ -396,7 +384,7 @@ namespace PowerSupplyApp
             return ProcessArgsResult.Ok;
         }
 
-        private static ProcessArgsResult ProcessArgs(PowerSupply inst, string[] args)
+        private static ProcessArgsResult ProcessArgs(IPowerSupplyBackend inst, string[] args)
         {
             if (args.Length > 0)
             {
@@ -650,7 +638,7 @@ namespace PowerSupplyApp
             return 0;
         }
 
-        private static int ProcessWrite(PowerSupply inst, Operation op, string[] args, int index)
+        private static int ProcessWrite(IPowerSupplyBackend inst, Operation op, string[] args, int index)
         {
             bool result = false;
             ushort parsedValue = 0;
@@ -1113,7 +1101,7 @@ namespace PowerSupplyApp
         /// <param name="args"></param>
         /// <param name="index"></param>
         /// <returns>The number of arguments processed. <= 0 indicates an error.</returns>
-        private static int ProcessRead(PowerSupply inst, Operation op, string[] args, int index)
+        private static int ProcessRead(IPowerSupplyBackend inst, Operation op, string[] args, int index)
         {
             const byte maxPresetIndex = 9;
             int argsToProcess;

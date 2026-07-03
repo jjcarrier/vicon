@@ -134,7 +134,7 @@ namespace PowerSupplyApp
         /// <param name="supply">The device.</param>
         /// <param name="config">The stored configuration.</param>
         /// <returns>The number of differences detected.</returns>
-        private static int ShowDifferences(PowerSupply supply, ConfiguredState config)
+        private static int ShowDifferences(IPowerSupplyBackend supply, ConfiguredState config)
         {
             int AddDiff(Table table, string scope, string name, object deviceValue, object configValue)
             {
@@ -319,7 +319,7 @@ namespace PowerSupplyApp
         /// <param name="supply">The power supply instance.</param>
         /// <param name="activeState">The current state information of the device.</param>
         /// <returns>The <see cref="Grid"/> for the bar chart.</returns>
-        private static Grid GetBarChartGrid(PowerSupply supply, PowerSupplyActiveState activeState)
+        private static Grid GetBarChartGrid(IPowerSupplyBackend supply, PowerSupplyActiveState activeState)
         {
             int vo_limit = (activeState.VoltageOutputMax > supply.Presets[supply.Output.Preset].OVP) ?
                 supply.Presets[supply.Output.Preset].OVP : activeState.VoltageOutputMax;
@@ -451,7 +451,7 @@ namespace PowerSupplyApp
         /// <param name="system">The current system data.</param>
         /// <param name="active">The current active data.</param>
         /// <returns>The data <see cref="Table"/> containing the key power supply data.</returns>
-        private static Table GetDataTable(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
+        private static Table GetDataTable(IPowerSupplyBackend supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
         {
             const string voidDataString = "----";
             const int numDataRows = 8;
@@ -602,7 +602,7 @@ namespace PowerSupplyApp
         /// </summary>
         /// <param name="supply">The supply instance.</param>
         /// <returns>The panel providing device information.</returns>
-        private static Panel GetDeviceInfoPanel(PowerSupply supply)
+        private static Panel GetDeviceInfoPanel(IPowerSupplyBackend supply)
         {
             return new Panel(
                     Align.Center(GetDeviceInfoGrid(supply.Device).Expand(),
@@ -672,7 +672,7 @@ namespace PowerSupplyApp
         /// <param name="system">The current system parameters.</param>
         /// <param name="active">The active values received by the power supply.</param>
         /// <returns>The grid containing the current state of the device.</returns>
-        private static Grid GetDataGrid(PowerSupply supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
+        private static Grid GetDataGrid(IPowerSupplyBackend supply, PowerSupplySetpoint setpoint, PowerSupplySystemParams system, PowerSupplyActiveState active)
         {
             string controlsCaption = wavegenMode ? "Press Q to Quit." : "Press Q to Quit. Press ? to Show Controls.";
             Grid grid = new Grid()

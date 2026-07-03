@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using UsbPowerSupply = LibDP100.PowerSupply;
 
 namespace PowerSupplyApp
 {
@@ -13,7 +14,7 @@ namespace PowerSupplyApp
 
         private sealed class ScpiServerSession
         {
-            public ScpiServerSession(PowerSupply powerSupply, string serialNumber, bool debugMode, bool showTui, TimeSpan sleepTime)
+            public ScpiServerSession(IPowerSupplyBackend powerSupply, string serialNumber, bool debugMode, bool showTui, TimeSpan sleepTime)
             {
                 PowerSupply = powerSupply;
                 SerialNumber = serialNumber;
@@ -22,7 +23,7 @@ namespace PowerSupplyApp
                 SleepTime = sleepTime;
             }
 
-            public PowerSupply PowerSupply { get; set; }
+            public IPowerSupplyBackend PowerSupply { get; set; }
 
             public string SerialNumber { get; }
 
@@ -303,7 +304,7 @@ namespace PowerSupplyApp
             return string.Join(';', responses);
         }
 
-        private static void SynchronizeServerMirrors(PowerSupply inst)
+        private static void SynchronizeServerMirrors(IPowerSupplyBackend inst)
         {
             sys = new PowerSupplySystemParams(inst.SystemParams);
             sp = new PowerSupplySetpoint(inst.Output.Setpoint);
@@ -311,7 +312,7 @@ namespace PowerSupplyApp
 
         private static bool TryRefreshServerSession(ScpiServerSession session)
         {
-            PowerSupply previous = session.PowerSupply;
+            IPowerSupplyBackend previous = session.PowerSupply;
             scpiServerRefreshInProgress = true;
 
             try
@@ -325,7 +326,7 @@ namespace PowerSupplyApp
                 previous.Disconnect();
                 Thread.Sleep(150);
 
-                if (!TryCreateHeadlessServerPowerSupply(session.SerialNumber, session.DebugMode, out PowerSupply replacement))
+                if (!TryCreateHeadlessServerPowerSupply(session.SerialNumber, session.DebugMode, out IPowerSupplyBackend replacement))
                 {
                     return false;
                 }
@@ -348,12 +349,14 @@ namespace PowerSupplyApp
             }
         }
 
-        private static bool TryCreateHeadlessServerPowerSupply(string serialNumber, bool debugMode, out PowerSupply powerSupply)
+        private static bool TryCreateHeadlessServerPowerSupply(string serialNumber, bool debugMode, out IPowerSupplyBackend powerSupply)
         {
-            powerSupply = new PowerSupply
+            UsbPowerSupply usbPowerSupply = new()
             {
                 DebugMode = debugMode
             };
+
+            powerSupply = new UsbPowerSupplyBackend(usbPowerSupply);
 
             if ((powerSupply.Connect(serialNumber) != PowerSupplyResult.OK) ||
                 (powerSupply.GetDeviceInfo() != PowerSupplyResult.OK) ||
@@ -367,7 +370,7 @@ namespace PowerSupplyApp
             return true;
         }
 
-        private static string ProcessScpiCommand(PowerSupply inst, string command, out bool closeClient, out bool stopServer, out bool stateChanged)
+        private static string ProcessScpiCommand(IPowerSupplyBackend inst, string command, out bool closeClient, out bool stopServer, out bool stateChanged)
         {
             closeClient = false;
             stopServer = false;
@@ -407,7 +410,7 @@ namespace PowerSupplyApp
 
             if (cmd.Equals("SYST:HELP?", StringComparison.OrdinalIgnoreCase))
             {
-                return "*IDN?,SYST:DEV?,OUTP?,OUTP <0|1|OFF|ON>,PRES?,PRES:READ? <0-9>,SOUR:VOLT?,SOUR:VOLT <mV>,SOUR:CURR?,SOUR:CURR <mA>,SOUR:VOLT:PROT?,SOUR:VOLT:PROT <mV>,SOUR:CURR:PROT?,SOUR:CURR:PROT <mA>,SYST:PROT:POW?,SYST:PROT:POW <0.1W>,SYST:PROT:TEMP?,SYST:PROT:TEMP <C>,SYST:RPP?,SYST:RPP <0|1>,SYST:AUTO?,SYST:AUTO <0|1>,SYST:VOL?,SYST:VOL <0-4>,SYST:BACK?,SYST:BACK <0-4>,MEAS:VOLT?,MEAS:CURR?,MEAS:POW?,MEAS:ALL?,PRES:USE <0-9>,PRES:RECALL <0-9>,QUIT,EXIT (long-form keywords such as SYSTEM, SOURCE, OUTPUT, PRESET, MEASURE, PROTECTION, VOLTAGE, CURRENT, POWER, TEMPERATURE, DEVICE, VOLUME, BACKLIGHT are also accepted)";
+                return "*IDN?,SYST:DEV?,OUTP?,OUTP <0|1|OFF|ON>,PRES?,PRES:READ? <0-9>,PRES:WRITE <0-9>,<mV>,<mA>,<ovp>,<ocp>,SOUR:VOLT?,SOUR:VOLT <mV>,SOUR:CURR?,SOUR:CURR <mA>,SOUR:VOLT:PROT?,SOUR:VOLT:PROT <mV>,SOUR:CURR:PROT?,SOUR:CURR:PROT <mA>,SYST:PROT:POW?,SYST:PROT:POW <0.1W>,SYST:PROT:TEMP?,SYST:PROT:TEMP <C>,SYST:RPP?,SYST:RPP <0|1>,SYST:AUTO?,SYST:AUTO <0|1>,SYST:VOL?,SYST:VOL <0-4>,SYST:BACK?,SYST:BACK <0-4>,MEAS:VOLT?,MEAS:CURR?,MEAS:POW?,MEAS:ALL?,PRES:USE <0-9>,PRES:RECALL <0-9>,QUIT,EXIT (long-form keywords such as SYSTEM, SOURCE, OUTPUT, PRESET, MEASURE, PROTECTION, VOLTAGE, CURRENT, POWER, TEMPERATURE, DEVICE, VOLUME, BACKLIGHT are also accepted)";
             }
 
             if (cmd.Equals("SYST:ERR?", StringComparison.OrdinalIgnoreCase))
@@ -444,6 +447,13 @@ namespace PowerSupplyApp
 
                 var presetData = inst.Presets[presetIndex];
                 return FormattableString.Invariant($"{presetData.Voltage},{presetData.Current},{presetData.OVP},{presetData.OCP}");
+            }
+
+            if (TryParsePresetWrite(cmd, out presetIndex, out ushort presetVoltage, out ushort presetCurrent, out ushort presetOvp, out ushort presetOcp) && presetIndex <= 9)
+            {
+                PowerSupplyResult result = inst.SetPreset(presetIndex, presetVoltage, presetCurrent, presetOvp, presetOcp);
+                stateChanged = result == PowerSupplyResult.OK;
+                return result == PowerSupplyResult.OK ? "OK" : "ERR:IO";
             }
 
             if (TryParseBooleanSet(cmd, "OUTP", out bool requestedOutputOn))
@@ -750,7 +760,7 @@ namespace PowerSupplyApp
             return "ERR:UNSUPPORTED";
         }
 
-        private static void SynchronizeInteractiveState(PowerSupply inst)
+        private static void SynchronizeInteractiveState(IPowerSupplyBackend inst)
         {
             if (!interactiveMode)
             {
@@ -1765,6 +1775,32 @@ namespace PowerSupplyApp
 
             value = remainder;
             return true;
+        }
+
+        private static bool TryParsePresetWrite(string command, out byte preset, out ushort voltage, out ushort current, out ushort ovp, out ushort ocp)
+        {
+            preset = 0;
+            voltage = 0;
+            current = 0;
+            ovp = 0;
+            ocp = 0;
+
+            if (!TryParseCommandValue(command, "PRES:WRITE", out string raw))
+            {
+                return false;
+            }
+
+            string[] parts = raw.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 5)
+            {
+                return false;
+            }
+
+            return byte.TryParse(parts[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out preset) &&
+                ushort.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out voltage) &&
+                ushort.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out current) &&
+                ushort.TryParse(parts[3], NumberStyles.Integer, CultureInfo.InvariantCulture, out ovp) &&
+                ushort.TryParse(parts[4], NumberStyles.Integer, CultureInfo.InvariantCulture, out ocp);
         }
 
         private static string NormalizeScpiCommand(string command)

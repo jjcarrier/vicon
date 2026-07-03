@@ -1,4 +1,6 @@
 using LibDP100;
+using ScpiPowerSupply = LibDP100Soc.PowerSupply;
+using UsbPowerSupply = LibDP100.PowerSupply;
 using System.Reflection;
 using System.Security.Cryptography;
 
@@ -14,7 +16,7 @@ namespace PowerSupplyApp
         private static bool serializeAsJsonArray = false;
         private static int serializedOutput = 0;
         private static int numSerializedOutputs = 0;
-        private static PowerSupply? psu;
+        private static IPowerSupplyBackend? psu;
 
         // Holds the user requested setpoint (which may or may not match the actual state of the device).
         private static PowerSupplySetpoint sp = new(0);
@@ -51,50 +53,70 @@ namespace PowerSupplyApp
 
             if (scpiConnectionMode == ScpiConnectionMode.Client)
             {
-                return (int)ProcessScpiClientArgs(args);
-            }
-
-            int psuCount = Enumerator.Enumerate(settings.AliasedDevices);
-
-            if (enumerate)
-            {
-                return PrintEnumeration();
-            }
-
-            if (psuCount == 0)
-            {
-                ShowError("No DP100 detected!");
-                return (int)ProcessArgsResult.DeviceNotPresent;
-            }
-
-            if ((psuSerialNumber == string.Empty) && (psuCount > 1))
-            {
-                if (interactiveMode)
+                ScpiPowerSupply clientSupply = new(scpiEndpointAddress, scpiEndpointPort)
                 {
-                    EnterAlternateScreenBuffer();
-                    Console.SetCursorPosition(0, 0);
-                    psuSerialNumber = GetDeviceSelection(Enumerator.GetAliasedDevices());
-                }
-                else
+                    DebugMode = debug
+                };
+
+                psu = new ScpiPowerSupplyBackend(clientSupply);
+                PowerSupplyResult connectResult = string.IsNullOrEmpty(psuSerialNumber)
+                    ? psu.Connect()
+                    : psu.Connect(psuSerialNumber);
+
+                if (connectResult != PowerSupplyResult.OK)
                 {
-                    ShowError("Multiple DP100s detected. Please provide the --serial option!");
-                    return (int)ProcessArgsResult.SerialNumberRequired;
+                    ShowError($"Could not connect to SCPI server at {scpiEndpointAddress}:{scpiEndpointPort}.");
+                    return (int)ProcessArgsResult.DeviceNotPresent;
                 }
             }
-
-            if (!string.IsNullOrEmpty(psuSerialNumber))
+            else
             {
-                psu = Enumerator.GetDeviceBySerial(psuSerialNumber);
-            }
-            else if (psuCount == 1)
-            {
-                psuSerialNumber = Enumerator.GetAliasedDevices()[0].Serial;
-                psu = Enumerator.GetDeviceByIndex(0);
-            }
+                int psuCount = Enumerator.Enumerate(settings.AliasedDevices);
 
-            // Device selection done, release unused instances so that other
-            // applications may connect to them.
-            Enumerator.Done();
+                if (enumerate)
+                {
+                    return PrintEnumeration();
+                }
+
+                if (psuCount == 0)
+                {
+                    ShowError("No DP100 detected!");
+                    return (int)ProcessArgsResult.DeviceNotPresent;
+                }
+
+                if ((psuSerialNumber == string.Empty) && (psuCount > 1))
+                {
+                    if (interactiveMode)
+                    {
+                        EnterAlternateScreenBuffer();
+                        Console.SetCursorPosition(0, 0);
+                        psuSerialNumber = GetDeviceSelection(Enumerator.GetAliasedDevices());
+                    }
+                    else
+                    {
+                        ShowError("Multiple DP100s detected. Please provide the --serial option!");
+                        return (int)ProcessArgsResult.SerialNumberRequired;
+                    }
+                }
+
+                UsbPowerSupply? selectedSupply = null;
+                if (!string.IsNullOrEmpty(psuSerialNumber))
+                {
+                    selectedSupply = Enumerator.GetDeviceBySerial(psuSerialNumber);
+                }
+                else if (psuCount == 1)
+                {
+                    psuSerialNumber = Enumerator.GetAliasedDevices()[0].Serial;
+                    selectedSupply = Enumerator.GetDeviceByIndex(0);
+                }
+
+                Enumerator.Done();
+
+                if (selectedSupply != null)
+                {
+                    psu = new UsbPowerSupplyBackend(selectedSupply);
+                }
+            }
 
             AliasedDevice? devSettings = null;
 
@@ -183,7 +205,7 @@ namespace PowerSupplyApp
             return (int)result;
         }
 
-        private static (string computedConfigHash, string computedDeviceHash, string recordedHash) GetHashes(PowerSupply psu, AliasedDevice devSettings)
+        private static (string computedConfigHash, string computedDeviceHash, string recordedHash) GetHashes(IPowerSupplyBackend psu, AliasedDevice devSettings)
         {
             string computedConfigHash = devSettings.Config == null ? string.Empty : devSettings.Config.ComputeConfiguredHash();
             string computedDeviceHash = GetConfigurationHash(psu.SystemParams, psu.Presets);
@@ -191,7 +213,7 @@ namespace PowerSupplyApp
             return (computedConfigHash, computedDeviceHash, recordedHash);
         }
 
-        private static ProcessArgsResult CheckConfiguration(PowerSupply psu, AliasedDevice devSettings, string computedConfigHash, string computedDeviceHash, string recordedHash)
+        private static ProcessArgsResult CheckConfiguration(IPowerSupplyBackend psu, AliasedDevice devSettings, string computedConfigHash, string computedDeviceHash, string recordedHash)
         {
             ProcessArgsResult result = ProcessArgsResult.Ok;
 
@@ -305,7 +327,7 @@ namespace PowerSupplyApp
             return ProcessArgsResult.Ok;
         }
 
-        static bool SaveConfiguration(PowerSupply psu, AliasedDevice devSettings)
+        static bool SaveConfiguration(IPowerSupplyBackend psu, AliasedDevice devSettings)
         {
             if (devSettings.Config == null)
             {
@@ -336,7 +358,7 @@ namespace PowerSupplyApp
             return true;
         }
 
-        static void LoadConfiguration(PowerSupply psu, ConfiguredState? config)
+        static void LoadConfiguration(IPowerSupplyBackend psu, ConfiguredState? config)
         {
             if (config == null)
             {
@@ -351,7 +373,7 @@ namespace PowerSupplyApp
         }
 
         // Prints all settings which do not match between device and config
-        static int PrintConfigurationDiff(PowerSupply psu, ConfiguredState? config)
+        static int PrintConfigurationDiff(IPowerSupplyBackend psu, ConfiguredState? config)
         {
             if (config == null)
             {
