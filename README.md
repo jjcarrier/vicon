@@ -291,23 +291,44 @@ Notes:
 
 Supported SCPI-like commands:
 
-- `*IDN?`
-- `SYST:DEV?`
-- `OUTP?`, `OUTP <0|1|OFF|ON>`
-- `PRES?`, `PRES:READ? <0-9>`
-- `SOUR:VOLT?`, `SOUR:VOLT <mV>`
-- `SOUR:CURR?`, `SOUR:CURR <mA>`
-- `SOUR:VOLT:PROT?`, `SOUR:VOLT:PROT <mV>`
-- `SOUR:CURR:PROT?`, `SOUR:CURR:PROT <mA>`
-- `SYST:PROT:POW?`, `SYST:PROT:POW <0.1W>`
-- `SYST:PROT:TEMP?`, `SYST:PROT:TEMP <C>`
-- `SYST:RPP?`, `SYST:RPP <0|1>`
-- `SYST:AUTO?`, `SYST:AUTO <0|1>`
-- `SYST:VOL?`, `SYST:VOL <0-4>`
-- `SYST:BACK?`, `SYST:BACK <0-4>`
-- `MEAS:VOLT?`, `MEAS:CURR?`, `MEAS:POW?`, `MEAS:ALL?`
-- `PRES:USE <0-9>`, `PRES:RECALL <0-9>`
-- `SYST:HELP?`, `SYST:ERR?`
+Long-form keywords are also accepted case-insensitively for the command groups below. For example, `SYSTEM:DEVICE?`, `SOURCE:VOLTAGE?`, and `MEASURE:ALL?` are valid alongside their abbreviated forms. This only applies to keyword contractions such as `SYST`/`SYSTEM`; device-specific terms such as `RPP` remain unchanged.
+
+| Command | Description |
+|---------|-------------|
+| `*IDN?` | Returns an identification string in the form `AlienTek,<type>,<serial>,<software-version>`. |
+| `SYST:DEV?` | Returns detailed device metadata: type, serial number, manufacturing date, hardware version, software version, bootloader version, and software state. Long form accepted: `SYSTEM:DEVICE?`. |
+| `OUTP?` | Returns the current output state as `1` for on or `0` for off. Long form accepted: `OUTPUT?`. |
+| `OUTP <0\|1\|OFF\|ON>` | Sets the output state. Accepts `0`/`OFF` to disable output and `1`/`ON` to enable it. Long form accepted: `OUTPUT <...>`. |
+| `PRES?` | Returns the currently selected preset index `0-9`. Long form accepted: `PRESET?`. |
+| `PRES:READ? <0-9>` | Reads the specified preset and returns `voltage,current,ovp,ocp`. Long form accepted: `PRESET:READ? <0-9>`. |
+| `SOUR:VOLT?` | Returns the configured output voltage setpoint in millivolts. Long form accepted: `SOURCE:VOLTAGE?`. |
+| `SOUR:VOLT <mV>` | Sets the output voltage setpoint in millivolts. Long form accepted: `SOURCE:VOLTAGE <mV>`. |
+| `SOUR:CURR?` | Returns the configured output current setpoint in milliamps. Long form accepted: `SOURCE:CURRENT?`. |
+| `SOUR:CURR <mA>` | Sets the output current setpoint in milliamps. Long form accepted: `SOURCE:CURRENT <mA>`. |
+| `SOUR:VOLT:PROT?` | Returns the preset over-voltage protection level in millivolts. Long form accepted: `SOURCE:VOLTAGE:PROTECTION?`. |
+| `SOUR:VOLT:PROT <mV>` | Sets the preset over-voltage protection level in millivolts for the active preset. Long form accepted: `SOURCE:VOLTAGE:PROTECTION <mV>`. |
+| `SOUR:CURR:PROT?` | Returns the preset over-current protection level in milliamps. Long form accepted: `SOURCE:CURRENT:PROTECTION?`. |
+| `SOUR:CURR:PROT <mA>` | Sets the preset over-current protection level in milliamps for the active preset. Long form accepted: `SOURCE:CURRENT:PROTECTION <mA>`. |
+| `SYST:PROT:POW?` | Returns the system over-power protection threshold in units of `0.1 W`. Long form accepted: `SYSTEM:PROTECTION:POWER?`. |
+| `SYST:PROT:POW <0.1W>` | Sets the system over-power protection threshold in units of `0.1 W`. Long form accepted: `SYSTEM:PROTECTION:POWER <0.1W>`. |
+| `SYST:PROT:TEMP?` | Returns the system over-temperature protection threshold in degrees Celsius. Long form accepted: `SYSTEM:PROTECTION:TEMPERATURE?`. |
+| `SYST:PROT:TEMP <C>` | Sets the system over-temperature protection threshold in degrees Celsius. Long form accepted: `SYSTEM:PROTECTION:TEMPERATURE <C>`. |
+| `SYST:RPP?` | Returns reverse polarity protection state as `1` or `0`. `RPP` is not expanded to a long form. |
+| `SYST:RPP <0\|1>` | Enables or disables reverse polarity protection. `RPP` is not expanded to a long form. |
+| `SYST:AUTO?` | Returns whether automatic output-on at device startup is enabled as `1` or `0`. Long form accepted: `SYSTEM:AUTO?`. |
+| `SYST:AUTO <0\|1>` | Enables or disables automatic output-on at device startup. Long form accepted: `SYSTEM:AUTO <0\|1>`. |
+| `SYST:VOL?` | Returns the configured volume level `0-4`. Long form accepted: `SYSTEM:VOLUME?`. |
+| `SYST:VOL <0-4>` | Sets the configured volume level `0-4`. Long form accepted: `SYSTEM:VOLUME <0-4>`. |
+| `SYST:BACK?` | Returns the configured backlight level `0-4`. Long form accepted: `SYSTEM:BACKLIGHT?`. |
+| `SYST:BACK <0-4>` | Sets the configured backlight level `0-4`. Long form accepted: `SYSTEM:BACKLIGHT <0-4>`. |
+| `MEAS:VOLT?` | Returns the measured output voltage in millivolts. Long form accepted: `MEASURE:VOLTAGE?`. |
+| `MEAS:CURR?` | Returns the measured output current in milliamps. Long form accepted: `MEASURE:CURRENT?`. |
+| `MEAS:POW?` | Returns the measured output power in milliwatts with one decimal place. Long form accepted: `MEASURE:POWER?`. |
+| `MEAS:ALL?` | Returns a comma-separated measurement snapshot: input voltage, output voltage, output current, output power, max output voltage, temperature 1, temperature 2, USB 5V voltage, output mode, and fault status. Long form accepted: `MEASURE:ALL?`. |
+| `PRES:USE <0-9>` | Loads the specified preset from non-volatile storage. Long form accepted: `PRESET:USE <0-9>`. |
+| `PRES:RECALL <0-9>` | Loads the specified preset from volatile state. Long form accepted: `PRESET:RECALL <0-9>`. |
+| `SYST:HELP?` | Returns the supported SCPI-like command list. Long form accepted: `SYSTEM:HELP?`. |
+| `SYST:ERR?` | Returns the current server error status. The current implementation reports `0,No error`. Long form accepted: `SYSTEM:ERROR?`. |
 
 ### TUI Overview
 
